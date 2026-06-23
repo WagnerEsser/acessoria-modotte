@@ -28,15 +28,15 @@ export async function generateMetadata({
 
   if (!neighborhood) {
     return buildMetadata({
-      title: "Area nao encontrada",
-      description: "A area solicitada nao existe.",
+      title: "Área não encontrada",
+      description: "A área solicitada não existe.",
       path: `/areas/${slug}`,
       noIndex: true,
     });
   }
 
   return buildMetadata({
-    title: `${neighborhood.name}`,
+    title: neighborhood.name,
     description: neighborhood.description,
     path: `/areas/${neighborhood.slug}`,
   });
@@ -54,7 +54,7 @@ export default async function NeighborhoodPage({ params }: NeighborhoodPageProps
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
-          eyebrow="Areas"
+          eyebrow="Áreas"
           title={neighborhood.name}
           description={neighborhood.description}
         />
@@ -65,12 +65,12 @@ export default async function NeighborhoodPage({ params }: NeighborhoodPageProps
             <div className="mt-5 flex items-center gap-3">
               <MapPinHouse className="size-5 text-brand-gold" />
               <p className="text-sm uppercase tracking-[0.28em] text-brand-beige/55">
-                Conteudo local pronto para SEO e conversao
+                Conteúdo local pronto para SEO e conversão
               </p>
             </div>
             <p className="mt-4 text-sm leading-7 text-brand-ivory/70">
-              A pagina de area serve para destacar zonas de interesse, gerar
-              relevancia local e conectar o bairro aos imoveis mais aderentes.
+              A página de área serve para destacar zonas de interesse, gerar
+              relevância local e conectar o bairro aos imóveis mais aderentes.
             </p>
           </Card>
 
@@ -82,7 +82,9 @@ export default async function NeighborhoodPage({ params }: NeighborhoodPageProps
             <p className="mt-2 font-display text-5xl text-brand-ivory">
               {neighborhood.propertyCount}
             </p>
-            <p className="mt-2 text-sm text-brand-ivory/68">Imoveis mapeados para esta area.</p>
+            <p className="mt-2 text-sm text-brand-ivory/68">
+              Imóveis mapeados para esta área.
+            </p>
           </Card>
         </div>
       </div>

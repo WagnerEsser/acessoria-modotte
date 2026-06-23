@@ -10,7 +10,7 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Login do painel",
-  description: "Acesso administrativo da assessoria imobiliaria.",
+  description: "Acesso administrativo da assessoria imobiliária.",
   path: "/admin/login",
   noIndex: true,
 });
@@ -85,7 +85,7 @@ export default async function AdminLoginPage({
                 : "rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 px-4 py-3 text-sm leading-6 text-brand-ivory/72"
             }
           >
-            {errorMessage ?? "Acesso protegido. Apenas usuarios autorizados podem entrar."}
+            {errorMessage ?? "Acesso protegido. Apenas usuários autorizados podem entrar."}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">

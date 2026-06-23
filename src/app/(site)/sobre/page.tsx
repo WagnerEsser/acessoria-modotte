@@ -37,18 +37,18 @@ export default function AboutPage() {
         <SectionHeading
           eyebrow="Sobre"
           title="Uma assessoria pequena, clara e pronta para evoluir"
-          description={`${brand.name} prioriza curadoria, contato direto e operacao simples.`}
+          description={`${brand.name} prioriza curadoria, contato direto e operação simples.`}
         />
 
         <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <Card className="p-6">
             <Badge variant="gold">Essencia</Badge>
             <h2 className="mt-4 font-display text-3xl font-semibold text-brand-ivory">
-              Clareza no atendimento e consistencia na entrega
+              Clareza no atendimento e consistência na entrega
             </h2>
             <p className="mt-4 text-sm leading-7 text-brand-ivory/70">
-              A marca foi desenhada para comunicar confianca, destacar poucos
-              imoveis e facilitar a gestao diaria.
+              A marca foi desenhada para comunicar confiança, destacar poucos
+              imóveis e facilitar a gestão diária.
             </p>
           </Card>
 
@@ -65,7 +65,7 @@ export default function AboutPage() {
               </li>
               <li className="flex gap-2">
                 <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
-                <span>Identidade alinhada a logo e paleta.</span>
+                <span>Identidade alinhada à logo e à paleta.</span>
               </li>
             </ul>
           </Card>

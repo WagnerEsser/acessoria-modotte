@@ -2,13 +2,15 @@ import type { ReactNode } from "react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { WhatsAppBubble } from "@/components/layout/whatsapp-bubble";
 
 export default function SiteLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-dvh flex-col">
       <SiteHeader />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
       <SiteFooter />
+      <WhatsAppBubble />
     </div>
   );
 }

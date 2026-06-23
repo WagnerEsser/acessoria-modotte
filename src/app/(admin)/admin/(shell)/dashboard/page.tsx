@@ -12,7 +12,7 @@ import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
 export const metadata = buildMetadata({
   title: "Dashboard administrativo",
-  description: "Resumo operacional do painel da assessoria imobiliaria.",
+  description: "Resumo operacional do painel da assessoria imobiliária.",
   path: "/admin/dashboard",
   noIndex: true,
 });
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
     {
       label: "Ativos publicados",
       value: String(publishedProperties.length),
-      description: "Imoveis visiveis no site publico.",
+      description: "Imóveis visíveis no site público.",
       icon: <Building2 className="size-4" />,
     },
     {
@@ -137,15 +137,15 @@ export default async function DashboardPage() {
       icon: <Inbox className="size-4" />,
     },
     {
-      label: "Blocos editaveis",
+      label: "Blocos editáveis",
       value: String(activePageBlocks.length),
-      description: "Conteudos e seções controlados no banco.",
+      description: "Conteúdos e seções controlados no banco.",
       icon: <Layers3 className="size-4" />,
     },
     {
       label: "SEO pronto",
       value: `${seoPercent}%`,
-      description: "Paginas publicadas com title e description.",
+      description: "Páginas publicadas com title e description.",
       icon: <Sparkles className="size-4" />,
     },
   ];
@@ -154,11 +154,11 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <SectionHeading
         eyebrow="Dashboard"
-        title="Visao rapida da operacao da assessoria"
-        description="Agora os indicadores e listas vem do banco real, então o painel passa a refletir o estado atual do projeto."
+        title="Visão rápida da operação da assessoria"
+        description="Agora os indicadores e listas vêm do banco real, então o painel passa a refletir o estado atual do projeto."
         action={
           <Link href="/admin/imoveis" className={buttonVariants({ variant: "gold" })}>
-            Gerenciar imoveis
+            Gerenciar imóveis
             <ArrowRight className="size-4" />
           </Link>
         }
@@ -175,10 +175,10 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
-                Conteudo recente
+                Conteúdo recente
               </p>
               <h2 className="mt-2 font-display text-3xl font-semibold text-brand-ivory">
-                Paginas publicadas e em revisao
+                Páginas publicadas e em revisão
               </h2>
             </div>
             <Badge variant="gold">{pages.length} registros</Badge>
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
               })
             ) : (
               <div className="rounded-2xl border border-dashed border-brand-beige/18 bg-brand-ivory/4 p-6 text-sm text-brand-ivory/68">
-                Nenhuma pagina cadastrada ainda.
+                Nenhuma página cadastrada ainda.
               </div>
             )}
           </div>
@@ -251,7 +251,7 @@ export default async function DashboardPage() {
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-brand-beige/18 bg-brand-ivory/4 p-6 text-sm text-brand-ivory/68">
-                Nenhum usuario cadastrado ainda.
+                Nenhum usuário cadastrado ainda.
               </div>
             )}
           </div>
@@ -296,7 +296,7 @@ export default async function DashboardPage() {
 
         <Card className="p-6">
           <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
-            Imoveis recentes
+            Imóveis recentes
           </p>
           <div className="mt-5 space-y-4">
             {properties.length ? (
@@ -318,7 +318,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="normal-case tracking-normal">
-                      {property.featured ? "Destaque" : "Padrao"}
+                      {property.featured ? "Destaque" : "Padrão"}
                     </Badge>
                     <span className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
                       {property.transaction_type}
@@ -331,7 +331,7 @@ export default async function DashboardPage() {
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-brand-beige/18 bg-brand-ivory/4 p-6 text-sm text-brand-ivory/68">
-                Nenhum imovel cadastrado ainda.
+                Nenhum imóvel cadastrado ainda.
               </div>
             )}
           </div>

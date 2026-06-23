@@ -30,8 +30,8 @@ export async function generateMetadata({
 
   if (!property) {
     return buildMetadata({
-      title: "Imovel nao encontrado",
-      description: "O imovel solicitado nao existe ou foi removido.",
+      title: "Imóvel não encontrado",
+      description: "O imóvel solicitado não existe ou foi removido.",
       path: `/imoveis/${slug}`,
       noIndex: true,
     });
@@ -56,7 +56,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
-          eyebrow="Detalhe do imovel"
+          eyebrow="Detalhe do imóvel"
           title={property.title}
           description={property.summary}
           action={
@@ -93,12 +93,12 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/4 p-4">
                   <Square className="size-4 text-brand-gold" />
-                  <p className="mt-3 text-sm text-brand-ivory/68">Area</p>
+                  <p className="mt-3 text-sm text-brand-ivory/68">Área</p>
                   <p className="font-display text-2xl text-brand-ivory">{property.size}</p>
                 </div>
                 <div className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/4 p-4">
                   <BedDouble className="size-4 text-brand-gold" />
-                  <p className="mt-3 text-sm text-brand-ivory/68">Dormitorios</p>
+                  <p className="mt-3 text-sm text-brand-ivory/68">Dormitórios</p>
                   <p className="font-display text-2xl text-brand-ivory">{property.bedrooms}</p>
                 </div>
                 <div className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/4 p-4">
@@ -126,8 +126,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                 ))}
               </div>
               <p className="mt-5 text-sm leading-6 text-brand-ivory/70">
-                Esta pagina ja esta preparada para receber galeria, documentos,
-                mapa e campos dinamicos do banco quando a migracao entrar.
+                Esta página já está preparada para receber galeria, documentos,
+                mapa e campos dinâmicos do banco quando a migração entrar.
               </p>
             </Card>
           </div>

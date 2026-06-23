@@ -43,30 +43,30 @@ export type BlogPost = {
 export const featuredProperties: PropertyListing[] = [
   {
     slug: "casa-contemporanea-jardim-primavera",
-    title: "Casa contemporanea com jardim e varanda gourmet",
+    title: "Casa contemporânea com jardim e varanda gourmet",
     type: "Casa",
     location: "Jardim Primavera",
-    city: "Sao Paulo",
+    city: "São Paulo",
     price: "R$ 2.480.000",
     summary:
-      "Projeto com linhas limpas, area social integrada e acabamento pensado para quem quer conforto sem abrir mao de representatividade.",
+      "Projeto com linhas limpas, área social integrada e acabamento pensado para quem quer conforto sem abrir mão de representatividade.",
     size: "312 m²",
     bedrooms: 4,
     bathrooms: 5,
     garages: 3,
     featured: true,
     accent: "from-brand-gold/70 via-brand-beige/20 to-brand-navy-deep",
-    highlights: ["Piscina", "Home office", "Area gourmet"],
+    highlights: ["Piscina", "Home office", "Área gourmet"],
   },
   {
     slug: "apartamento-vista-aberta-vila-nova",
-    title: "Apartamento alto padrao com vista aberta",
+    title: "Apartamento alto padrão com vista aberta",
     type: "Apartamento",
     location: "Vila Nova",
-    city: "Sao Paulo",
+    city: "São Paulo",
     price: "R$ 1.680.000",
     summary:
-      "Um endereco urbano com planta funcional, varanda ampla e infraestrutura completa para rotina moderna.",
+      "Um endereço urbano com planta funcional, varanda ampla e infraestrutura completa para a rotina moderna.",
     size: "184 m²",
     bedrooms: 3,
     bathrooms: 4,
@@ -76,54 +76,54 @@ export const featuredProperties: PropertyListing[] = [
   },
   {
     slug: "terreno-estrategico-parque-central",
-    title: "Terreno estrategico para incorporacao",
+    title: "Terreno estratégico para incorporação",
     type: "Terreno",
     location: "Parque Central",
     city: "Campinas",
     price: "R$ 950.000",
     summary:
-      "Opção ideal para incorporadores e investidores que buscam area com potencial de valorizacao e leitura clara de mercado.",
+      "Opção ideal para incorporadores e investidores que buscam área com potencial de valorização e leitura clara de mercado.",
     size: "480 m²",
     bedrooms: 0,
     bathrooms: 0,
     garages: 0,
     accent: "from-brand-taupe via-brand-beige/30 to-brand-navy",
-    highlights: ["Zoneamento favoravel", "Acesso rapido", "Documentacao ok"],
+    highlights: ["Zoneamento favorável", "Acesso rápido", "Documentação ok"],
   },
   {
     slug: "townhouse-reservas-do-alto",
     title: "Townhouse sofisticada com vista para a reserva",
     type: "Townhouse",
     location: "Reservas do Alto",
-    city: "Santo Andre",
+    city: "Santo André",
     price: "R$ 1.920.000",
     summary:
-      "Uma proposta de arquitetura contemporanea, ambientes integrados e atmosfera de casa de revista.",
+      "Uma proposta de arquitetura contemporânea, ambientes integrados e atmosfera de casa de revista.",
     size: "228 m²",
     bedrooms: 3,
     bathrooms: 4,
     garages: 2,
     accent: "from-brand-gold/55 via-brand-navy-deep to-brand-ink",
-    highlights: ["Suite master", "Jardim interno", "Fechadura digital"],
+    highlights: ["Suíte master", "Jardim interno", "Fechadura digital"],
   },
 ];
 
 export const services: ServiceCard[] = [
   {
-    title: "Curadoria de imoveis",
-    description: "Selecao enxuta dos ativos mais aderentes ao perfil do cliente.",
+    title: "Curadoria de imóveis",
+    description: "Seleção enxuta dos ativos mais aderentes ao perfil do cliente.",
     icon: "compass",
     bullets: ["Filtro simples", "Leitura comercial"],
   },
   {
-    title: "Anuncios premium",
-    description: "Texto, imagem e apresentacao alinhados para reforcar valor.",
+    title: "Anúncios premium",
+    description: "Texto, imagem e apresentação alinhados para reforçar valor.",
     icon: "sparkles",
     bullets: ["Copy curta", "Imagem limpa"],
   },
   {
-    title: "Documentacao e fechamento",
-    description: "Acompanhamento do processo ate a assinatura final.",
+    title: "Documentação e fechamento",
+    description: "Acompanhamento do processo até a assinatura final.",
     icon: "shield-check",
     bullets: ["Checklist", "Menos risco"],
   },
@@ -133,17 +133,17 @@ export const neighborhoods: Neighborhood[] = [
   {
     slug: "jardim-primavera",
     name: "Jardim Primavera",
-    city: "Sao Paulo",
+    city: "São Paulo",
     description:
-      "Area residencial valorizada, com perfil familiar e forte demanda para casas de alto padrao.",
+      "Área residencial valorizada, com perfil familiar e forte demanda para casas de alto padrão.",
     propertyCount: 18,
   },
   {
     slug: "vila-nova",
     name: "Vila Nova",
-    city: "Sao Paulo",
+    city: "São Paulo",
     description:
-      "Regiao urbana com apartamentos premium, servicos proximos e liquidez consistente.",
+      "Região urbana com apartamentos premium, serviços próximos e liquidez consistente.",
     propertyCount: 24,
   },
   {
@@ -151,7 +151,7 @@ export const neighborhoods: Neighborhood[] = [
     name: "Parque Central",
     city: "Campinas",
     description:
-      "Corredor estrategico para investidores que procuram terrenos e projetos com potencial de escala.",
+      "Corredor estratégico para investidores que procuram terrenos e projetos com potencial de escala.",
     propertyCount: 12,
   },
 ];
@@ -159,73 +159,73 @@ export const neighborhoods: Neighborhood[] = [
 export const blogPosts: BlogPost[] = [
   {
     slug: "como-valorizar-um-imovel-antes-de-anunciar",
-    title: "Como valorizar um imovel antes de anunciar",
+    title: "Como valorizar um imóvel antes de anunciar",
     excerpt:
-      "A lista certa de ajustes aumenta a percepcao de valor sem comprometer a margem da operacao.",
+      "A lista certa de ajustes aumenta a percepção de valor sem comprometer a margem da operação.",
     category: "Venda inteligente",
     readingTime: "5 min",
     publishedAt: "2026-06-01",
     summary: [
-      "Organizar iluminacao, fotos e pequenos reparos antes da publicacao.",
-      "Posicionar o preco com base no bairro e no perfil do comprador.",
-      "Construir uma apresentacao que reduza objecoes logo no primeiro contato.",
+      "Organizar iluminação, fotos e pequenos reparos antes da publicação.",
+      "Posicionar o preço com base no bairro e no perfil do comprador.",
+      "Construir uma apresentação que reduza objeções logo no primeiro contato.",
     ],
   },
   {
     slug: "qual-bairro-faz-mais-sentido-para-familias",
-    title: "Qual bairro faz mais sentido para familias em crescimento",
+    title: "Qual bairro faz mais sentido para famílias em crescimento",
     excerpt:
-      "A decisao vai alem do metro quadrado e depende de rotina, acesso e projeção de valorizacao.",
+      "A decisão vai além do metro quadrado e depende de rotina, acesso e projeção de valorização.",
     category: "SEO local",
     readingTime: "6 min",
     publishedAt: "2026-06-06",
     summary: [
-      "Analise de mobilidade, escolas e servicos proximos.",
-      "Importancia de historico de liquidez e rotatividade do bairro.",
+      "Análise de mobilidade, escolas e serviços próximos.",
+      "Importância de histórico de liquidez e rotatividade do bairro.",
       "Como a assessoria pode apresentar comparativos claros para o cliente.",
     ],
   },
   {
     slug: "o-que-o-vendedor-precisa-antes-de-publicar-o-imovel",
-    title: "O que o vendedor precisa antes de publicar o imovel",
+    title: "O que o vendedor precisa antes de publicar o imóvel",
     excerpt:
-      "Documentacao, fotos, narrativa e estrategia comercial precisam estar alinhadas antes da publicacao.",
+      "Documentação, fotos, narrativa e estratégia comercial precisam estar alinhadas antes da publicação.",
     category: "Processo",
     readingTime: "4 min",
     publishedAt: "2026-06-11",
     summary: [
-      "Conferir documentos e situacao juridica do ativo.",
-      "Definir publico e faixa de preco antes de expor o anuncio.",
-      "Preparar fotos, descricoes e chamada para contato.",
+      "Conferir documentos e situação jurídica do ativo.",
+      "Definir público e faixa de preço antes de expor o anúncio.",
+      "Preparar fotos, descrições e chamada para contato.",
     ],
   },
 ];
 
 export const sellerBenefits = [
-  "Leitura mais clara do ativo e do preco.",
-  "Acompanhamento humano ate o fechamento.",
+  "Leitura mais clara do ativo e do preço.",
+  "Acompanhamento humano até o fechamento.",
 ];
 
 export const sellingSteps = [
   {
-    title: "Diagnostico",
+    title: "Diagnóstico",
     description: "Entendemos o ativo e o momento de venda.",
   },
   {
-    title: "Preparacao",
-    description: "Ajustamos fotos, preco e texto do anuncio.",
+    title: "Preparação",
+    description: "Ajustamos fotos, preço e texto do anúncio.",
   },
   {
-    title: "Divulgacao e negociacao",
-    description: "Divulgamos, recebemos contatos e seguimos ate a proposta final.",
+    title: "Divulgação e negociação",
+    description: "Divulgamos, recebemos contatos e seguimos até a proposta final.",
   },
 ];
 
 export const contactChannels = [
   {
     label: "WhatsApp comercial",
-    value: "A configurar no site_settings",
-    note: "Canal principal para atendimento rapido.",
+    value: "A configurar no painel",
+    note: "Canal principal para atendimento rápido.",
   },
   {
     label: "E-mail institucional",
@@ -233,15 +233,15 @@ export const contactChannels = [
     note: "Recebe leads do site e encaminhamentos internos.",
   },
   {
-    label: "Horario",
-    value: "Seg a sex, 9h as 18h",
+    label: "Horário",
+    value: "Seg. a sex., 9h às 18h",
     note: "Atendimento com foco em previsibilidade e retorno.",
   },
 ];
 
 export const adminMetrics = [
   {
-    label: "Imoveis ativos",
+    label: "Imóveis ativos",
     value: "42",
     description: "Publicados, rascunhos e destaques separados por estado.",
   },
@@ -251,14 +251,14 @@ export const adminMetrics = [
     description: "Capturas recentes vindas do site e de campanhas locais.",
   },
   {
-    label: "Conteudos editaveis",
+    label: "Conteúdos editáveis",
     value: "12",
-    description: "Paginas, blocos e banners prontos para atualizacao.",
+    description: "Páginas, blocos e banners prontos para atualização.",
   },
   {
     label: "Taxa de resposta",
     value: "94%",
-    description: "Tempo medio de retorno dentro da janela operacional.",
+    description: "Tempo médio de retorno dentro da janela operacional.",
   },
 ];
 
@@ -272,8 +272,8 @@ export const recentLeads = [
   },
   {
     name: "Paulo Mendes",
-    channel: "Formulario",
-    interest: "Avaliacao de terreno",
+    channel: "Formulário",
+    interest: "Avaliação de terreno",
     status: "Em atendimento",
     createdAt: "Hoje, 10:40",
   },
@@ -289,12 +289,12 @@ export const recentLeads = [
 export const contentBlocks = [
   {
     name: "Hero da home",
-    status: "Publico",
+    status: "Público",
     updatedAt: "Hoje",
   },
   {
-    name: "Servicos institucionais",
-    status: "Em revisao",
+    name: "Serviços institucionais",
+    status: "Em revisão",
     updatedAt: "Ontem",
   },
   {
@@ -305,9 +305,9 @@ export const contentBlocks = [
 ];
 
 export const seoChecklist = [
-  "Title e description por pagina configurados",
+  "Title e description por página configurados",
   "Breadcrumbs e headings coerentes com a busca local",
-  "Sitemap e robots prontos para indexacao",
+  "Sitemap e robots prontos para indexação",
   "Open Graph consistente com a marca",
 ];
 
@@ -324,7 +324,7 @@ export const teamMembers = [
   },
   {
     name: "Marketing Local",
-    role: "SEO e conteudo",
+    role: "SEO e conteúdo",
     permission: "Editor",
   },
 ];

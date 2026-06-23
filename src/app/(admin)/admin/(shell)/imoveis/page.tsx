@@ -10,8 +10,8 @@ import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
 export const metadata = buildMetadata({
-  title: "Imoveis no painel",
-  description: "Gestao dos imoveis cadastrados na assessoria.",
+  title: "Imóveis no painel",
+  description: "Gestão dos imóveis cadastrados na assessoria.",
   path: "/admin/imoveis",
   noIndex: true,
 });
@@ -54,12 +54,12 @@ export default async function AdminPropertiesPage() {
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow="Imoveis"
-        title="Cadastro, destaque e publicacao dos ativos"
+        eyebrow="Imóveis"
+        title="Cadastro, destaque e publicação dos ativos"
         description="Agora a vitrine do painel sai da tabela properties do banco."
         action={
           <Link href="/admin/imoveis/novo" className={buttonVariants({ variant: "gold" })}>
-            Novo imovel
+            Novo imóvel
             <Plus className="size-4" />
           </Link>
         }
@@ -95,7 +95,7 @@ export default async function AdminPropertiesPage() {
                   {property.is_published ? "Publicado" : "Rascunho"}
                 </Badge>
                 <Badge variant={property.featured ? "gold" : "outline"} className="normal-case tracking-normal">
-                  {property.featured ? "Destaque" : "Padrao"}
+                  {property.featured ? "Destaque" : "Padrão"}
                 </Badge>
                 <Link
                   href={`/admin/imoveis/${property.id}/editar`}
@@ -109,7 +109,7 @@ export default async function AdminPropertiesPage() {
           ))
         ) : (
           <Card className="p-6 text-sm text-brand-ivory/68">
-            Nenhum imovel cadastrado ainda.
+            Nenhum imóvel cadastrado ainda.
           </Card>
         )}
       </div>

@@ -10,31 +10,31 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Avaliacao",
+  title: "Avaliação",
   description:
-    "Pagina para solicitacao de avaliacao de imovel com fluxo preparado para captura de leads.",
+    "Página para solicitação de avaliação de imóvel com fluxo preparado para captura de leads.",
   path: "/avaliacao",
 });
 
 const steps = [
   {
     title: "Leitura do ativo",
-    description: "Entender o perfil do imovel, urgencia e posicionamento.",
+    description: "Entender o perfil do imóvel, urgência e posicionamento.",
     icon: MapPinHouse,
   },
   {
-    title: "Analise comparativa",
-    description: "Comparar faixa, bairro e liquidez para sugerir estrategia.",
+    title: "Análise comparativa",
+    description: "Comparar faixa, bairro e liquidez para sugerir estratégia.",
     icon: Calculator,
   },
   {
     title: "Ajustes de mercado",
-    description: "Definir pontos de destaque e precificacao mais inteligente.",
+    description: "Definir pontos de destaque e precificação mais inteligente.",
     icon: Sparkles,
   },
   {
     title: "Retorno comercial",
-    description: "Enviar a leitura para o vendedor com proximos passos claros.",
+    description: "Enviar a leitura para o vendedor com próximos passos claros.",
     icon: ClipboardCheck,
   },
 ];
@@ -44,9 +44,9 @@ export default function EvaluationPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
-          eyebrow="Avaliacao"
-          title="Solicite uma leitura comercial do seu imovel"
-          description="A pagina ja esta preparada para coletar dados e entregar uma primeira analise com base na estrategia da assessoria."
+          eyebrow="Avaliação"
+          title="Solicite uma leitura comercial do seu imóvel"
+          description="A página já está preparada para coletar dados e entregar uma primeira análise com base na estratégia da assessoria."
           action={
             <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
               Falar com a assessoria
@@ -91,14 +91,14 @@ export default function EvaluationPage() {
 
           <Card className="space-y-5 p-6">
             <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
-              Formulario base
+              Formulário base
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               <Input placeholder="Nome" />
               <Input placeholder="E-mail" type="email" />
               <Input placeholder="Telefone" />
               <Input placeholder="Cidade / bairro" />
-              <Textarea className="md:col-span-2" placeholder="Descreva o imovel e a urgencia" />
+              <Textarea className="md:col-span-2" placeholder="Descreva o imóvel e a urgência" />
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/contato" className={buttonVariants({ size: "lg" })}>

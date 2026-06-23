@@ -10,8 +10,7 @@ import { blogPosts } from "@/lib/site-data";
 
 export const metadata = buildMetadata({
   title: "Blog",
-  description:
-    "Conteudos editoriais e local SEO para a assessoria imobiliaria.",
+  description: "Conteúdos editoriais e SEO local para a assessoria imobiliária.",
   path: "/blog",
 });
 
@@ -21,8 +20,8 @@ export default function BlogPage() {
       <div className="space-y-10">
         <SectionHeading
           eyebrow="Blog"
-          title="Conteudos que ajudam o cliente e fortalecem a busca local"
-          description="A camada editorial ja esta preparada para receber artigos, categorias e meta tags."
+          title="Conteúdos que ajudam o cliente e fortalecem a busca local"
+          description="A camada editorial já está preparada para receber artigos, categorias e meta tags."
           action={
             <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
               Propor pauta

@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${display.variable} ${sans.variable}`}>
-      <body className="bg-brand-ink font-sans text-brand-ivory antialiased selection:bg-brand-gold selection:text-brand-navy">
+      <body className="min-h-dvh bg-brand-ink font-sans text-brand-ivory antialiased selection:bg-brand-gold selection:text-brand-navy">
         {children}
       </body>
     </html>

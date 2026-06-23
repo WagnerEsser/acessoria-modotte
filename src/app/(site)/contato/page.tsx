@@ -13,7 +13,7 @@ import { contactChannels } from "@/lib/site-data";
 export const metadata = buildMetadata({
   title: "Contato",
   description:
-    "Canal de contato da Luana Modotte para interessados, proprietarios e parceiros.",
+    "Canal de contato da Luana Modotte para interessados, proprietários e parceiros.",
   path: "/contato",
 });
 
@@ -23,8 +23,8 @@ export default function ContactPage() {
       <div className="space-y-10">
         <SectionHeading
           eyebrow="Contato"
-          title="Fale com a assessoria e encaminhe o imovel ou a sua demanda"
-          description="Este bloco ja esta preparado para virar um fluxo real de captura de leads quando o backend entrar."
+          title="Fale com a assessoria e encaminhe o imóvel ou a sua demanda"
+          description="Este formulário já pode virar um fluxo real de captura de leads quando o backend entrar."
         />
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -52,7 +52,7 @@ export default function ContactPage() {
 
           <Card className="p-6">
             <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
-              Formulario base
+              Formulário base
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Input placeholder="Nome" />
@@ -67,9 +67,6 @@ export default function ContactPage() {
                 Enviar mensagem
                 <ArrowRight className="size-4" />
               </Link>
-              <Badge variant="outline" className="normal-case tracking-normal">
-                Captura de lead preparada
-              </Badge>
             </div>
           </Card>
         </div>

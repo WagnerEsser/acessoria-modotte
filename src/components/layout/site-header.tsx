@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { publicNavigation } from "@/lib/navigation";
 
@@ -34,9 +33,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="soft" className="hidden sm:inline-flex">
-            Atendimento premium
-          </Badge>
           <Link href="/quero-vender" className={buttonVariants({ size: "sm" })}>
             Quero vender
           </Link>

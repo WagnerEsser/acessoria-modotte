@@ -27,9 +27,9 @@ describe("admin auth helpers", () => {
 
   it("maps login errors to user-facing messages", () => {
     expect(getLoginErrorMessage("missing_credentials")).toContain("Informe e-mail");
-    expect(getLoginErrorMessage("invalid_credentials")).toContain("invalidos");
+    expect(getLoginErrorMessage("invalid_credentials")).toContain("inválidos");
     expect(getLoginErrorMessage("unauthorized")).toContain("acesso ao painel");
-    expect(getLoginErrorMessage("unknown_code")).toContain("Nao foi possivel");
+    expect(getLoginErrorMessage("unknown_code")).toContain("Não foi possível");
   });
 
   it("resolves the admin route access flow", () => {

@@ -28,8 +28,8 @@ export async function generateMetadata({
 
   if (!post) {
     return buildMetadata({
-      title: "Post nao encontrado",
-      description: "O artigo solicitado nao existe.",
+      title: "Post não encontrado",
+      description: "O artigo solicitado não existe.",
       path: `/blog/${slug}`,
       noIndex: true,
     });
@@ -53,11 +53,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
-        <SectionHeading
-          eyebrow="Artigo"
-          title={post.title}
-          description={post.excerpt}
-        />
+        <SectionHeading eyebrow="Artigo" title={post.title} description={post.excerpt} />
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Card className="space-y-4 p-6">

@@ -83,12 +83,12 @@ export function getLoginErrorMessage(error: string | null | undefined): string |
 
   const messages: Record<string, string> = {
     missing_credentials: "Informe e-mail e senha para continuar.",
-    invalid_credentials: "E-mail ou senha invalidos.",
-    unauthorized: "Seu usuario nao tem acesso ao painel.",
-    session_expired: "Sua sessao expirou. Entre novamente.",
+    invalid_credentials: "E-mail ou senha inválidos.",
+    unauthorized: "Seu usuário não tem acesso ao painel.",
+    session_expired: "Sua sessão expirou. Entre novamente.",
   };
 
-  return messages[error] ?? "Nao foi possivel entrar. Tente novamente.";
+  return messages[error] ?? "Não foi possível entrar. Tente novamente.";
 }
 
 function buildProtectedRedirectTarget(

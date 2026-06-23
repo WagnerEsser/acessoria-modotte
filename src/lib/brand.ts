@@ -1,7 +1,7 @@
 export const brand = {
   name: "Luana Modotte",
-  subtitle: "Assessoria Imobiliaria",
-  slogan: "O seu coracao escolhe o lar. Nossa assessoria garante o negocio.",
+  subtitle: "Assessoria Imobiliária",
+  slogan: "O seu coração escolhe o lar. Nossa assessoria garante o negócio.",
   colors: {
     navy: "#0B1B2C",
     navyDeep: "#13253B",

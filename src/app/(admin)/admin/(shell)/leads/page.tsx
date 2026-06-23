@@ -40,7 +40,7 @@ export default async function AdminLeadsPage() {
     <div className="space-y-8">
       <SectionHeading
         eyebrow="Leads"
-        title="Contato gerado pelo site e distribuicao do atendimento"
+        title="Contato gerado pelo site e distribuição do atendimento"
         description="Os contatos exibidos aqui agora saem da tabela leads do banco."
       />
 

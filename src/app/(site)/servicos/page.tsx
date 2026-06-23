@@ -6,8 +6,8 @@ import { buildMetadata } from "@/lib/seo";
 import { services } from "@/lib/site-data";
 
 export const metadata = buildMetadata({
-  title: "Servicos",
-  description: "Servicos essenciais da assessoria imobiliaria.",
+  title: "Serviços",
+  description: "Serviços essenciais da assessoria imobiliária.",
   path: "/servicos",
 });
 
@@ -22,8 +22,8 @@ export default function ServicesPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
-          eyebrow="Servicos"
-          title="Servicos essenciais para vender com mais clareza"
+          eyebrow="Serviços"
+          title="Serviços essenciais para vender com mais clareza"
           description="Um recorte simples do que a assessoria entrega hoje."
         />
 

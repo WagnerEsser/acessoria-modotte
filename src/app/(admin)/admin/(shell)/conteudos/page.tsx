@@ -6,8 +6,8 @@ import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
 export const metadata = buildMetadata({
-  title: "Conteudos",
-  description: "Blocos editaveis do site publico.",
+  title: "Conteúdos",
+  description: "Blocos editáveis do site público.",
   path: "/admin/conteudos",
   noIndex: true,
 });
@@ -37,9 +37,9 @@ export default async function AdminContentPage() {
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow="Conteudos"
-        title="Home, banners e textos institucionais em um unico lugar"
-        description="As paginas abaixo saem da tabela pages e mostram o que esta publicado ou em revisao."
+        eyebrow="Conteúdos"
+        title="Home, banners e textos institucionais em um único lugar"
+        description="As páginas abaixo saem da tabela pages e mostram o que está publicado ou em revisão."
       />
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -73,7 +73,7 @@ export default async function AdminContentPage() {
           })
         ) : (
           <Card className="p-6 text-sm text-brand-ivory/68">
-            Nenhuma pagina cadastrada ainda.
+            Nenhuma página cadastrada ainda.
           </Card>
         )}
       </div>

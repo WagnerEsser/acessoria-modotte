@@ -6,8 +6,8 @@ import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
 export const metadata = buildMetadata({
-  title: "Usuarios",
-  description: "Controle de acessos e papeis do painel.",
+  title: "Usuários",
+  description: "Controle de acessos e papéis do painel.",
   path: "/admin/usuarios",
   noIndex: true,
 });
@@ -35,7 +35,7 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow="Usuarios"
+        eyebrow="Usuários"
         title="Quem pode editar cada parte do site"
         description="A tabela users do banco mostra quem tem acesso ao painel."
       />
@@ -63,7 +63,7 @@ export default async function AdminUsersPage() {
           ))
         ) : (
           <Card className="p-6 text-sm text-brand-ivory/68">
-            Nenhum usuario cadastrado ainda.
+            Nenhum usuário cadastrado ainda.
           </Card>
         )}
       </div>

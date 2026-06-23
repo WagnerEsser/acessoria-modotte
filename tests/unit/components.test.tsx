@@ -10,7 +10,7 @@ describe("components", () => {
     render(createElement(BrandMark));
 
     expect(screen.getByText("Luana Modotte")).toBeInTheDocument();
-    expect(screen.getByText("Assessoria Imobiliaria")).toBeInTheDocument();
+    expect(screen.getByText("Assessoria Imobiliária")).toBeInTheDocument();
   });
 
   it("renders the button label", () => {

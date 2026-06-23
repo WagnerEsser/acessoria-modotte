@@ -7,7 +7,7 @@ import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
 export const metadata = buildMetadata({
   title: "SEO",
-  description: "Checklist de SEO e indexacao para o site da assessoria.",
+  description: "Checklist de SEO e indexação para o site da assessoria.",
   path: "/admin/seo",
   noIndex: true,
 });
@@ -41,8 +41,8 @@ export default async function AdminSeoPage() {
     <div className="space-y-8">
       <SectionHeading
         eyebrow="SEO"
-        title="Indexacao, titles e sinalizacao local"
-        description="A leitura agora vem das paginas reais cadastradas no banco."
+        title="Indexação, titles e sinalização local"
+        description="A leitura agora vem das páginas reais cadastradas no banco."
       />
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -76,7 +76,7 @@ export default async function AdminSeoPage() {
 
       <Card className="p-6">
         <div className="flex items-center justify-between gap-4">
-          <Badge variant="gold">Paginas monitoradas</Badge>
+          <Badge variant="gold">Páginas monitoradas</Badge>
           <span className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
             Total {pages.length}
           </span>
@@ -110,7 +110,7 @@ export default async function AdminSeoPage() {
             })
           ) : (
             <div className="rounded-2xl border border-dashed border-brand-beige/18 bg-brand-ivory/4 p-6 text-sm text-brand-ivory/68">
-              Nenhuma pagina cadastrada ainda.
+              Nenhuma página cadastrada ainda.
             </div>
           )}
         </div>

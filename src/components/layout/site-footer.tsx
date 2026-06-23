@@ -14,13 +14,13 @@ export function SiteFooter() {
             {brand.slogan}
           </p>
           <p className="text-xs uppercase tracking-[0.24em] text-brand-beige/55">
-            Assessoria imobiliaria nova, com foco em clareza e contato direto.
+            Assessoria imobiliária nova, com foco em clareza e contato direto.
           </p>
         </div>
 
         <div>
           <div className="mb-4 text-xs uppercase tracking-[0.28em] text-brand-beige/55">
-            Navegacao
+            Navegação
           </div>
           <ul className="space-y-3 text-sm text-brand-ivory/72">
             {publicNavigation.map((item) => (
@@ -38,9 +38,9 @@ export function SiteFooter() {
             Contato
           </div>
           <div className="space-y-3 text-sm text-brand-ivory/70">
-            <p>WhatsApp: a configurar no painel.</p>
+            <p>WhatsApp: disponível no botão flutuante.</p>
             <p>E-mail: contato@luanamodotte.com.br</p>
-            <p>Horario: seg a sex, 9h as 18h.</p>
+            <p>Horário: seg. a sex., 9h às 18h.</p>
           </div>
         </div>
       </div>

@@ -12,15 +12,15 @@ import { buildMetadata } from "@/lib/seo";
 import { featuredProperties } from "@/lib/site-data";
 
 export const metadata = buildMetadata({
-  title: "Assessoria imobiliaria",
+  title: "Assessoria imobiliária",
   description:
-    "Site institucional leve da Luana Modotte, com foco em apresentacao clara, poucos imoveis e contato direto.",
+    "Site institucional leve da Luana Modotte, com foco em apresentação clara, poucos imóveis e contato direto.",
 });
 
 const homeSignals = [
   {
     title: "Curadoria inicial",
-    description: "Poucos imoveis, bem apresentados e com foco comercial.",
+    description: "Poucos imóveis, bem apresentados e com foco comercial.",
     icon: Sparkles,
   },
   {
@@ -42,23 +42,23 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-20">
           <div className="space-y-6">
             <Badge variant="soft" className="w-fit">
-              Assessoria imobiliaria nova
+              Assessoria imobiliária nova
             </Badge>
 
             <div className="space-y-5">
               <h1 className="max-w-3xl font-display text-5xl font-semibold leading-none text-brand-ivory sm:text-6xl lg:text-7xl">
-                Uma presenca digital elegante, clara e sem excesso.
+                Uma presença digital elegante, clara e sem excesso.
               </h1>
               <p className="max-w-2xl text-base leading-7 text-brand-ivory/72 sm:text-lg">
                 {brand.name} foi apresentada de forma mais leve para combinar com
-                uma assessoria que ainda esta construindo portifolio, autoridade
-                e relacionamento com o mercado.
+                uma assessoria que ainda está construindo portfólio, autoridade e
+                relacionamento com o mercado.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <Link href="/imoveis" className={buttonVariants({ size: "lg" })}>
-                Ver imoveis
+                Ver imóveis
                 <ArrowRight className="size-4" />
               </Link>
               <Link
@@ -94,7 +94,7 @@ export default function HomePage() {
             <div className="rounded-[1.5rem] border border-brand-beige/12 bg-[linear-gradient(180deg,rgba(19,37,59,0.92),rgba(11,27,44,0.98))] p-4">
               <Image
                 src="/brand/luana-modotte-logo-lockup.png"
-                alt="Luana Modotte Assessoria Imobiliaria"
+                alt="Luana Modotte Assessoria Imobiliária"
                 width={1600}
                 height={900}
                 priority
@@ -108,7 +108,7 @@ export default function HomePage() {
                   Foco
                 </p>
                 <p className="mt-2 text-sm leading-6 text-brand-ivory/72">
-                  Pouco conteudo, mais clareza.
+                  Pouco conteúdo, mais clareza.
                 </p>
               </div>
               <div className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 p-4">
@@ -134,9 +134,9 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Imoveis em destaque"
-          title="Uma vitrine curta, porque o catalogo ainda esta nascendo"
-          description="Por enquanto a home mostra apenas os imoveis que fazem mais sentido para o posicionamento da assessoria."
+          eyebrow="Imóveis em destaque"
+          title="Uma vitrine curta, porque o catálogo ainda está nascendo"
+          description="Por enquanto a home mostra apenas os imóveis que fazem mais sentido para o posicionamento da assessoria."
         />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -150,14 +150,14 @@ export default function HomePage() {
         <Card className="grid gap-6 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="max-w-2xl">
             <p className="text-xs uppercase tracking-[0.32em] text-brand-beige/60">
-              Proximo passo
+              Próximo passo
             </p>
             <h2 className="mt-3 font-display text-4xl font-semibold leading-tight text-brand-ivory">
               Menos informação agora. Mais foco no essencial.
             </h2>
             <p className="mt-4 text-sm leading-6 text-brand-ivory/72">
               O site segue com a base pronta para crescer quando houver mais
-              imoveis, mais areas e mais conteudo institucional.
+              imóveis, mais áreas e mais conteúdo institucional.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
