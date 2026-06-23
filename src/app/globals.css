@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-navy: #0b1b2c;
+  --color-brand-navy-deep: #13253b;
+  --color-brand-gold: #cbb28c;
+  --color-brand-ivory: #f4eadf;
+  --color-brand-beige: #d9c7b0;
+  --color-brand-taupe: #9d8468;
+  --color-brand-ink: #07111d;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-brand-beige/15;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-brand-ink text-brand-ivory antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(203, 178, 140, 0.12), transparent 28%),
+      radial-gradient(circle at top right, rgba(244, 234, 223, 0.08), transparent 24%),
+      linear-gradient(180deg, #07111d 0%, #0b1b2c 100%);
+  }
+
+  ::selection {
+    @apply bg-brand-gold text-brand-navy;
+  }
+}

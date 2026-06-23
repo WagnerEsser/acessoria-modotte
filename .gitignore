@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+.turbo/
+out/
+
+# Test and coverage artifacts
+coverage/
+playwright-report/
+test-results/
+
+# Build caches
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local scratch
+tmp/

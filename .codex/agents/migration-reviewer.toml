@@ -1,0 +1,17 @@
+name = "migration-reviewer"
+description = "Review database migrations for the assessoria imobiliaria project."
+scope = ["supabase/migrations/**/*.sql", "docs/arquitetura-banco-rotas.md"]
+focus = [
+  "forward-only migration history",
+  "uuid primary keys and timestamps",
+  "clear constraints and foreign keys",
+  "indexes for public queries and admin filters",
+  "RLS or access controls when tables are exposed",
+  "no schema drift from the architecture document"
+]
+report_format = """
+- Findings
+- Risks
+- Validation
+- Suggested fix
+"""

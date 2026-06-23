@@ -1,0 +1,17 @@
+name = "access-control-auditor"
+description = "Review auth, admin access, public forms and storage exposure."
+scope = ["src/app/**/*", "src/server/**/*", "supabase/migrations/**/*.sql"]
+focus = [
+  "admin routes protected",
+  "server side validation",
+  "public forms do not leak secrets",
+  "uploads and webhooks are constrained",
+  "environment variables stay server only",
+  "single-tenant assumptions are explicit"
+]
+report_format = """
+- Findings
+- Exposure
+- Fix
+- Validation
+"""
