@@ -10,8 +10,7 @@ import { sellerBenefits, sellingSteps } from "@/lib/site-data";
 
 export const metadata = buildMetadata({
   title: "Quero vender",
-  description:
-    "Pagina para proprietarios que querem vender com estrategia, clareza e apoio comercial.",
+  description: "Pagina para proprietarios que querem vender com clareza.",
   path: "/quero-vender",
 });
 
@@ -21,8 +20,8 @@ export default function SellPage() {
       <div className="space-y-10">
         <SectionHeading
           eyebrow="Vendedores"
-          title="Para vender bem, o ativo precisa ser apresentado da forma certa"
-          description="O site abre um caminho claro para capturar vendedores e preparar o imovel antes da publicacao."
+          title="Se voce quer vender, o foco e simples: apresentar melhor e fechar com seguranca"
+          description="Um caminho curto para captar proprietarios sem excesso de conteudo."
           action={
             <Link href="/contato" className={buttonVariants({ size: "lg" })}>
               Pedir analise
@@ -44,7 +43,7 @@ export default function SellPage() {
             </ul>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             {sellingSteps.map((step, index) => (
               <Card key={step.title} className="p-5">
                 <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">

@@ -111,31 +111,21 @@ export const featuredProperties: PropertyListing[] = [
 export const services: ServiceCard[] = [
   {
     title: "Curadoria de imoveis",
-    description:
-      "Selecionamos oportunidades alinhadas ao perfil do cliente e ao posicionamento da marca da assessoria.",
+    description: "Selecao enxuta dos ativos mais aderentes ao perfil do cliente.",
     icon: "compass",
-    bullets: ["Filtro tecnico", "Visao comercial", "Leitura de liquidez"],
+    bullets: ["Filtro simples", "Leitura comercial"],
   },
   {
-    title: "Gestao de anuncios premium",
-    description:
-      "Anuncios com narrativa consistente, fotos organizadas e destaque para os pontos que realmente vendem.",
+    title: "Anuncios premium",
+    description: "Texto, imagem e apresentacao alinhados para reforcar valor.",
     icon: "sparkles",
-    bullets: ["Copy comercial", "Destaque visual", "SEO do anuncio"],
+    bullets: ["Copy curta", "Imagem limpa"],
   },
   {
-    title: "Acompanhamento documental",
-    description:
-      "Do primeiro contato ao fechamento, a assessoria acompanha documentos, prazos e riscos da operacao.",
+    title: "Documentacao e fechamento",
+    description: "Acompanhamento do processo ate a assinatura final.",
     icon: "shield-check",
-    bullets: ["Checklist", "Conferencia", "Reducao de risco"],
-  },
-  {
-    title: "Estratégia para vendedores",
-    description:
-      "Posicionamento correto do ativo, precificacao inteligente e previsao de objecoes para acelerar a venda.",
-    icon: "chart-column",
-    bullets: ["Preco", "Apresentacao", "Conversao"],
+    bullets: ["Checklist", "Menos risco"],
   },
 ];
 
@@ -212,31 +202,22 @@ export const blogPosts: BlogPost[] = [
 ];
 
 export const sellerBenefits = [
-  "Precificacao mais precisa para reduzir tempo parado no mercado.",
-  "Apresentacao do ativo com narrativa premium e orientada a conversao.",
-  "Acompanhamento humano durante documentacao, negociacao e fechamento.",
+  "Leitura mais clara do ativo e do preco.",
+  "Acompanhamento humano ate o fechamento.",
 ];
 
 export const sellingSteps = [
   {
-    title: "Diagnostico inicial",
-    description:
-      "Entendemos o ativo, a urgencia do vendedor e o posicionamento ideal para o mercado.",
+    title: "Diagnostico",
+    description: "Entendemos o ativo e o momento de venda.",
   },
   {
-    title: "Preparacao comercial",
-    description:
-      "Organizamos imagem, precificacao, fotos e roteiro de contato para melhorar a percepcao de valor.",
+    title: "Preparacao",
+    description: "Ajustamos fotos, preco e texto do anuncio.",
   },
   {
-    title: "Publicacao e divulgacao",
-    description:
-      "Disparamos o anuncio nos canais corretos e acompanhamos o retorno com foco em qualidade de lead.",
-  },
-  {
-    title: "Negociacao e fechamento",
-    description:
-      "Monitoramos propostas, documentos e ajustes finais para manter o negocio seguro ate a assinatura.",
+    title: "Divulgacao e negociacao",
+    description: "Divulgamos, recebemos contatos e seguimos ate a proposta final.",
   },
 ];
 
