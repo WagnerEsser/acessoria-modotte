@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BrandMark } from "@/components/layout/brand-mark";
+import { getWhatsAppDisplayNumber } from "@/lib/contact";
 import { brand } from "@/lib/brand";
 import { publicNavigation } from "@/lib/navigation";
 
@@ -38,7 +39,7 @@ export function SiteFooter() {
             Contato
           </div>
           <div className="space-y-3 text-sm text-brand-ivory/70">
-            <p>WhatsApp: disponível no botão flutuante.</p>
+            <p>WhatsApp: {getWhatsAppDisplayNumber()}.</p>
             <p>E-mail: contato@luanamodotte.com.br</p>
             <p>Horário: seg. a sex., 9h às 18h.</p>
           </div>

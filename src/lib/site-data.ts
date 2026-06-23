@@ -224,7 +224,7 @@ export const sellingSteps = [
 export const contactChannels = [
   {
     label: "WhatsApp comercial",
-    value: "A configurar no painel",
+    value: "55 47 992826721",
     note: "Canal principal para atendimento rápido.",
   },
   {
