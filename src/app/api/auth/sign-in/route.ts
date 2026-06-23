@@ -40,6 +40,15 @@ export async function POST(request: NextRequest) {
   const isAllowed = await canAccessAdmin(supabase);
 
   if (!isAllowed) {
+    const { error: bootstrapError } = await supabase.rpc("bootstrap_first_admin");
+    const isBootstrapped = !bootstrapError && (await canAccessAdmin(supabase));
+
+    if (isBootstrapped) {
+      const response = NextResponse.redirect(new URL(redirectTo, request.url), 303);
+
+      return applyNoStoreHeaders(applyCookies(response));
+    }
+
     await supabase.auth.signOut();
 
     const response = NextResponse.redirect(

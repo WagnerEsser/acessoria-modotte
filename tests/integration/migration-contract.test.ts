@@ -18,4 +18,18 @@ describe("migration contract", () => {
     expect(sql).toContain("create policy \"Users self read or admin\"");
     expect(sql).toContain("create trigger set_updated_at_properties");
   });
+
+  it("bootstraps the first admin and syncs auth users", () => {
+    const sql = readFileSync(
+      path.resolve("supabase/migrations/0002_auth_bootstrap.sql"),
+      "utf8"
+    );
+
+    expect(sql).toContain("create or replace function public.sync_new_auth_user()");
+    expect(sql).toContain("create trigger on_auth_user_created");
+    expect(sql).toContain("create or replace function public.sync_auth_user_profile()");
+    expect(sql).toContain("create trigger on_auth_user_updated");
+    expect(sql).toContain("create or replace function public.bootstrap_first_admin()");
+    expect(sql).toContain("grant execute on function public.bootstrap_first_admin()");
+  });
 });
