@@ -8,6 +8,7 @@ import {
   resolveAdminRouteAccess,
   sanitizeAdminRedirect,
 } from "@/lib/auth";
+import { DEV_ADMIN_EMAIL, DEV_ADMIN_PASSWORD, isDevAdminCredentials } from "@/lib/dev-auth";
 
 describe("admin auth helpers", () => {
   it("sanitizes redirects to admin-only paths", () => {
@@ -62,5 +63,10 @@ describe("admin auth helpers", () => {
     );
 
     expect(allowedLogin).toEqual({ kind: "allow" });
+  });
+
+  it("matches the local dev credentials", () => {
+    expect(isDevAdminCredentials(DEV_ADMIN_EMAIL, DEV_ADMIN_PASSWORD)).toBe(true);
+    expect(isDevAdminCredentials("wrong@example.com", DEV_ADMIN_PASSWORD)).toBe(false);
   });
 });

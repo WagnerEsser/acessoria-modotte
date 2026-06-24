@@ -1,0 +1,16 @@
+.git
+.next
+.turbo
+coverage
+playwright-report
+test-results
+node_modules
+tmp
+docs
+tests
+assets
+scripts
+supabase
+.env
+.env.*
+!.env.example

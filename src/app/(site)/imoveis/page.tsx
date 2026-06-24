@@ -5,8 +5,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { getPublicProperties } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
-import { featuredProperties } from "@/lib/site-data";
 import {
   filterProperties,
   getPropertyTypes,
@@ -18,7 +18,7 @@ import {
 export const metadata = buildMetadata({
   title: "Imóveis",
   description:
-    "Catálogo de imóveis da Luana Modotte com foco em leitura premium, transparência e conversão.",
+    "Catálogo de imóveis da Luana Modotte com busca clara, transparência e conversão.",
   path: "/imoveis",
 });
 
@@ -38,6 +38,7 @@ function getFirstValue(value: string | string[] | undefined): string | undefined
 
 function buildPropertiesHref(options: {
   type?: string;
+  neighborhoodSlug?: string;
   featuredOnly?: boolean;
   page?: number;
 }) {
@@ -45,6 +46,10 @@ function buildPropertiesHref(options: {
 
   if (options.type) {
     params.set("tipo", options.type);
+  }
+
+  if (options.neighborhoodSlug) {
+    params.set("bairro", options.neighborhoodSlug);
   }
 
   if (options.featuredOnly) {
@@ -61,23 +66,27 @@ function buildPropertiesHref(options: {
 }
 
 export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
+  const properties = await getPublicProperties();
   const resolvedSearchParams = await searchParams;
   const activeType = getFirstValue(resolvedSearchParams.tipo);
+  const activeNeighborhoodSlug = getFirstValue(resolvedSearchParams.bairro);
   const featuredOnly = getFirstValue(resolvedSearchParams.destaque) === "1";
   const currentPage = parsePositiveInteger(resolvedSearchParams.pagina, 1);
 
-  const filteredProperties = filterProperties(featuredProperties, {
+  const filteredProperties = filterProperties(properties, {
     type: activeType,
+    neighborhoodSlug: activeNeighborhoodSlug,
     featuredOnly,
   });
   const pagination = paginateProperties(filteredProperties, currentPage, PROPERTY_PAGE_SIZE);
-  const propertyTypes = getPropertyTypes(featuredProperties);
-  const hasActiveFilter = Boolean(activeType || featuredOnly);
+  const propertyTypes = getPropertyTypes(properties);
+  const hasActiveFilter = Boolean(activeType || activeNeighborhoodSlug || featuredOnly);
 
   const prevHref =
     pagination.currentPage > 1
       ? buildPropertiesHref({
           type: activeType,
+          neighborhoodSlug: activeNeighborhoodSlug,
           featuredOnly,
           page: pagination.currentPage - 1,
         })
@@ -87,6 +96,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     pagination.currentPage < pagination.totalPages
       ? buildPropertiesHref({
           type: activeType,
+          neighborhoodSlug: activeNeighborhoodSlug,
           featuredOnly,
           page: pagination.currentPage + 1,
         })
@@ -128,6 +138,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
 
             <Link
               href={buildPropertiesHref({
+                neighborhoodSlug: activeNeighborhoodSlug,
                 featuredOnly: true,
                 page: 1,
               })}
@@ -145,6 +156,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 key={type}
                 href={buildPropertiesHref({
                   type,
+                  neighborhoodSlug: activeNeighborhoodSlug,
                   page: 1,
                 })}
                 className={buttonVariants({
@@ -177,7 +189,9 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
 
         {pagination.items.length === 0 ? (
           <Card className="p-8 text-center text-sm leading-6 text-brand-ivory/70">
-            Nenhum imóvel encontrado com os filtros atuais.
+            {pagination.totalItems
+              ? "Nenhum imóvel encontrado com os filtros atuais."
+              : "Nenhum imóvel publicado ainda."}
           </Card>
         ) : null}
 

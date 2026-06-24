@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PropertyForm } from "@/components/admin/property-form";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -22,7 +19,7 @@ export default function NewPropertyPage() {
       <SectionHeading
         eyebrow="Cadastro"
         title="Criar novo imóvel"
-        description="A página já está preparada para um formulário real de persistência quando a camada de backend entrar."
+        description="Este formulário grava o imóvel no Supabase e pode ser publicado ou salvo como rascunho."
         action={
           <Link href="/admin/imoveis" className={buttonVariants({ variant: "outline" })}>
             Voltar
@@ -31,23 +28,16 @@ export default function NewPropertyPage() {
         }
       />
 
-      <Card className="space-y-5 p-6">
-        <Badge variant="gold">Base do formulário</Badge>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input placeholder="Título do imóvel" />
-          <Input placeholder="Tipo" />
-          <Input placeholder="Cidade" />
-          <Input placeholder="Bairro" />
-          <Input placeholder="Preço" />
-          <Input placeholder="Área m²" />
-          <Textarea className="md:col-span-2" placeholder="Descrição principal" />
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/admin/imoveis" className={buttonVariants({ size: "lg" })}>
-            Salvar rascunho
-          </Link>
-        </div>
-      </Card>
+      <PropertyForm
+        action="/api/admin/properties"
+        redirectTo="/admin/imoveis"
+        submitLabel="Salvar imóvel"
+        title="Dados do imóvel"
+        description="Preencha os campos essenciais primeiro. Imagens, galeria e complementos podem entrar depois."
+        values={{
+          transactionType: "sale",
+        }}
+      />
     </div>
   );
 }

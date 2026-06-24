@@ -1,25 +1,28 @@
-import type { PropertyListing } from "@/lib/site-data";
+import type { PublicPropertyCard } from "@/lib/public-content";
 
 export const PROPERTY_PAGE_SIZE = 10;
 
 export type PropertyCatalogFilters = {
   type?: string;
+  neighborhoodSlug?: string;
   featuredOnly?: boolean;
 };
 
 export type PaginatedProperties = {
-  items: PropertyListing[];
+  items: PublicPropertyCard[];
   currentPage: number;
   totalPages: number;
   totalItems: number;
 };
 
-export function getPropertyTypes(properties: PropertyListing[]) {
-  return Array.from(new Set(properties.map((property) => property.type)));
+export function getPropertyTypes(properties: PublicPropertyCard[]) {
+  return Array.from(new Set(properties.map((property) => property.type))).sort((left, right) =>
+    left.localeCompare(right, "pt-BR")
+  );
 }
 
 export function filterProperties(
-  properties: PropertyListing[],
+  properties: PublicPropertyCard[],
   filters: PropertyCatalogFilters = {}
 ) {
   return properties.filter((property) => {
@@ -31,12 +34,16 @@ export function filterProperties(
       return false;
     }
 
+    if (filters.neighborhoodSlug && property.neighborhoodSlug !== filters.neighborhoodSlug) {
+      return false;
+    }
+
     return true;
   });
 }
 
 export function paginateProperties(
-  properties: PropertyListing[],
+  properties: PublicPropertyCard[],
   currentPageInput = 1,
   pageSize = PROPERTY_PAGE_SIZE
 ): PaginatedProperties {

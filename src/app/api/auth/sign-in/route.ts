@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { applyNoStoreHeaders, buildAdminLoginUrl, sanitizeAdminRedirect } from "@/lib/auth";
+import { isDevAdminCredentials, setDevAdminSession } from "@/lib/dev-auth";
+import { hasSupabaseEnv } from "@/lib/env";
 import { canAccessAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServerContext } from "@/lib/supabase/server";
 
@@ -21,6 +23,26 @@ export async function POST(request: NextRequest) {
       new URL(buildAdminLoginUrl(redirectTo, "missing_credentials"), request.url),
       303
     );
+
+    return applyNoStoreHeaders(response);
+  }
+
+  if (!hasSupabaseEnv()) {
+    if (!isDevAdminCredentials(email, password)) {
+      const response = NextResponse.redirect(
+        new URL(buildAdminLoginUrl(redirectTo, "invalid_credentials"), request.url),
+        303
+      );
+
+      return applyNoStoreHeaders(response);
+    }
+
+    const response = NextResponse.redirect(
+      new URL(redirectTo, request.url),
+      303
+    );
+
+    setDevAdminSession(response);
 
     return applyNoStoreHeaders(response);
   }

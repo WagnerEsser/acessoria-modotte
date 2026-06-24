@@ -1,11 +1,14 @@
+import Link from "next/link";
 import { ArrowRight, LockKeyhole } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getLoginErrorMessage, sanitizeAdminRedirect } from "@/lib/auth";
 import { brand } from "@/lib/brand";
+import { DEV_ADMIN_EMAIL, DEV_ADMIN_PASSWORD } from "@/lib/dev-auth";
+import { hasSupabaseEnv } from "@/lib/env";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -33,6 +36,7 @@ export default async function AdminLoginPage({
   const resolvedSearchParams = await searchParams;
   const errorMessage = getLoginErrorMessage(getFirstValue(resolvedSearchParams.error));
   const redirectTo = sanitizeAdminRedirect(getFirstValue(resolvedSearchParams.redirectTo));
+  const isDevMode = !hasSupabaseEnv();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] px-4 py-10 text-brand-ivory">
@@ -45,6 +49,12 @@ export default async function AdminLoginPage({
           Acesso restrito
         </Badge>
 
+        {isDevMode ? (
+          <div className="mt-4 rounded-2xl border border-brand-gold/18 bg-brand-gold/10 px-4 py-3 text-xs uppercase tracking-[0.24em] text-brand-gold">
+            Modo de teste ativo
+          </div>
+        ) : null}
+
         <h1 className="mt-4 font-display text-4xl font-semibold text-brand-ivory">
           Entrar no painel
         </h1>
@@ -52,6 +62,12 @@ export default async function AdminLoginPage({
           Use suas credenciais do Supabase Auth para entrar no painel
           administrativo da assessoria.
         </p>
+
+        <div className="mt-5">
+          <Link href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
+            Voltar ao site
+          </Link>
+        </div>
 
         <form action="/api/auth/sign-in" method="post" className="mt-6 space-y-4">
           <input type="hidden" name="redirectTo" value={redirectTo} />
@@ -63,6 +79,7 @@ export default async function AdminLoginPage({
               name="email"
               placeholder="voce@empresa.com.br"
               type="email"
+              defaultValue={isDevMode ? DEV_ADMIN_EMAIL : ""}
               required
             />
           </label>
@@ -74,6 +91,7 @@ export default async function AdminLoginPage({
               name="password"
               placeholder="senha"
               type="password"
+              defaultValue={isDevMode ? DEV_ADMIN_PASSWORD : ""}
               required
             />
           </label>

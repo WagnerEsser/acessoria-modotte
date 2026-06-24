@@ -1,7 +1,9 @@
 import { createServerClient, type CookieOptions, type CookieMethodsServer } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/env";
+import { getSupabaseAnonKey, getSupabaseUrl, hasSupabaseEnv } from "@/lib/env";
+import { createFallbackSupabaseClient } from "@/lib/supabase/fallback";
 
 type CookieUpdate = {
   name: string;
@@ -9,7 +11,23 @@ type CookieUpdate = {
   options: CookieOptions;
 };
 
-export function createSupabaseServerContext(request: NextRequest) {
+export function createSupabaseServerContext(
+  request: NextRequest
+): {
+  supabase: SupabaseClient;
+  applyCookies(response: NextResponse): NextResponse;
+} {
+  if (!hasSupabaseEnv()) {
+    const supabase = createFallbackSupabaseClient() as unknown as SupabaseClient;
+
+    return {
+      supabase,
+      applyCookies(response: NextResponse) {
+        return response;
+      },
+    };
+  }
+
   const pendingCookies: CookieUpdate[] = [];
   const pendingHeaders = new Map<string, string>();
 

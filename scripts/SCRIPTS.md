@@ -8,7 +8,10 @@ Cada dominio deve ter seus scripts dentro de subpastas em `scripts/` e seu uso d
 
 ## Situacao Atual
 
-- sem scripts utilitarios versionados ainda
+- scripts utilitarios versionados para operacao do Supabase oficial
+- `scripts/supabase/start.ps1` para subir o stack local oficial
+- `scripts/supabase/stop.ps1` para derrubar o stack local oficial
+- o `scripts/supabase/*` usa somente o `.env` da raiz
 
 ## Futuro
 

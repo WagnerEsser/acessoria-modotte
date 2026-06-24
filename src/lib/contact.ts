@@ -1,18 +1,24 @@
-const DEFAULT_WHATSAPP_NUMBER = "5547992826721";
-const DEFAULT_WHATSAPP_DISPLAY_NUMBER = "55 47 992826721";
-
 function normalizeDigits(value: string) {
   return value.replace(/\D/g, "");
 }
 
-export function getWhatsAppNumber() {
-  return normalizeDigits(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_WHATSAPP_NUMBER);
+function formatWhatsAppDisplayNumber(number: string) {
+  const digits = normalizeDigits(number);
+
+  if (digits.length >= 12 && digits.startsWith("55")) {
+    return `55 ${digits.slice(2, 4)} ${digits.slice(4)}`;
+  }
+
+  return number;
 }
 
-export function getWhatsAppDisplayNumber() {
-  return DEFAULT_WHATSAPP_DISPLAY_NUMBER;
+export function getWhatsAppDisplayNumber(number: string) {
+  return formatWhatsAppDisplayNumber(number);
 }
 
-export function getWhatsAppHref(message = "Olá, gostaria de falar com a assessoria.") {
-  return `https://wa.me/${getWhatsAppNumber()}?text=${encodeURIComponent(message)}`;
+export function getWhatsAppHref(
+  message = "Olá, gostaria de falar com a assessoria.",
+  number: string
+) {
+  return `https://wa.me/${normalizeDigits(number)}?text=${encodeURIComponent(message)}`;
 }

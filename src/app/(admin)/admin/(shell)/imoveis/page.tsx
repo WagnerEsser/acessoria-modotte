@@ -34,6 +34,18 @@ type PropertyRecord = {
   updated_at: string;
 };
 
+type PropertiesPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function getFirstValue(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+
+  return value;
+}
+
 function getPropertyPriceLabel(property: PropertyRecord): string {
   if (property.price_on_request) {
     return "Sob consulta";
@@ -42,7 +54,10 @@ function getPropertyPriceLabel(property: PropertyRecord): string {
   return formatCurrencyBRL(property.price);
 }
 
-export default async function AdminPropertiesPage() {
+export default async function AdminPropertiesPage({ searchParams }: PropertiesPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const status = getFirstValue(resolvedSearchParams.status);
+  const error = getFirstValue(resolvedSearchParams.error);
   const supabase = await createSupabaseRscClient();
   const { data } = await supabase
     .from("properties")
@@ -64,6 +79,18 @@ export default async function AdminPropertiesPage() {
           </Link>
         }
       />
+
+      {status === "created" || status === "updated" ? (
+        <Card className="border-emerald-400/30 bg-emerald-500/10 p-4 text-sm leading-6 text-emerald-100">
+          Imóvel salvo com sucesso.
+        </Card>
+      ) : null}
+
+      {error ? (
+        <Card className="border-red-400/30 bg-red-500/10 p-4 text-sm leading-6 text-red-100">
+          Não foi possível salvar o imóvel. Verifique os campos e tente novamente.
+        </Card>
+      ) : null}
 
       <div className="grid gap-4">
         {properties.length ? (

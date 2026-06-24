@@ -5,16 +5,16 @@ import {
   buildAdminLoginUrl,
   resolveAdminRouteAccess,
 } from "@/lib/auth";
+import { hasDevAdminSession } from "@/lib/dev-auth";
+import { hasSupabaseEnv } from "@/lib/env";
 import { canAccessAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 export async function middleware(request: NextRequest) {
   const { supabase, applyCookies } = createSupabaseServerContext(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const isAllowed = user ? await canAccessAdmin(supabase) : false;
+  const isAllowed = hasSupabaseEnv()
+    ? Boolean((await supabase.auth.getUser()).data.user) && (await canAccessAdmin(supabase))
+    : hasDevAdminSession(request);
   const decision = resolveAdminRouteAccess(
     request.nextUrl.pathname,
     request.nextUrl.searchParams,

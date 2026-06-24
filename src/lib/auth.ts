@@ -86,6 +86,7 @@ export function getLoginErrorMessage(error: string | null | undefined): string |
     invalid_credentials: "E-mail ou senha inválidos.",
     unauthorized: "Seu usuário não tem acesso ao painel.",
     session_expired: "Sua sessão expirou. Entre novamente.",
+    configuration_missing: "O ambiente do Supabase não está configurado neste workspace.",
   };
 
   return messages[error] ?? "Não foi possível entrar. Tente novamente.";

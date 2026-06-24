@@ -1,94 +1,120 @@
-import { HeartHandshake, ShieldCheck, Sparkles } from "lucide-react";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { brand } from "@/lib/brand";
+import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Sobre",
-  description: "Quem somos e como a assessoria trabalha.",
-  path: "/sobre",
-});
+export const dynamic = "force-dynamic";
 
-const values = [
-  {
-    title: "Credibilidade",
-    description: "Atendimento seguro desde o primeiro contato.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Curadoria",
-    description: "Menos volume, mais foco no que faz sentido.",
-    icon: Sparkles,
-  },
-  {
-    title: "Proximidade",
-    description: "Relacionamento simples, claro e humano.",
-    icon: HeartHandshake,
-  },
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const [siteSettings, page] = await Promise.all([
+    getPublicSiteSettings(),
+    getPublicPageBySlug("sobre"),
+  ]);
 
-export default function AboutPage() {
+  if (!page) {
+    return buildMetadata({
+      title: "Sobre",
+      description: siteSettings.defaultSeoDescription,
+      path: "/sobre",
+      noIndex: true,
+    });
+  }
+
+  return buildMetadata({
+    title: page.seoTitle ?? page.title,
+    description: page.seoDescription ?? page.subtitle ?? siteSettings.defaultSeoDescription,
+    path: "/sobre",
+  });
+}
+
+export default async function AboutPage() {
+  const page = await getPublicPageBySlug("sobre");
+  const paragraphs = splitParagraphs(page?.body);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-12">
         <SectionHeading
           eyebrow="Sobre"
-          title="Uma assessoria pequena, clara e pronta para evoluir"
-          description={`${brand.name} prioriza curadoria, contato direto e operação simples.`}
+          title={page?.title ?? "Sobre a assessoria"}
+          description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo institucional ainda não cadastrado."}
         />
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <Card className="p-6">
-            <Badge variant="gold">Essencia</Badge>
-            <h2 className="mt-4 font-display text-3xl font-semibold text-brand-ivory">
-              Clareza no atendimento e consistência na entrega
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-brand-ivory/70">
-              A marca foi desenhada para comunicar confiança, destacar poucos
-              imóveis e facilitar a gestão diária.
-            </p>
+            <Badge variant="gold">Essência</Badge>
+            <div className="mt-4 space-y-4 text-sm leading-7 text-brand-ivory/70">
+              {paragraphs.length ? (
+                paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+              ) : (
+                <p>O painel administrativo ainda não recebeu o texto institucional desta página.</p>
+              )}
+            </div>
           </Card>
 
-          <Card className="p-6">
-            <Badge variant="outline">Direcao</Badge>
-            <ul className="mt-5 space-y-3 text-sm leading-6 text-brand-ivory/72">
-              <li className="flex gap-2">
-                <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
-                <span>Tom premium e direto.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
-                <span>Poucos blocos, mais clareza.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
-                <span>Identidade alinhada à logo e à paleta.</span>
-              </li>
-            </ul>
+          <Card className="overflow-hidden p-0">
+            <div className="relative aspect-[4/5] overflow-hidden">
+              <Image
+                src="/images/luana-modotte-portrait-pro.png"
+                alt="Retrato profissional de Luana Modotte"
+                fill
+                priority
+                sizes="(min-width: 1024px) 32rem, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/24 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-6">
+                <Badge variant="soft" className="w-fit">
+                  Luana Modotte
+                </Badge>
+                <h2 className="mt-4 font-display text-3xl text-brand-ivory">
+                  Atendimento próximo, leitura técnica e condução direta.
+                </h2>
+              </div>
+            </div>
+            <div className="p-6">
+              <Badge variant="outline">Perfil</Badge>
+              <p className="mt-4 text-sm leading-7 text-brand-ivory/72">
+                A apresentação da assessoria passa pela confiança de quem conduz cada etapa do
+                processo. A proposta aqui é manter uma comunicação clara, elegante e humana, com
+                contato direto e alinhamento rápido ao perfil de cada cliente.
+              </p>
+            </div>
           </Card>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {values.map((value) => {
-            const Icon = value.icon;
+        <Card className="p-6">
+          <Badge variant="outline">Direção</Badge>
+          <ul className="mt-5 grid gap-3 text-sm leading-6 text-brand-ivory/72 md:grid-cols-2">
+            {page?.blocks.length ? (
+              page.blocks.map((block) => (
+                <li key={block.id} className="flex gap-2 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4">
+                  <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
+                  <span>{block.title ?? block.content ?? block.blockKey}</span>
+                </li>
+              ))
+            ) : (
+              <li className="flex gap-2 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4 md:col-span-2">
+                <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
+                <span>Os blocos desta página serão cadastrados no painel administrativo.</span>
+              </li>
+            )}
+          </ul>
+        </Card>
 
-            return (
-              <Card key={value.title} className="p-5">
-                <div className="grid size-11 place-items-center rounded-2xl border border-brand-gold/16 bg-brand-gold/12 text-brand-gold">
-                  <Icon className="size-5" />
-                </div>
-                <h3 className="mt-5 font-display text-xl font-semibold text-brand-ivory">
-                  {value.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-brand-ivory/70">
-                  {value.description}
-                </p>
-              </Card>
-            );
-          })}
+        <div className="flex flex-wrap gap-3">
+          <Link href="/contato" className={buttonVariants({ size: "lg" })}>
+            Falar com a assessoria
+          </Link>
+          <Link href="/imoveis" className={buttonVariants({ variant: "outline", size: "lg" })}>
+            Ver imóveis
+          </Link>
         </div>
       </div>
     </div>
