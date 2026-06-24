@@ -181,7 +181,10 @@ export default async function DashboardPage() {
                 Páginas publicadas e em revisão
               </h2>
             </div>
-            <Badge variant="gold">{pages.length} registros</Badge>
+            <Badge variant="gold">
+              <span className="font-numeric">{pages.length}</span>
+              registros
+            </Badge>
           </div>
 
           <div className="mt-6 space-y-4">

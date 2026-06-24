@@ -4,6 +4,7 @@ export const PROPERTY_PAGE_SIZE = 10;
 
 export type PropertyCatalogFilters = {
   type?: string;
+  city?: string;
   neighborhoodSlug?: string;
   featuredOnly?: boolean;
 };
@@ -21,6 +22,12 @@ export function getPropertyTypes(properties: PublicPropertyCard[]) {
   );
 }
 
+export function getPropertyCities(properties: PublicPropertyCard[]) {
+  return Array.from(
+    new Set(properties.map((property) => property.city).filter((city): city is string => Boolean(city)))
+  ).sort((left, right) => left.localeCompare(right, "pt-BR"));
+}
+
 export function filterProperties(
   properties: PublicPropertyCard[],
   filters: PropertyCatalogFilters = {}
@@ -31,6 +38,10 @@ export function filterProperties(
     }
 
     if (filters.type && property.type !== filters.type) {
+      return false;
+    }
+
+    if (filters.city && property.city !== filters.city) {
       return false;
     }
 

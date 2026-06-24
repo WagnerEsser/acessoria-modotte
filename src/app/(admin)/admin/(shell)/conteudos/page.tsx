@@ -4,7 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getWhatsAppDisplayNumber } from "@/lib/contact";
+import {
+  formatBrazilianPhoneDisplayNumber,
+  getWhatsAppDisplayNumber,
+} from "@/lib/contact";
 import { formatDateTimeBRL } from "@/lib/formatters";
 import { getPublicSiteSettings } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
@@ -126,7 +129,7 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
     ? getWhatsAppDisplayNumber(siteSettings.whatsappNumber)
     : "";
   const primaryPhoneDisplay = siteSettings.primaryPhone
-    ? getWhatsAppDisplayNumber(siteSettings.primaryPhone)
+    ? formatBrazilianPhoneDisplayNumber(siteSettings.primaryPhone)
     : "";
   const instagramDisplay = getInstagramInputValue(siteSettings.socialLinks.instagram);
   const aboutPage = pages.find((page) => page.slug === "sobre") ?? null;
@@ -186,9 +189,10 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
               </p>
               <Input
                 name="whatsapp_number"
-                placeholder="55 47 98818-8967"
+                placeholder="+55 47 99999-9999"
                 defaultValue={whatsappNumberDisplay}
                 autoComplete="tel"
+                inputMode="tel"
               />
             </div>
 
@@ -198,9 +202,10 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
               </p>
               <Input
                 name="primary_phone"
-                placeholder="55 47 98818-8967"
+                placeholder="+55 47 99999-9999"
                 defaultValue={primaryPhoneDisplay}
                 autoComplete="tel"
+                inputMode="tel"
               />
             </div>
 

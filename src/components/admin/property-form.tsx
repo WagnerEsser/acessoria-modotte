@@ -127,12 +127,14 @@ export function PropertyForm({
       <div className="grid gap-4 md:grid-cols-2">
         <Input
           name="contact_phone"
-          placeholder="Telefone de contato"
+          placeholder="+55 47 99999-9999"
+          inputMode="tel"
           defaultValue={getFieldValue(values?.contactPhone)}
         />
         <Input
           name="contact_whatsapp"
-          placeholder="WhatsApp de contato"
+          placeholder="+55 47 99999-9999"
+          inputMode="tel"
           defaultValue={getFieldValue(values?.contactWhatsapp)}
         />
       </div>

@@ -1,6 +1,11 @@
 import { brand } from "@/lib/brand";
 import { formatCurrencyBRL } from "@/lib/formatters";
-import { getWhatsAppDisplayNumber, getWhatsAppHref } from "@/lib/contact";
+import {
+  formatBrazilianPhoneDisplayNumber,
+  getWhatsAppDisplayNumber,
+  getWhatsAppHref,
+  normalizePhoneDigits,
+} from "@/lib/contact";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 
 type JsonRecord = Record<string, unknown>;
@@ -813,9 +818,9 @@ export function getPublicContactChannels(settings: PublicSiteSettings) {
   if (settings.primaryPhone && settings.primaryPhone !== settings.whatsappNumber) {
     channels.push({
       label: "Telefone",
-      value: settings.primaryPhone,
+      value: formatBrazilianPhoneDisplayNumber(settings.primaryPhone),
       note: "Contato direto com a equipe.",
-      href: `tel:${settings.primaryPhone.replace(/\D/g, "")}`,
+      href: `tel:${normalizePhoneDigits(settings.primaryPhone)}`,
     });
   }
 

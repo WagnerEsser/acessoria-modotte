@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { normalizePhoneDigits } from "@/lib/contact";
 import { parseNumberField, readFormBoolean, readFormValue, slugify } from "@/lib/form-utils";
 
 export type ParsedPropertyForm = {
@@ -44,8 +45,8 @@ export function parsePropertyFormData(formData: FormData) {
   const garages = parseNumberField(readFormValue(formData, "garages")) ?? 0;
   const areaTotal = parseNumberField(readFormValue(formData, "area_total"));
   const areaUseful = parseNumberField(readFormValue(formData, "area_useful"));
-  const contactPhone = readFormValue(formData, "contact_phone");
-  const contactWhatsapp = readFormValue(formData, "contact_whatsapp");
+  const contactPhone = normalizePhoneDigits(readFormValue(formData, "contact_phone"));
+  const contactWhatsapp = normalizePhoneDigits(readFormValue(formData, "contact_whatsapp"));
   const seoTitle = readFormValue(formData, "seo_title");
   const seoDescription = readFormValue(formData, "seo_description");
   const description = readFormValue(formData, "description");

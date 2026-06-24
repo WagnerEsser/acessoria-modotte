@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { applyNoStoreHeaders, buildAdminLoginUrl } from "@/lib/auth";
 import { brand } from "@/lib/brand";
+import { normalizePhoneDigits } from "@/lib/contact";
 import { hasDevAdminSession } from "@/lib/dev-auth";
 import { hasSupabaseEnv } from "@/lib/env";
 import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
@@ -28,12 +29,6 @@ type SiteSettingsRecord = {
   default_seo_title: string | null;
   default_seo_description: string | null;
 };
-
-function normalizePhone(value: string) {
-  const digits = value.replace(/\D/g, "");
-
-  return digits || null;
-}
 
 function normalizeInstagramProfile(value: string) {
   const trimmed = value.trim();
@@ -92,8 +87,8 @@ export async function POST(request: NextRequest) {
     return applyNoStoreHeaders(applyCookies(response));
   }
 
-  const whatsappNumber = normalizePhone(readFormValue(formData, "whatsapp_number"));
-  const primaryPhone = normalizePhone(readFormValue(formData, "primary_phone"));
+  const whatsappNumber = normalizePhoneDigits(readFormValue(formData, "whatsapp_number")) || null;
+  const primaryPhone = normalizePhoneDigits(readFormValue(formData, "primary_phone")) || null;
   const email = readFormValue(formData, "email") || null;
   const impactPhrase = readFormValue(formData, "impact_phrase") || brand.slogan;
   const instagramProfile = normalizeInstagramProfile(readFormValue(formData, "instagram"));

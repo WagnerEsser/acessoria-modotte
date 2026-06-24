@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { applyNoStoreHeaders } from "@/lib/auth";
+import { normalizePhoneDigits } from "@/lib/contact";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
 
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
   const redirectTo = sanitizeInternalRedirect(readFormValue(formData, "redirect_to"), "/contato");
   const name = readFormValue(formData, "name");
   const email = readFormValue(formData, "email");
-  const phone = readFormValue(formData, "phone");
+  const phone = normalizePhoneDigits(readFormValue(formData, "phone"));
   const source = readFormValue(formData, "source") || "site";
   const pageSlug = readFormValue(formData, "page_slug") || null;
   const interestType = readFormValue(formData, "interest_type") || null;

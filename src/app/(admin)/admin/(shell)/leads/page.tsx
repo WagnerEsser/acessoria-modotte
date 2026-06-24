@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { formatBrazilianPhoneDisplayNumber } from "@/lib/contact";
 import { formatDateTimeBRL } from "@/lib/formatters";
 import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
@@ -57,8 +58,9 @@ export default async function AdminLeadsPage() {
                   <p className="text-sm text-brand-ivory/64">
                     {lead.source ?? "Site"} - {lead.interest_type ?? lead.property?.[0]?.title ?? "Contato geral"}
                   </p>
-                  <p className="text-xs uppercase tracking-[0.24em] text-brand-beige/55">
-                    {lead.email ?? "Sem e-mail"} {lead.phone ? `- ${lead.phone}` : ""}
+                  <p className="font-numeric text-xs uppercase tracking-[0.24em] text-brand-beige/55">
+                    {lead.email ?? "Sem e-mail"}{" "}
+                    {lead.phone ? `- ${formatBrazilianPhoneDisplayNumber(lead.phone)}` : ""}
                   </p>
                 </div>
                 <div className="flex flex-col items-start gap-3 sm:items-end">

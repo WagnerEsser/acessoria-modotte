@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { PropertyForm } from "@/components/admin/property-form";
 import { buttonVariants } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { formatBrazilianPhoneDisplayNumber } from "@/lib/contact";
 import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
@@ -112,8 +113,10 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
             property.area_useful === null || property.area_useful === undefined
               ? ""
               : String(property.area_useful),
-          contactPhone: property.contact_phone ?? "",
-          contactWhatsapp: property.contact_whatsapp ?? "",
+          contactPhone: property.contact_phone ? formatBrazilianPhoneDisplayNumber(property.contact_phone) : "",
+          contactWhatsapp: property.contact_whatsapp
+            ? formatBrazilianPhoneDisplayNumber(property.contact_whatsapp)
+            : "",
           featured: property.featured,
           isPublished: property.is_published,
           seoTitle: property.seo_title ?? "",
