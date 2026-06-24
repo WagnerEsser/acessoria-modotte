@@ -81,7 +81,7 @@ export default async function NeighborhoodPage({ params }: NeighborhoodPageProps
             <p className="mt-4 text-xs uppercase tracking-[0.3em] text-brand-beige/55">
               Imóveis vinculados
             </p>
-            <p className="mt-2 font-display text-5xl text-brand-ivory">
+            <p className="mt-2 font-numeric text-5xl text-brand-ivory">
               {neighborhood.propertyCount}
             </p>
             <p className="mt-2 text-sm text-brand-ivory/68">

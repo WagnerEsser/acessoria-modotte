@@ -33,3 +33,12 @@
     @apply bg-brand-gold text-brand-navy;
   }
 }
+
+@layer utilities {
+  .font-numeric {
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    letter-spacing: -0.01em;
+  }
+}

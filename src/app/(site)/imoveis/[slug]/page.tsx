@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getWhatsAppHref } from "@/lib/contact";
+import { formatBrazilianPhoneDisplayNumber, getWhatsAppHref } from "@/lib/contact";
 import { buildMetadata } from "@/lib/seo";
 import { getPublicPropertyBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 
@@ -176,7 +176,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                       >
                         <Icon className="size-4 text-brand-gold" />
                         <p className="mt-3 text-sm text-brand-ivory/68">{item.label}</p>
-                        <p className="font-display text-2xl text-brand-ivory">{item.value}</p>
+                        <p className="font-numeric text-2xl text-brand-ivory">{item.value}</p>
                       </div>
                     );
                   })}
@@ -214,10 +214,14 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               </p>
               <div className="space-y-3 text-sm leading-6 text-brand-ivory/72">
                 {property.contactWhatsapp ? (
-                  <p>WhatsApp do imóvel: {property.contactWhatsapp}</p>
+                  <p className="font-numeric">
+                    WhatsApp do imóvel: {formatBrazilianPhoneDisplayNumber(property.contactWhatsapp)}
+                  </p>
                 ) : null}
                 {property.contactPhone ? (
-                  <p>Telefone do imóvel: {property.contactPhone}</p>
+                  <p className="font-numeric">
+                    Telefone do imóvel: {formatBrazilianPhoneDisplayNumber(property.contactPhone)}
+                  </p>
                 ) : null}
                 {!property.contactPhone && !property.contactWhatsapp ? (
                   <p>O contato deste imóvel será preenchido quando o cadastro estiver concluído.</p>
@@ -264,7 +268,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                     {feature.label}
                   </p>
                   {feature.value ? (
-                    <p className="mt-2 font-display text-xl text-brand-ivory">{feature.value}</p>
+                    <p className="mt-2 font-numeric text-xl text-brand-ivory">{feature.value}</p>
                   ) : null}
                 </div>
               ))}

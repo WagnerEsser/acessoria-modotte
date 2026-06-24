@@ -91,7 +91,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                   <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
                     {channel.label}
                   </p>
-                  <p className="mt-2 font-display text-2xl text-brand-ivory">
+                  <p className="mt-2 font-numeric text-2xl text-brand-ivory">
                     {channel.value}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-brand-ivory/70">{channel.note}</p>

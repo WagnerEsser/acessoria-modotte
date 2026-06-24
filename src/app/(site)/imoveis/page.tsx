@@ -38,6 +38,7 @@ function getFirstValue(value: string | string[] | undefined): string | undefined
 
 function buildPropertiesHref(options: {
   type?: string;
+  city?: string;
   neighborhoodSlug?: string;
   featuredOnly?: boolean;
   page?: number;
@@ -46,6 +47,10 @@ function buildPropertiesHref(options: {
 
   if (options.type) {
     params.set("tipo", options.type);
+  }
+
+  if (options.city) {
+    params.set("cidade", options.city);
   }
 
   if (options.neighborhoodSlug) {
@@ -69,23 +74,26 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const properties = await getPublicProperties();
   const resolvedSearchParams = await searchParams;
   const activeType = getFirstValue(resolvedSearchParams.tipo);
+  const activeCity = getFirstValue(resolvedSearchParams.cidade);
   const activeNeighborhoodSlug = getFirstValue(resolvedSearchParams.bairro);
   const featuredOnly = getFirstValue(resolvedSearchParams.destaque) === "1";
   const currentPage = parsePositiveInteger(resolvedSearchParams.pagina, 1);
 
   const filteredProperties = filterProperties(properties, {
     type: activeType,
+    city: activeCity,
     neighborhoodSlug: activeNeighborhoodSlug,
     featuredOnly,
   });
   const pagination = paginateProperties(filteredProperties, currentPage, PROPERTY_PAGE_SIZE);
   const propertyTypes = getPropertyTypes(properties);
-  const hasActiveFilter = Boolean(activeType || activeNeighborhoodSlug || featuredOnly);
+  const hasActiveFilter = Boolean(activeType || activeCity || activeNeighborhoodSlug || featuredOnly);
 
   const prevHref =
     pagination.currentPage > 1
       ? buildPropertiesHref({
           type: activeType,
+          city: activeCity,
           neighborhoodSlug: activeNeighborhoodSlug,
           featuredOnly,
           page: pagination.currentPage - 1,
@@ -96,6 +104,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     pagination.currentPage < pagination.totalPages
       ? buildPropertiesHref({
           type: activeType,
+          city: activeCity,
           neighborhoodSlug: activeNeighborhoodSlug,
           featuredOnly,
           page: pagination.currentPage + 1,
@@ -138,6 +147,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
 
             <Link
               href={buildPropertiesHref({
+                city: activeCity,
                 neighborhoodSlug: activeNeighborhoodSlug,
                 featuredOnly: true,
                 page: 1,
@@ -156,6 +166,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 key={type}
                 href={buildPropertiesHref({
                   type,
+                  city: activeCity,
                   neighborhoodSlug: activeNeighborhoodSlug,
                   page: 1,
                 })}

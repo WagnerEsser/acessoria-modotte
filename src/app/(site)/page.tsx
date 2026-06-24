@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Building2, Sparkles, Store } from "lucide-react";
+import { ArrowRight, Building2, Store } from "lucide-react";
 
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -10,9 +10,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { brand } from "@/lib/brand";
-import { getPropertyTypes } from "@/lib/property-catalog";
+import { getPropertyCities, getPropertyTypes } from "@/lib/property-catalog";
 import {
-  getPublicBlogPosts,
   getPublicNeighborhoods,
   getPublicPageBySlug,
   getPublicProperties,
@@ -37,11 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [siteSettings, properties, neighborhoods, blogPosts, homePage] = await Promise.all([
+  const [siteSettings, properties, neighborhoods, homePage] = await Promise.all([
     getPublicSiteSettings(),
     getPublicProperties(),
     getPublicNeighborhoods(),
-    getPublicBlogPosts(),
     getPublicPageBySlug("home"),
   ]);
 
@@ -55,7 +53,19 @@ export default async function HomePage() {
     brand.slogan;
   const homeBlocks = homePage?.blocks ?? [];
   const propertyTypes = getPropertyTypes(properties);
+  const propertyCities = getPropertyCities(properties);
   const searchableNeighborhoods = neighborhoods.filter((neighborhood) => neighborhood.propertyCount > 0);
+  const cityOptions = [
+    {
+      value: "",
+      label: "Todas as cidades",
+      description: "Sem filtro de cidade",
+    },
+    ...propertyCities.map((city) => ({
+      value: city,
+      label: city,
+    })),
+  ];
   const neighborhoodOptions = [
     {
       value: "",
@@ -97,12 +107,6 @@ export default async function HomePage() {
       description: "Bairros publicados no painel.",
       icon: Store,
     },
-    {
-      label: "Artigos ativos",
-      value: String(blogPosts.length),
-      description: "Conteúdo editorial indexável.",
-      icon: Sparkles,
-    },
   ] as const;
 
   return (
@@ -110,10 +114,6 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-20">
           <div className="space-y-6">
-            <Badge variant="soft" className="w-fit">
-              {siteSettings.brandName}
-            </Badge>
-
             <Card className="border-brand-gold/18 bg-brand-ink/88 p-5 shadow-xl shadow-brand-ink/25">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="space-y-2">
@@ -121,7 +121,7 @@ export default async function HomePage() {
                     Busca principal
                   </Badge>
                   <h2 className="font-display text-2xl font-semibold text-brand-ivory">
-                    Encontre imóveis por bairro ou tipo
+                    Encontre imóveis por cidade, bairro ou tipo
                   </h2>
                   <p className="max-w-2xl text-sm leading-6 text-brand-ivory/70">
                     Selecione os filtros e siga direto para a lista já organizada.
@@ -130,7 +130,15 @@ export default async function HomePage() {
               </div>
 
               <form action="/imoveis" method="get" className="mt-5 space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Select
+                    name="cidade"
+                    label="Cidade"
+                    placeholder="Todas as cidades"
+                    defaultValue=""
+                    options={cityOptions}
+                  />
+
                   <Select
                     name="bairro"
                     label="Bairro"
@@ -153,15 +161,12 @@ export default async function HomePage() {
                     Buscar imóveis
                     <ArrowRight className="size-4" />
                   </Button>
-                  <p className="text-xs leading-6 text-brand-ivory/60">
-                    Você será levado à listagem já filtrada.
-                  </p>
                 </div>
               </form>
             </Card>
 
             <div className="space-y-5">
-              <h1 className="max-w-3xl font-display text-5xl font-semibold leading-none text-brand-ivory sm:text-6xl lg:text-7xl">
+              <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight text-brand-ivory sm:text-5xl lg:text-6xl">
                 {heroTitle}
               </h1>
               <p className="max-w-2xl text-base leading-7 text-brand-ivory/72 sm:text-lg">
@@ -182,7 +187,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {quickStats.map((item) => {
                 const Icon = item.icon;
 
@@ -191,7 +196,7 @@ export default async function HomePage() {
                     <div className="grid size-10 place-items-center rounded-2xl border border-brand-gold/16 bg-brand-gold/12 text-brand-gold">
                       <Icon className="size-4" />
                     </div>
-                    <div className="mt-4 font-display text-3xl font-semibold text-brand-ivory">
+                    <div className="mt-4 font-numeric text-3xl font-semibold text-brand-ivory">
                       {item.value}
                     </div>
                     <h2 className="mt-2 font-display text-xl font-semibold text-brand-ivory">
@@ -206,7 +211,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <Card className="overflow-hidden p-5">
+          <Card className="overflow-hidden p-5 lg:self-start">
             <div className="rounded-[1.5rem] border border-brand-beige/12 bg-[linear-gradient(180deg,rgba(19,37,59,0.92),rgba(11,27,44,0.98))] p-4">
               <Image
                 src="/brand/luana-modotte-logo-lockup.png"
@@ -244,25 +249,6 @@ export default async function HomePage() {
                   <p className="mt-3 max-w-xl text-sm leading-6 text-brand-ivory/80 sm:text-base">
                     Atendimento direto, leitura cuidadosa do perfil do cliente e condução objetiva
                     em cada etapa.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
-                <div className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
-                    Contato
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-brand-ivory/72">
-                    WhatsApp e e-mail saem do painel administrativo.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
-                    Direção
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-brand-ivory/72">
-                    Estrutura simples, conteúdo enxuto e atualização centralizada.
                   </p>
                 </div>
               </div>

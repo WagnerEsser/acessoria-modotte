@@ -25,7 +25,7 @@ export function StatCard({
           <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
             {label}
           </p>
-          <div className="mt-2 font-display text-3xl font-semibold text-brand-ivory">
+          <div className="mt-2 font-numeric text-3xl font-semibold text-brand-ivory">
             {value}
           </div>
         </div>

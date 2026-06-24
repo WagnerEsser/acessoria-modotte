@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { MessageCircleMore } from "lucide-react";
+import { useState } from "react";
+import { siWhatsapp, type SimpleIcon } from "simple-icons";
 
 import { getWhatsAppHref } from "@/lib/contact";
 
@@ -10,19 +10,23 @@ type WhatsAppBubbleProps = {
   whatsappNumber?: string | null;
 };
 
+function BrandIcon({ icon }: { icon: SimpleIcon }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-5 shrink-0 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]"
+      role="img"
+      viewBox="0 0 24 24"
+    >
+      <path d={icon.path} fill="currentColor" />
+    </svg>
+  );
+}
+
 export function WhatsAppBubble({ whatsappNumber }: WhatsAppBubbleProps) {
   const [isVisible, setIsVisible] = useState(true);
 
-  useEffect(() => {
-    const dismissed = window.localStorage.getItem("whatsapp-bubble-dismissed");
-
-    if (dismissed === "1") {
-      setIsVisible(false);
-    }
-  }, []);
-
   function handleDismiss() {
-    window.localStorage.setItem("whatsapp-bubble-dismissed", "1");
     setIsVisible(false);
   }
 
@@ -46,12 +50,11 @@ export function WhatsAppBubble({ whatsappNumber }: WhatsAppBubbleProps) {
         target="_blank"
         rel="noreferrer"
         aria-label="Falar com a assessoria no WhatsApp"
-        className="inline-flex items-center gap-3 rounded-full border border-brand-gold/30 bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-2xl shadow-black/25 transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink"
+        className="inline-flex items-center justify-center rounded-full border border-brand-gold/30 bg-[#25D366] p-3 text-white shadow-2xl shadow-black/25 transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink"
       >
-        <span className="grid size-8 place-items-center rounded-full bg-white/15">
-          <MessageCircleMore className="size-4" />
+        <span className="grid size-9 place-items-center rounded-full bg-white/18">
+          <BrandIcon icon={siWhatsapp} />
         </span>
-        <span className="hidden sm:inline">WhatsApp</span>
       </Link>
     </div>
   );

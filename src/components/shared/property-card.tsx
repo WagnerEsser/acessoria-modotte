@@ -90,7 +90,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
                   <p className="text-xs uppercase tracking-[0.24em] text-brand-beige/55">
                     {item.label}
                   </p>
-                  <p className="mt-1 text-sm text-brand-ivory/80">{item.value}</p>
+                  <p className="mt-1 font-numeric text-sm text-brand-ivory/80">{item.value}</p>
                 </div>
               );
             })}
@@ -110,7 +110,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-brand-beige/10 pt-4">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">Valor</p>
-            <div className="mt-1 font-display text-xl font-semibold text-brand-ivory">
+            <div className="mt-1 font-numeric text-xl font-semibold text-brand-ivory">
               {property.price}
             </div>
           </div>
