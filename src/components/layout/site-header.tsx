@@ -20,33 +20,35 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-brand-beige/10 bg-brand-ink/88 backdrop-blur-2xl">
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            aria-label="Luana Modotte Assessoria Imobiliária"
-            className="inline-flex w-fit items-center justify-center rounded-2xl p-0.5 transition hover:bg-brand-ivory/6"
-          >
-            <img
-              src="/brand/lm-monogram.svg"
-              alt=""
-              aria-hidden="true"
-              className="h-11 w-11 object-contain sm:h-12 sm:w-12"
-            />
-          </Link>
+        <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-3 lg:gap-5">
+            <Link
+              href="/"
+              aria-label="Luana Modotte Assessoria Imobiliária"
+              className="inline-flex w-fit items-center justify-center rounded-2xl p-0.5 transition hover:bg-brand-ivory/6"
+            >
+              <img
+                src="/brand/lm-monogram-header.png"
+                alt=""
+                aria-hidden="true"
+                className="h-11 w-auto sm:h-12"
+              />
+            </Link>
 
-          <nav className="hidden items-center gap-2 text-sm text-brand-ivory/78 lg:flex lg:justify-center">
-            {publicNavigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-full px-3 py-2 transition hover:bg-brand-ivory/8 hover:text-brand-ivory"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+            <nav className="hidden items-center gap-1 text-sm text-brand-ivory/78 lg:flex">
+              {publicNavigation.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-full px-3 py-2 transition hover:bg-brand-ivory/8 hover:text-brand-ivory"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-          <div className="hidden lg:flex lg:items-center lg:gap-3">
+          <div className="hidden items-center gap-3 lg:ml-auto lg:flex">
             <Link href="/quero-vender" className={buttonVariants({ size: "sm" })}>
               Quero vender
             </Link>
@@ -56,7 +58,7 @@ export function SiteHeader() {
             type="button"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "lg:hidden"
+              "ml-auto lg:hidden"
             )}
             aria-expanded={mobileMenuOpen}
             aria-controls="site-mobile-menu"
