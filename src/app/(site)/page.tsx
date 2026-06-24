@@ -307,33 +307,6 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Card className="grid gap-6 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.32em] text-brand-beige/60">
-              Próximo passo
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-semibold leading-tight text-brand-ivory">
-              O restante do conteúdo entra pelo painel, sem retrabalho no site.
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-brand-ivory/72">
-              Quando você cadastrar imóveis, páginas, bairros e artigos no painel administrativo,
-              a navegação pública passa a refletir isso automaticamente.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/contato" className={buttonVariants({ size: "lg" })}>
-              Quero contato
-            </Link>
-            <Link
-              href="/imoveis"
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              Ver catálogo
-            </Link>
-          </div>
-        </Card>
-      </section>
     </div>
   );
 }
