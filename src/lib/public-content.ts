@@ -828,7 +828,7 @@ export function getPublicContactChannels(settings: PublicSiteSettings) {
     channels.push({
       label: "E-mail institucional",
       value: settings.email,
-      note: "Recebe leads e encaminhamentos internos.",
+      note: "Recebe contatos e encaminhamentos internos.",
       href: `mailto:${settings.email}`,
     });
   }
