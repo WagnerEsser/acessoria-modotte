@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     template: `%s | ${brand.name}`,
   },
   description: brand.slogan,
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

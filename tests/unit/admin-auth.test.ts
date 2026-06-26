@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   ADMIN_DEFAULT_PATH,
@@ -8,9 +8,13 @@ import {
   resolveAdminRouteAccess,
   sanitizeAdminRedirect,
 } from "@/lib/auth";
-import { DEV_ADMIN_EMAIL, DEV_ADMIN_PASSWORD, isDevAdminCredentials } from "@/lib/dev-auth";
+import { getAdminLoginEmail, getAdminLoginPassword } from "@/lib/env";
 
 describe("admin auth helpers", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("sanitizes redirects to admin-only paths", () => {
     expect(sanitizeAdminRedirect("/admin/imoveis?status=draft")).toBe(
       "/admin/imoveis?status=draft"
@@ -65,8 +69,11 @@ describe("admin auth helpers", () => {
     expect(allowedLogin).toEqual({ kind: "allow" });
   });
 
-  it("matches the local dev credentials", () => {
-    expect(isDevAdminCredentials(DEV_ADMIN_EMAIL, DEV_ADMIN_PASSWORD)).toBe(true);
-    expect(isDevAdminCredentials("wrong@example.com", DEV_ADMIN_PASSWORD)).toBe(false);
+  it("reads the admin credentials from env", () => {
+    vi.stubEnv("ADMIN_LOGIN_EMAIL", "teste@luanamodotte.local");
+    vi.stubEnv("ADMIN_LOGIN_PASSWORD", "Teste@1234");
+
+    expect(getAdminLoginEmail()).toBe("teste@luanamodotte.local");
+    expect(getAdminLoginPassword()).toBe("Teste@1234");
   });
 });

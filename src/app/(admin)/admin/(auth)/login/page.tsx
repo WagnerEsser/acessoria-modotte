@@ -7,8 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getLoginErrorMessage, sanitizeAdminRedirect } from "@/lib/auth";
 import { brand } from "@/lib/brand";
-import { DEV_ADMIN_EMAIL, DEV_ADMIN_PASSWORD } from "@/lib/dev-auth";
-import { hasSupabaseEnv } from "@/lib/env";
+import { getAdminLoginEmail, getAdminLoginPassword } from "@/lib/env";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -36,11 +35,18 @@ export default async function AdminLoginPage({
   const resolvedSearchParams = await searchParams;
   const errorMessage = getLoginErrorMessage(getFirstValue(resolvedSearchParams.error));
   const redirectTo = sanitizeAdminRedirect(getFirstValue(resolvedSearchParams.redirectTo));
-  const isDevMode = !hasSupabaseEnv();
+  const adminEmail = getAdminLoginEmail();
+  const adminPassword = getAdminLoginPassword();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] px-4 py-10 text-brand-ivory">
-      <Card className="w-full max-w-lg p-8">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] px-4 py-10 text-brand-ivory">
+      <div className="mx-auto mb-6 flex w-full max-w-lg justify-start">
+        <Link href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          Voltar ao site
+        </Link>
+      </div>
+
+      <Card className="mx-auto w-full max-w-lg p-8">
         <div className="grid size-12 place-items-center rounded-2xl border border-brand-gold/16 bg-brand-gold/12 text-brand-gold">
           <LockKeyhole className="size-5" />
         </div>
@@ -49,12 +55,6 @@ export default async function AdminLoginPage({
           Acesso restrito
         </Badge>
 
-        {isDevMode ? (
-          <div className="mt-4 rounded-2xl border border-brand-gold/18 bg-brand-gold/10 px-4 py-3 text-xs uppercase tracking-[0.24em] text-brand-gold">
-            Modo de teste ativo
-          </div>
-        ) : null}
-
         <h1 className="mt-4 font-display text-4xl font-semibold text-brand-ivory">
           Entrar no painel
         </h1>
@@ -62,12 +62,6 @@ export default async function AdminLoginPage({
           Use suas credenciais do Supabase Auth para entrar no painel
           administrativo da assessoria.
         </p>
-
-        <div className="mt-5">
-          <Link href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
-            Voltar ao site
-          </Link>
-        </div>
 
         <form action="/api/auth/sign-in" method="post" className="mt-6 space-y-4">
           <input type="hidden" name="redirectTo" value={redirectTo} />
@@ -79,7 +73,7 @@ export default async function AdminLoginPage({
               name="email"
               placeholder="voce@empresa.com.br"
               type="email"
-              defaultValue={isDevMode ? DEV_ADMIN_EMAIL : ""}
+              defaultValue={adminEmail}
               required
             />
           </label>
@@ -91,7 +85,7 @@ export default async function AdminLoginPage({
               name="password"
               placeholder="senha"
               type="password"
-              defaultValue={isDevMode ? DEV_ADMIN_PASSWORD : ""}
+              defaultValue={adminPassword}
               required
             />
           </label>
@@ -106,14 +100,14 @@ export default async function AdminLoginPage({
             {errorMessage ?? "Acesso protegido. Apenas usuários autorizados podem entrar."}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Button type="submit" size="lg" className="w-full sm:w-auto">
-              Entrar
-              <ArrowRight className="size-4" />
-            </Button>
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-brand-ivory/56">
               {brand.name} - {brand.subtitle}
             </p>
+            <Button type="submit" size="lg" className="w-full cursor-pointer sm:w-auto">
+              Entrar
+              <ArrowRight className="size-4" />
+            </Button>
           </div>
         </form>
       </Card>

@@ -47,7 +47,7 @@ describe("public content helpers", () => {
     const channels = getPublicContactChannels(settings);
 
     expect(channels[0].label).toBe("WhatsApp comercial");
-    expect(channels[0].value).toContain("988188967");
+    expect(channels[0].value).toBe("+55 47 98818-8967");
     expect(channels.some((channel) => channel.label === "E-mail institucional")).toBe(true);
     expect(channels.some((channel) => channel.label === "Instagram")).toBe(true);
     expect(channels.some((channel) => channel.label === "Telefone")).toBe(true);

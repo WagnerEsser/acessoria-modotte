@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { applyNoStoreHeaders } from "@/lib/auth";
+import { applyNoStoreHeaders, getRequestOrigin } from "@/lib/auth";
 import { normalizePhoneDigits } from "@/lib/contact";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
@@ -24,6 +24,7 @@ async function resolvePropertyIdBySlug(slug: string) {
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const redirectTo = sanitizeInternalRedirect(readFormValue(formData, "redirect_to"), "/contato");
+  const requestOrigin = getRequestOrigin(request);
   const name = readFormValue(formData, "name");
   const email = readFormValue(formData, "email");
   const phone = normalizePhoneDigits(readFormValue(formData, "phone"));
@@ -36,14 +37,17 @@ export async function POST(request: NextRequest) {
   const message = readFormValue(formData, "message");
 
   if (website) {
-    const response = NextResponse.redirect(new URL(`${redirectTo}?submitted=1`, request.url), 303);
+    const response = NextResponse.redirect(
+      new URL(`${redirectTo}?submitted=1`, requestOrigin),
+      303
+    );
 
     return applyNoStoreHeaders(response);
   }
 
   if (!name || (!email && !phone)) {
     const response = NextResponse.redirect(
-      new URL(`${redirectTo}?error=invalid_data`, request.url),
+      new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
       303
     );
 
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.redirect(
     new URL(
       error ? `${redirectTo}?error=save_failed` : `${redirectTo}?submitted=1`,
-      request.url
+      requestOrigin
     ),
     303
   );

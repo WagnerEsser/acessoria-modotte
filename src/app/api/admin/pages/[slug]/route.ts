@@ -1,10 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { applyNoStoreHeaders, buildAdminLoginUrl } from "@/lib/auth";
+import { applyNoStoreHeaders, buildAdminLoginUrl, getRequestOrigin } from "@/lib/auth";
 import { hasDevAdminSession } from "@/lib/dev-auth";
-import { hasSupabaseEnv } from "@/lib/env";
 import { readFormBoolean, readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
-import { canAccessAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 const EDITABLE_PAGE_DEFAULTS = {
@@ -85,10 +83,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     readFormValue(formData, "redirect_to"),
     "/admin/conteudos"
   );
+  const requestOrigin = getRequestOrigin(request);
 
   if (!isEditablePageSlug(slug)) {
     const response = NextResponse.redirect(
-      new URL(`${redirectTo}?error=not_found`, request.url),
+      new URL(`${redirectTo}?error=not_found`, requestOrigin),
       303
     );
 
@@ -96,13 +95,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   }
 
   const { supabase, applyCookies } = createSupabaseServerContext(request);
-  const hasAccess = hasSupabaseEnv()
-    ? await canAccessAdmin(supabase)
-    : hasDevAdminSession(request);
+  const hasAccess = hasDevAdminSession(request);
 
   if (!hasAccess) {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), request.url),
+      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), requestOrigin),
       303
     );
 
@@ -147,9 +144,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     .select("id")
     .single();
 
-  if (pageError || !savedPage) {
+    if (pageError || !savedPage) {
     const response = NextResponse.redirect(
-      new URL(`${redirectTo}?error=save_failed`, request.url),
+      new URL(`${redirectTo}?error=save_failed`, requestOrigin),
       303
     );
 
@@ -172,7 +169,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
     if (blocksError) {
       const response = NextResponse.redirect(
-        new URL(`${redirectTo}?error=save_failed`, request.url),
+        new URL(`${redirectTo}?error=save_failed`, requestOrigin),
         303
       );
 
@@ -181,7 +178,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   }
 
   const response = NextResponse.redirect(
-    new URL(`${redirectTo}?status=updated`, request.url),
+    new URL(`${redirectTo}?status=updated`, requestOrigin),
     303
   );
 

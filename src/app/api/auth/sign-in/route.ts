@@ -1,10 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { applyNoStoreHeaders, buildAdminLoginUrl, sanitizeAdminRedirect } from "@/lib/auth";
-import { isDevAdminCredentials, setDevAdminSession } from "@/lib/dev-auth";
-import { hasSupabaseEnv } from "@/lib/env";
-import { canAccessAdmin } from "@/lib/supabase/admin";
-import { createSupabaseServerContext } from "@/lib/supabase/server";
+import {
+  applyNoStoreHeaders,
+  buildAdminLoginUrl,
+  getRequestOrigin,
+  sanitizeAdminRedirect,
+} from "@/lib/auth";
+import { setDevAdminSession } from "@/lib/dev-auth";
+import { getAdminLoginEmail, getAdminLoginPassword } from "@/lib/env";
 
 function readFormValue(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -17,71 +20,31 @@ export async function POST(request: NextRequest) {
   const email = readFormValue(formData, "email");
   const password = readFormValue(formData, "password");
   const redirectTo = sanitizeAdminRedirect(readFormValue(formData, "redirectTo"));
+  const adminEmail = getAdminLoginEmail();
+  const adminPassword = getAdminLoginPassword();
+  const requestOrigin = getRequestOrigin(request);
 
   if (!email || !password) {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "missing_credentials"), request.url),
+      new URL(buildAdminLoginUrl(redirectTo, "missing_credentials"), requestOrigin),
       303
     );
 
     return applyNoStoreHeaders(response);
   }
 
-  if (!hasSupabaseEnv()) {
-    if (!isDevAdminCredentials(email, password)) {
-      const response = NextResponse.redirect(
-        new URL(buildAdminLoginUrl(redirectTo, "invalid_credentials"), request.url),
-        303
-      );
-
-      return applyNoStoreHeaders(response);
-    }
-
+  if (email !== adminEmail || password !== adminPassword) {
     const response = NextResponse.redirect(
-      new URL(redirectTo, request.url),
+      new URL(buildAdminLoginUrl(redirectTo, "invalid_credentials"), requestOrigin),
       303
     );
-
-    setDevAdminSession(response);
 
     return applyNoStoreHeaders(response);
   }
 
-  const { supabase, applyCookies } = createSupabaseServerContext(request);
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const response = NextResponse.redirect(new URL(redirectTo, requestOrigin), 303);
 
-  if (error) {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "invalid_credentials"), request.url),
-      303
-    );
+  setDevAdminSession(response);
 
-    return applyNoStoreHeaders(applyCookies(response));
-  }
-
-  const isAllowed = await canAccessAdmin(supabase);
-
-  if (!isAllowed) {
-    const { error: bootstrapError } = await supabase.rpc("bootstrap_first_admin");
-    const isBootstrapped = !bootstrapError && (await canAccessAdmin(supabase));
-
-    if (isBootstrapped) {
-      const response = NextResponse.redirect(new URL(redirectTo, request.url), 303);
-
-      return applyNoStoreHeaders(applyCookies(response));
-    }
-
-    await supabase.auth.signOut();
-
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "unauthorized"), request.url),
-      303
-    );
-
-    return applyNoStoreHeaders(applyCookies(response));
-  }
-
-  const response = NextResponse.redirect(new URL(redirectTo, request.url), 303);
-
-  return applyNoStoreHeaders(applyCookies(response));
+  return applyNoStoreHeaders(response);
 }

@@ -1,12 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { applyNoStoreHeaders, buildAdminLoginUrl } from "@/lib/auth";
+import { applyNoStoreHeaders, buildAdminLoginUrl, getRequestOrigin } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { normalizePhoneDigits } from "@/lib/contact";
 import { hasDevAdminSession } from "@/lib/dev-auth";
-import { hasSupabaseEnv } from "@/lib/env";
 import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
-import { canAccessAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 type SiteSettingsRecord = {
@@ -73,14 +71,13 @@ export async function POST(request: NextRequest) {
     "/admin/conteudos"
   );
   const { supabase, applyCookies } = createSupabaseServerContext(request);
+  const requestOrigin = getRequestOrigin(request);
 
-  const hasAccess = hasSupabaseEnv()
-    ? await canAccessAdmin(supabase)
-    : hasDevAdminSession(request);
+  const hasAccess = hasDevAdminSession(request);
 
   if (!hasAccess) {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), request.url),
+      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), requestOrigin),
       303
     );
 
@@ -129,7 +126,7 @@ export async function POST(request: NextRequest) {
   );
 
   const response = NextResponse.redirect(
-    new URL(error ? `${redirectTo}?error=save_failed` : `${redirectTo}?status=updated`, request.url),
+    new URL(error ? `${redirectTo}?error=save_failed` : `${redirectTo}?status=updated`, requestOrigin),
     303
   );
 

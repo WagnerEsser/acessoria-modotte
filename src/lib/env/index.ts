@@ -60,3 +60,23 @@ export function getSupabaseAnonKey(): string {
 
   return value;
 }
+
+export function getAdminLoginEmail(): string {
+  const value = getOptionalEnv("ADMIN_LOGIN_EMAIL");
+
+  if (!value) {
+    throw new Error("Missing required environment variable: ADMIN_LOGIN_EMAIL");
+  }
+
+  return value;
+}
+
+export function getAdminLoginPassword(): string {
+  const value = getOptionalEnv("ADMIN_LOGIN_PASSWORD");
+
+  if (!value) {
+    throw new Error("Missing required environment variable: ADMIN_LOGIN_PASSWORD");
+  }
+
+  return value;
+}

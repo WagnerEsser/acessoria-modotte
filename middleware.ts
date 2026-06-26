@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   applyNoStoreHeaders,
   buildAdminLoginUrl,
+  getRequestOrigin,
   resolveAdminRouteAccess,
 } from "@/lib/auth";
 import { hasDevAdminSession } from "@/lib/dev-auth";
@@ -12,9 +13,13 @@ import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 export async function middleware(request: NextRequest) {
   const { supabase, applyCookies } = createSupabaseServerContext(request);
-  const isAllowed = hasSupabaseEnv()
-    ? Boolean((await supabase.auth.getUser()).data.user) && (await canAccessAdmin(supabase))
-    : hasDevAdminSession(request);
+  const hasDevAccess = hasDevAdminSession(request);
+  const hasSupabaseAccess =
+    !hasDevAccess && hasSupabaseEnv()
+      ? Boolean((await supabase.auth.getUser()).data.user) && (await canAccessAdmin(supabase))
+      : false;
+  const isAllowed = hasDevAccess || hasSupabaseAccess;
+  const requestOrigin = getRequestOrigin(request);
   const decision = resolveAdminRouteAccess(
     request.nextUrl.pathname,
     request.nextUrl.searchParams,
@@ -27,14 +32,14 @@ export async function middleware(request: NextRequest) {
 
   if (decision.kind === "redirect-login") {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(decision.redirectTo), request.url),
+      new URL(buildAdminLoginUrl(decision.redirectTo), requestOrigin),
       307
     );
 
     return applyNoStoreHeaders(applyCookies(response));
   }
 
-  const response = NextResponse.redirect(new URL(decision.target, request.url), 307);
+  const response = NextResponse.redirect(new URL(decision.target, requestOrigin), 307);
 
   return applyNoStoreHeaders(applyCookies(response));
 }

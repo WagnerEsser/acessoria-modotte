@@ -1,4 +1,4 @@
-import type { NextResponse } from "next/server";
+import { type NextRequest, type NextResponse } from "next/server";
 
 export const ADMIN_LOGIN_PATH = "/admin/login";
 export const ADMIN_DEFAULT_PATH = "/admin/dashboard";
@@ -74,6 +74,28 @@ export function buildAdminLoginUrl(
   }
 
   return `${url.pathname}${url.search}`;
+}
+
+export function getRequestOrigin(
+  request: Pick<NextRequest, "headers" | "nextUrl" | "url">
+): string {
+  const originHeader = request.headers.get("origin")?.trim();
+
+  if (originHeader && originHeader !== "null") {
+    return originHeader.replace(/\/+$/, "");
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const host = forwardedHost || request.headers.get("host")?.trim();
+
+  if (host) {
+    const protocol = forwardedProto || request.nextUrl.protocol.replace(":", "") || "http";
+
+    return `${protocol}://${host}`;
+  }
+
+  return new URL(request.url).origin;
 }
 
 export function getLoginErrorMessage(error: string | null | undefined): string | null {
