@@ -6,6 +6,7 @@ export default tseslint.config(
   {
     ignores: [
       ".next/**",
+      ".netlify/**",
       "coverage/**",
       "node_modules/**",
       "supabase/docker/**",

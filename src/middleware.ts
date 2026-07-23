@@ -9,7 +9,7 @@ import {
   resolveAdminRouteAccess,
 } from "@/lib/auth";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const {
     applyCookies,
     isAuthenticated,

@@ -14,7 +14,7 @@ vi.mock("@/lib/auth", async (importOriginal) => {
   };
 });
 
-import { config, proxy } from "@/proxy";
+import { config, middleware } from "@/middleware";
 
 function setAuthState(options: {
   isAuthenticated: boolean;
@@ -46,7 +46,7 @@ describe("admin middleware", () => {
   it("returns 401 for an anonymous administrative API request", async () => {
     setAuthState({ isAuthenticated: false, isAuthorized: false });
 
-    const response = await proxy(
+    const response = await middleware(
       new NextRequest("https://example.com/api/admin/properties", {
         method: "POST",
       })
@@ -59,7 +59,7 @@ describe("admin middleware", () => {
   it("ignores the removed fixed development cookie", async () => {
     setAuthState({ isAuthenticated: false, isAuthorized: false });
 
-    const response = await proxy(
+    const response = await middleware(
       new NextRequest("https://example.com/admin/dashboard", {
         headers: {
           cookie: "lm-dev-admin-session=1",
@@ -74,7 +74,7 @@ describe("admin middleware", () => {
   it("returns 403 for an authenticated user without the admin role", async () => {
     setAuthState({ isAuthenticated: true, isAuthorized: false });
 
-    const response = await proxy(
+    const response = await middleware(
       new NextRequest("https://example.com/api/admin/properties", {
         method: "POST",
       })
@@ -87,7 +87,7 @@ describe("admin middleware", () => {
   it("redirects an anonymous admin page request to a sanitized login URL", async () => {
     setAuthState({ isAuthenticated: false, isAuthorized: false });
 
-    const response = await proxy(
+    const response = await middleware(
       new NextRequest("https://example.com/admin/imoveis?status=draft")
     );
 
@@ -100,7 +100,7 @@ describe("admin middleware", () => {
   it("allows an active administrator through", async () => {
     setAuthState({ isAuthenticated: true, isAuthorized: true });
 
-    const response = await proxy(
+    const response = await middleware(
       new NextRequest("https://example.com/api/admin/properties", {
         method: "POST",
       })
@@ -108,5 +108,15 @@ describe("admin middleware", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("fails closed when the authentication provider is unavailable", async () => {
+    middlewareMocks.getAdminRequestContext.mockRejectedValue(
+      new Error("authentication unavailable")
+    );
+
+    await expect(
+      middleware(new NextRequest("https://example.com/admin/dashboard"))
+    ).rejects.toThrow("authentication unavailable");
   });
 });

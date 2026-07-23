@@ -16,6 +16,17 @@ Este ambiente existe para demonstracao e validacao com a cliente. Ele usa:
 
 No Netlify, a branch de producao deste site deve ser configurada como `hml`.
 
+## Compatibilidade temporaria do middleware
+
+O painel usa `src/middleware.ts` para que a verificacao de sessao execute no
+runtime Edge suportado pela Netlify. A logica, os matchers e as validacoes
+internas das APIs permanecem os mesmos.
+
+Essa convencao esta depreciada no Next.js 16, mas e necessaria enquanto o
+adaptador da Netlify nao empacota corretamente o `proxy.ts` no runtime Node.
+Antes de migrar novamente para `proxy.ts`, valide um build completo com
+`netlify build` e os fluxos anonimo, usuario inativo e administrador ativo.
+
 ## Variaveis do Netlify
 
 Cadastre as variaveis em **Site configuration > Environment variables**. O
