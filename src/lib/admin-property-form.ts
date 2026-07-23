@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
 
 import { normalizePhoneDigits } from "@/lib/contact";
 import { parseNumberField, readFormBoolean, readFormValue, slugify } from "@/lib/form-utils";
@@ -29,6 +30,43 @@ export type ParsedPropertyForm = {
   description: string | null;
 };
 
+const nullableText = (max: number) => z.string().trim().max(max).nullable();
+const nullableNumber = (max: number) => z.number().min(0).max(max).nullable();
+const propertyFormSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  slug: z.string().trim().min(1).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  transactionType: z.enum(["sale", "rent", "both"]),
+  propertyType: z.string().trim().min(2).max(80),
+  city: z.string().trim().min(2).max(100),
+  state: z.string().trim().min(2).max(50),
+  neighborhoodName: nullableText(120),
+  address: nullableText(250),
+  zipCode: nullableText(10).refine(
+    (value) => !value || /^\d{8}$/.test(value.replace(/\D/g, "")),
+    "invalid_zip_code"
+  ),
+  price: nullableNumber(1_000_000_000_000),
+  priceOnRequest: z.boolean(),
+  bedrooms: z.number().int().min(0).max(100),
+  bathrooms: z.number().int().min(0).max(100),
+  garages: z.number().int().min(0).max(100),
+  areaTotal: nullableNumber(10_000_000),
+  areaUseful: nullableNumber(10_000_000),
+  contactPhone: nullableText(15).refine(
+    (value) => !value || /^\d{8,15}$/.test(value),
+    "invalid_phone"
+  ),
+  contactWhatsapp: nullableText(15).refine(
+    (value) => !value || /^\d{8,15}$/.test(value),
+    "invalid_whatsapp"
+  ),
+  featured: z.boolean(),
+  isPublished: z.boolean(),
+  seoTitle: nullableText(120),
+  seoDescription: nullableText(320),
+  description: nullableText(10_000),
+});
+
 export function parsePropertyFormData(formData: FormData) {
   const title = readFormValue(formData, "title");
   const rawSlug = readFormValue(formData, "slug");
@@ -51,43 +89,44 @@ export function parsePropertyFormData(formData: FormData) {
   const seoDescription = readFormValue(formData, "seo_description");
   const description = readFormValue(formData, "description");
 
-  if (!title || !propertyType || !city || !state) {
+  const normalizedTransactionType =
+    transactionType === "rent" || transactionType === "both" ? transactionType : "sale";
+  const parsed = propertyFormSchema.safeParse({
+    title,
+    slug: rawSlug || slugify(title),
+    transactionType: normalizedTransactionType,
+    propertyType,
+    city,
+    state,
+    neighborhoodName: neighborhoodName || null,
+    address: address || null,
+    zipCode: zipCode || null,
+    price,
+    priceOnRequest: readFormBoolean(formData, "price_on_request"),
+    bedrooms: Math.trunc(bedrooms),
+    bathrooms: Math.trunc(bathrooms),
+    garages: Math.trunc(garages),
+    areaTotal,
+    areaUseful,
+    contactPhone: contactPhone || null,
+    contactWhatsapp: contactWhatsapp || null,
+    featured: readFormBoolean(formData, "featured"),
+    isPublished: readFormBoolean(formData, "is_published"),
+    seoTitle: seoTitle || null,
+    seoDescription: seoDescription || null,
+    description: description || null,
+  });
+
+  if (!parsed.success) {
     return {
       ok: false as const,
-      error: "missing_required_fields",
+      error: "invalid_fields",
     };
   }
 
-  const normalizedTransactionType =
-    transactionType === "rent" || transactionType === "both" ? transactionType : "sale";
-
   return {
     ok: true as const,
-    data: {
-      title,
-      slug: rawSlug || slugify(title),
-      transactionType: normalizedTransactionType,
-      propertyType,
-      city,
-      state,
-      neighborhoodName: neighborhoodName || null,
-      address: address || null,
-      zipCode: zipCode || null,
-      price,
-      priceOnRequest: readFormBoolean(formData, "price_on_request"),
-      bedrooms: Math.max(0, Math.trunc(bedrooms)),
-      bathrooms: Math.max(0, Math.trunc(bathrooms)),
-      garages: Math.max(0, Math.trunc(garages)),
-      areaTotal,
-      areaUseful,
-      contactPhone: contactPhone || null,
-      contactWhatsapp: contactWhatsapp || null,
-      featured: readFormBoolean(formData, "featured"),
-      isPublished: readFormBoolean(formData, "is_published"),
-      seoTitle: seoTitle || null,
-      seoDescription: seoDescription || null,
-      description: description || null,
-    } satisfies ParsedPropertyForm,
+    data: parsed.data satisfies ParsedPropertyForm,
   };
 }
 

@@ -1,20 +1,19 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
+import { describe, expect, it } from "vitest";
 
 import {
   ADMIN_DEFAULT_PATH,
   ADMIN_LOGIN_PATH,
   buildAdminLoginUrl,
   getLoginErrorMessage,
+  getRequestOrigin,
+  hasTrustedMutationOrigin,
+  isAdminApiPath,
   resolveAdminRouteAccess,
   sanitizeAdminRedirect,
 } from "@/lib/auth";
-import { getAdminLoginEmail, getAdminLoginPassword } from "@/lib/env";
 
 describe("admin auth helpers", () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it("sanitizes redirects to admin-only paths", () => {
     expect(sanitizeAdminRedirect("/admin/imoveis?status=draft")).toBe(
       "/admin/imoveis?status=draft"
@@ -22,6 +21,7 @@ describe("admin auth helpers", () => {
     expect(sanitizeAdminRedirect("/admin/")).toBe(ADMIN_DEFAULT_PATH);
     expect(sanitizeAdminRedirect("/contato")).toBe(ADMIN_DEFAULT_PATH);
     expect(sanitizeAdminRedirect("https://evil.example.com")).toBe(ADMIN_DEFAULT_PATH);
+    expect(sanitizeAdminRedirect("//evil.example.com/admin")).toBe(ADMIN_DEFAULT_PATH);
   });
 
   it("builds login urls safely", () => {
@@ -35,6 +35,49 @@ describe("admin auth helpers", () => {
     expect(getLoginErrorMessage("invalid_credentials")).toContain("inválidos");
     expect(getLoginErrorMessage("unauthorized")).toContain("acesso ao painel");
     expect(getLoginErrorMessage("unknown_code")).toContain("Não foi possível");
+  });
+
+  it("recognizes administrative API paths without matching lookalikes", () => {
+    expect(isAdminApiPath("/api/admin")).toBe(true);
+    expect(isAdminApiPath("/api/admin/properties")).toBe(true);
+    expect(isAdminApiPath("/api/administrator")).toBe(false);
+    expect(isAdminApiPath("/admin/dashboard")).toBe(false);
+  });
+
+  it("requires an exact same-origin mutation request", () => {
+    const sameOriginRequest = new NextRequest("https://example.com/api/admin/properties", {
+      method: "POST",
+      headers: {
+        origin: "https://example.com",
+        "sec-fetch-site": "same-origin",
+      },
+    });
+    const crossOriginRequest = new NextRequest("https://example.com/api/admin/properties", {
+      method: "POST",
+      headers: {
+        origin: "https://evil.example",
+        "sec-fetch-site": "cross-site",
+      },
+    });
+    const missingOriginRequest = new NextRequest(
+      "https://example.com/api/admin/properties",
+      { method: "POST" }
+    );
+
+    expect(hasTrustedMutationOrigin(sameOriginRequest)).toBe(true);
+    expect(hasTrustedMutationOrigin(crossOriginRequest)).toBe(false);
+    expect(hasTrustedMutationOrigin(missingOriginRequest)).toBe(false);
+  });
+
+  it("does not trust Origin or forwarded host headers when building redirects", () => {
+    const request = new NextRequest("https://example.com/admin/login", {
+      headers: {
+        origin: "https://evil.example",
+        "x-forwarded-host": "evil.example",
+      },
+    });
+
+    expect(getRequestOrigin(request)).toBe("https://example.com");
   });
 
   it("resolves the admin route access flow", () => {
@@ -67,13 +110,5 @@ describe("admin auth helpers", () => {
     );
 
     expect(allowedLogin).toEqual({ kind: "allow" });
-  });
-
-  it("reads the admin credentials from env", () => {
-    vi.stubEnv("ADMIN_LOGIN_EMAIL", "teste@luanamodotte.local");
-    vi.stubEnv("ADMIN_LOGIN_PASSWORD", "Teste@1234");
-
-    expect(getAdminLoginEmail()).toBe("teste@luanamodotte.local");
-    expect(getAdminLoginPassword()).toBe("Teste@1234");
   });
 });

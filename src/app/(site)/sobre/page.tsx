@@ -9,7 +9,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [siteSettings, page] = await Promise.all([
@@ -22,7 +22,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Sobre",
       description: siteSettings.defaultSeoDescription,
       path: "/sobre",
-      noIndex: true,
     });
   }
 
@@ -30,6 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? page.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/sobre",
+    image: page.ogImageUrl ?? page.heroImageUrl,
+    imageAlt: page.title,
   });
 }
 
@@ -41,6 +42,7 @@ export default async function AboutPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-12">
         <SectionHeading
+          as="h1"
           eyebrow="Sobre"
           title={page?.title ?? "Sobre a assessoria"}
           description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo institucional ainda não cadastrado."}
@@ -53,7 +55,10 @@ export default async function AboutPage() {
               {paragraphs.length ? (
                 paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
               ) : (
-                <p>O painel administrativo ainda não recebeu o texto institucional desta página.</p>
+                <p>
+                  Atendimento imobiliário próximo, análise cuidadosa e comunicação clara para
+                  conduzir decisões de compra e venda com mais segurança.
+                </p>
               )}
             </div>
           </Card>
@@ -102,7 +107,9 @@ export default async function AboutPage() {
             ) : (
               <li className="flex gap-2 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4 md:col-span-2">
                 <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
-                <span>Os blocos desta página serão cadastrados no painel administrativo.</span>
+                <span>
+                  Proximidade no atendimento, organização documental e negociação transparente.
+                </span>
               </li>
             )}
           </ul>

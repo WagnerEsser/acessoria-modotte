@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 
 import { brand } from "@/lib/brand";
-import { siteUrl } from "@/lib/site";
+import { buildMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -18,13 +18,28 @@ const sans = Manrope({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const rootMetadata = buildMetadata({
+  title: `${brand.name} | ${brand.subtitle}`,
+  description: brand.slogan,
+  path: "/",
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  ...rootMetadata,
   title: {
     default: `${brand.name} | ${brand.subtitle}`,
     template: `%s | ${brand.name}`,
   },
-  description: brand.slogan,
+  applicationName: brand.name,
+  creator: brand.name,
+  publisher: brand.name,
+  category: "imóveis",
+  referrer: "origin-when-cross-origin",
+  formatDetection: {
+    address: false,
+    email: false,
+    telephone: false,
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

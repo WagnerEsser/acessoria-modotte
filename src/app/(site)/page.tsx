@@ -19,7 +19,7 @@ import {
 } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [siteSettings, homePage] = await Promise.all([
@@ -32,6 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       homePage?.seoDescription ?? homePage?.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/",
+    image: homePage?.ogImageUrl ?? homePage?.heroImageUrl,
+    imageAlt: homePage?.title ?? siteSettings.brandName,
   });
 }
 
@@ -44,7 +46,8 @@ export default async function HomePage() {
   ]);
 
   const featuredProperties = properties.filter((property) => property.featured).slice(0, 2);
-  const heroTitle = homePage?.title ?? `${siteSettings.brandName} em uma presença digital leve.`;
+  const heroTitle =
+    homePage?.title ?? "Assessoria imobiliária com atendimento próximo e condução segura.";
   const heroDescription =
     homePage?.subtitle ??
     homePage?.body ??
@@ -98,13 +101,13 @@ export default async function HomePage() {
     {
       label: "Imóveis publicados",
       value: String(properties.length),
-      description: "Itens ativos saindo direto do cadastro.",
+      description: "Oportunidades disponíveis para compra ou locação.",
       icon: Building2,
     },
     {
       label: "Áreas mapeadas",
       value: String(neighborhoods.length),
-      description: "Bairros publicados no painel.",
+      description: "Regiões atendidas e conectadas ao catálogo.",
       icon: Store,
     },
   ] as const;
@@ -268,9 +271,9 @@ export default async function HomePage() {
       {homeBlocks.length ? (
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            eyebrow="Conteúdo da home"
-            title="Blocos publicados no painel"
-            description="Esses blocos vêm da tabela pages/page_blocks e podem ser editados sem mexer no código."
+            eyebrow="Como podemos ajudar"
+            title="Atendimento imobiliário pensado para cada etapa"
+            description="Conheça os serviços, diferenciais e cuidados que orientam a assessoria em cada negociação."
           />
 
           <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -295,8 +298,8 @@ export default async function HomePage() {
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Imóveis em destaque"
-            title="Os imóveis publicados mais relevantes aparecem aqui"
-            description="Quando o catálogo crescer, a home se atualiza automaticamente."
+            title="Imóveis selecionados para uma busca mais objetiva"
+            description="Compare as oportunidades em destaque e fale com a assessoria para receber orientação personalizada."
           />
 
           <div className="mt-8 grid gap-6 lg:grid-cols-2">

@@ -15,14 +15,7 @@ import {
   PROPERTY_PAGE_SIZE,
 } from "@/lib/property-catalog";
 
-export const metadata = buildMetadata({
-  title: "Imóveis",
-  description:
-    "Catálogo de imóveis da Luana Modotte com busca clara, transparência e conversão.",
-  path: "/imoveis",
-});
-
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type PropertiesPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -34,6 +27,26 @@ function getFirstValue(value: string | string[] | undefined): string | undefined
   }
 
   return value;
+}
+
+export async function generateMetadata({ searchParams }: PropertiesPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const currentPage = parsePositiveInteger(resolvedSearchParams.pagina, 1);
+  const hasFilters = Boolean(
+    getFirstValue(resolvedSearchParams.tipo) ||
+      getFirstValue(resolvedSearchParams.cidade) ||
+      getFirstValue(resolvedSearchParams.bairro) ||
+      getFirstValue(resolvedSearchParams.destaque)
+  );
+  const path = !hasFilters && currentPage > 1 ? `/imoveis?pagina=${currentPage}` : "/imoveis";
+
+  return buildMetadata({
+    title: currentPage > 1 ? `Imóveis - página ${currentPage}` : "Imóveis",
+    description:
+      "Encontre imóveis com atendimento próximo, informações claras e orientação da Luana Modotte Assessoria Imobiliária.",
+    path,
+    noIndex: hasFilters,
+  });
 }
 
 function buildPropertiesHref(options: {
@@ -115,9 +128,10 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Catálogo"
           title="Imóveis selecionados para a assessoria apresentar com clareza"
-          description="A listagem responde aos filtros e pagina os resultados em blocos de 10 itens."
+          description="Use os filtros para encontrar oportunidades alinhadas à região e ao tipo de imóvel que você procura."
           action={
             <Link href="/contato" className={buttonVariants({ variant: "outline" })}>
               Solicitar atendimento

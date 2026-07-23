@@ -1,7 +1,26 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { type NextRequest, type NextResponse } from "next/server";
+
+import { canAccessAdmin } from "@/lib/supabase/admin";
+import { createSupabaseServerContext } from "@/lib/supabase/server";
+import { siteUrl } from "@/lib/site";
 
 export const ADMIN_LOGIN_PATH = "/admin/login";
 export const ADMIN_DEFAULT_PATH = "/admin/dashboard";
+export const ADMIN_FORM_MAX_BYTES = 256 * 1024;
+
+export type MutationRequestRejection = {
+  error: "forbidden" | "payload_too_large" | "unsupported_media_type";
+  status: 403 | 413 | 415;
+};
+
+export type AdminRequestContext = {
+  supabase: SupabaseClient;
+  applyCookies(response: NextResponse): NextResponse;
+  isAuthenticated: boolean;
+  hasAdminProfile: boolean;
+  isAuthorized: boolean;
+};
 
 type AdminRouteDecision =
   | { kind: "allow" }
@@ -20,6 +39,12 @@ export function isAdminPath(pathname: string): boolean {
   const normalizedPath = stripTrailingSlash(pathname);
 
   return normalizedPath === "/admin" || normalizedPath.startsWith("/admin/");
+}
+
+export function isAdminApiPath(pathname: string): boolean {
+  const normalizedPath = stripTrailingSlash(pathname);
+
+  return normalizedPath === "/api/admin" || normalizedPath.startsWith("/api/admin/");
 }
 
 export function sanitizeAdminRedirect(
@@ -77,25 +102,84 @@ export function buildAdminLoginUrl(
 }
 
 export function getRequestOrigin(
-  request: Pick<NextRequest, "headers" | "nextUrl" | "url">
+  request: Pick<NextRequest, "nextUrl" | "url">
 ): string {
+  if (process.env.NODE_ENV === "production") {
+    return siteUrl;
+  }
+
+  return request.nextUrl.origin || new URL(request.url).origin;
+}
+
+export function hasTrustedMutationOrigin(
+  request: Pick<NextRequest, "headers" | "nextUrl" | "url">
+): boolean {
   const originHeader = request.headers.get("origin")?.trim();
+  const fetchSite = request.headers.get("sec-fetch-site")?.trim().toLowerCase();
 
-  if (originHeader && originHeader !== "null") {
-    return originHeader.replace(/\/+$/, "");
+  if (!originHeader || originHeader === "null" || fetchSite === "cross-site") {
+    return false;
   }
 
-  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-  const host = forwardedHost || request.headers.get("host")?.trim();
+  try {
+    return new URL(originHeader).origin === getRequestOrigin(request);
+  } catch {
+    return false;
+  }
+}
 
-  if (host) {
-    const protocol = forwardedProto || request.nextUrl.protocol.replace(":", "") || "http";
-
-    return `${protocol}://${host}`;
+export function getAdminFormRequestRejection(
+  request: Pick<NextRequest, "headers" | "nextUrl" | "url">
+): MutationRequestRejection | null {
+  if (!hasTrustedMutationOrigin(request)) {
+    return { error: "forbidden", status: 403 };
   }
 
-  return new URL(request.url).origin;
+  const contentType = request.headers.get("content-type")?.trim().toLowerCase() ?? "";
+  const isSupportedForm = contentType.startsWith(
+    "application/x-www-form-urlencoded"
+  );
+
+  if (!isSupportedForm) {
+    return { error: "unsupported_media_type", status: 415 };
+  }
+
+  const contentLength = request.headers.get("content-length")?.trim();
+
+  if (contentLength) {
+    const parsedLength = Number(contentLength);
+
+    if (
+      !/^\d+$/.test(contentLength) ||
+      !Number.isSafeInteger(parsedLength) ||
+      parsedLength > ADMIN_FORM_MAX_BYTES
+    ) {
+      return { error: "payload_too_large", status: 413 };
+    }
+  }
+
+  return null;
+}
+
+export async function getAdminRequestContext(
+  request: NextRequest
+): Promise<AdminRequestContext> {
+  const { supabase, applyCookies } = createSupabaseServerContext(request);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  const isAuthenticated = Boolean(user) && !error;
+  const hasAdminProfile = isAuthenticated ? await canAccessAdmin(supabase) : false;
+  const isAuthorized = hasAdminProfile;
+
+  return {
+    supabase,
+    applyCookies,
+    isAuthenticated,
+    hasAdminProfile,
+    isAuthorized,
+  };
 }
 
 export function getLoginErrorMessage(error: string | null | undefined): string | null {
@@ -104,6 +188,8 @@ export function getLoginErrorMessage(error: string | null | undefined): string |
   }
 
   const messages: Record<string, string> = {
+    invalid_request: "A solicitacao nao e valida. Atualize a pagina e tente novamente.",
+    rate_limited: "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
     missing_credentials: "Informe e-mail e senha para continuar.",
     invalid_credentials: "E-mail ou senha inválidos.",
     unauthorized: "Seu usuário não tem acesso ao painel.",

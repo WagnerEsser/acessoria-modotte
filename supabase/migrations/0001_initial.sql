@@ -61,7 +61,7 @@ create table if not exists public.page_blocks (
   content text,
   media_url text,
   sort_order integer not null default 0,
-  is_active boolean not null default true,
+  is_active boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (page_id, block_key)
@@ -213,6 +213,7 @@ create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
   auth_user_id uuid not null unique references auth.users(id) on delete cascade,
   full_name text not null,
+  email text,
   role text not null default 'editor' check (role in ('admin', 'editor')),
   avatar_url text,
   is_active boolean not null default true,
@@ -280,7 +281,6 @@ set search_path = public
 as $$
 declare
   full_name text;
-  role_name text;
 begin
   full_name := coalesce(
     nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''),
@@ -293,16 +293,11 @@ begin
     full_name := 'Usuario';
   end if;
 
-  if exists (select 1 from public.users) then
-    role_name := 'editor';
-  else
-    role_name := 'admin';
-  end if;
-
-  insert into public.users (auth_user_id, full_name, role, is_active)
-  values (new.id, full_name, role_name, true)
+  insert into public.users (auth_user_id, full_name, email, role, is_active)
+  values (new.id, full_name, lower(new.email), 'editor', false)
   on conflict (auth_user_id) do update
     set full_name = excluded.full_name,
+        email = excluded.email,
         updated_at = now();
 
   return new;
@@ -329,75 +324,28 @@ begin
     resolved_full_name := 'Usuario';
   end if;
 
-  insert into public.users (auth_user_id, full_name, role, is_active)
+  insert into public.users (auth_user_id, full_name, email, role, is_active)
   values (
     new.id,
     resolved_full_name,
+    lower(new.email),
     coalesce(
       (select role from public.users where auth_user_id = new.id),
       'editor'
     ),
-    true
+    coalesce(
+      (select is_active from public.users where auth_user_id = new.id),
+      false
+    )
   )
   on conflict (auth_user_id) do update
     set full_name = excluded.full_name,
+        email = excluded.email,
         updated_at = now();
 
   return new;
 end;
 $$;
-
-create or replace function public.bootstrap_first_admin()
-returns public.users
-language plpgsql
-security definer
-set search_path = public, auth
-as $$
-declare
-  auth_user_id uuid := auth.uid();
-  auth_email text;
-  metadata jsonb;
-  full_name text;
-  created_user public.users;
-begin
-  if auth_user_id is null then
-    raise exception 'not_authenticated' using errcode = '28000';
-  end if;
-
-  if exists (select 1 from public.users) then
-    raise exception 'bootstrap_not_allowed' using errcode = '42501';
-  end if;
-
-  select email, raw_user_meta_data
-    into auth_email, metadata
-  from auth.users
-  where id = auth_user_id;
-
-  full_name := coalesce(
-    nullif(trim(metadata ->> 'full_name'), ''),
-    nullif(trim(metadata ->> 'name'), ''),
-    nullif(trim(metadata ->> 'display_name'), ''),
-    initcap(replace(split_part(coalesce(auth_email, ''), '@', 1), '.', ' '))
-  );
-
-  if full_name is null or full_name = '' then
-    full_name := 'Administrador';
-  end if;
-
-  insert into public.users (auth_user_id, full_name, role, is_active)
-  values (auth_user_id, full_name, 'admin', true)
-  on conflict (auth_user_id) do update
-    set full_name = excluded.full_name,
-        role = 'admin',
-        is_active = true,
-        updated_at = now()
-  returning * into created_user;
-
-  return created_user;
-end;
-$$;
-
-grant execute on function public.bootstrap_first_admin() to authenticated;
 
 alter table public.site_settings enable row level security;
 alter table public.pages enable row level security;
@@ -509,14 +457,6 @@ create policy "Lead notes admin manage" on public.lead_notes
   using (public.current_user_is_admin())
   with check (public.current_user_is_admin());
 
-create policy "Leads public insert" on public.leads
-  for insert
-  with check (
-    status = 'new'
-    and assigned_to is null
-    and notes is null
-  );
-
 create policy "Testimonials public read" on public.testimonials
   for select
   using (is_published = true);
@@ -553,10 +493,9 @@ create policy "Users admin manage" on public.users
   using (public.current_user_is_admin())
   with check (public.current_user_is_admin());
 
-create policy "Audit logs admin manage" on public.audit_logs
-  for all
-  using (public.current_user_is_admin())
-  with check (public.current_user_is_admin());
+create policy "Audit logs admin read" on public.audit_logs
+  for select
+  using (public.current_user_is_admin());
 
 create trigger set_updated_at_site_settings
 before update on public.site_settings

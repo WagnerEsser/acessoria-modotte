@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getLoginErrorMessage, sanitizeAdminRedirect } from "@/lib/auth";
 import { brand } from "@/lib/brand";
-import { getAdminLoginEmail, getAdminLoginPassword } from "@/lib/env";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -35,8 +34,6 @@ export default async function AdminLoginPage({
   const resolvedSearchParams = await searchParams;
   const errorMessage = getLoginErrorMessage(getFirstValue(resolvedSearchParams.error));
   const redirectTo = sanitizeAdminRedirect(getFirstValue(resolvedSearchParams.redirectTo));
-  const adminEmail = getAdminLoginEmail();
-  const adminPassword = getAdminLoginPassword();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] px-4 py-10 text-brand-ivory">
@@ -73,7 +70,6 @@ export default async function AdminLoginPage({
               name="email"
               placeholder="voce@empresa.com.br"
               type="email"
-              defaultValue={adminEmail}
               required
             />
           </label>
@@ -85,7 +81,6 @@ export default async function AdminLoginPage({
               name="password"
               placeholder="senha"
               type="password"
-              defaultValue={adminPassword}
               required
             />
           </label>

@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Clock3, LockKeyhole, Mail, MapPin, Phone } from "lucide-react";
+import { Clock3, Mail, MapPin, Phone } from "lucide-react";
 import { siInstagram, siWhatsapp, type SimpleIcon } from "simple-icons";
 
 import { BrandMark } from "@/components/layout/brand-mark";
 import { getPublicContactChannels, type PublicSiteSettings } from "@/lib/public-content";
 import { brand } from "@/lib/brand";
+import { publicNavigation } from "@/lib/navigation";
 
 type SiteFooterProps = {
   siteSettings: PublicSiteSettings;
@@ -60,7 +61,7 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
 
   return (
     <footer className="border-t border-brand-beige/10 bg-brand-ink/96">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.9fr] lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.9fr_0.7fr] lg:px-8">
         <div className="space-y-5">
           <BrandMark compact />
           <div className="relative max-w-md overflow-hidden rounded-[2rem] border border-brand-beige/10 bg-[linear-gradient(135deg,rgba(203,178,140,0.05),rgba(7,17,29,0.98))] p-5 shadow-[0_14px_40px_-36px_rgba(0,0,0,0.68)]">
@@ -106,20 +107,31 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
             {!contactChannels.length ? <p>Os dados de contato serão preenchidos no painel.</p> : null}
           </div>
         </div>
+
+        <nav aria-label="Navegação do rodapé">
+          <div className="mb-4 text-xs uppercase tracking-[0.28em] text-brand-beige/55">
+            Explorar
+          </div>
+          <div className="grid gap-2 text-sm text-brand-ivory/70">
+            {publicNavigation
+              .filter((item) => item.href !== "/")
+              .map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="w-fit transition hover:text-brand-gold"
+                >
+                  {item.label}
+                </Link>
+              ))}
+          </div>
+        </nav>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-brand-beige/10 px-4 py-4 text-center text-xs uppercase tracking-[0.24em] text-brand-ivory/42 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:text-left lg:px-8">
+      <div className="border-t border-brand-beige/10 px-4 py-4 text-center text-xs uppercase tracking-[0.24em] text-brand-ivory/42 sm:px-6 lg:px-8 lg:text-left">
         <span>
           {brand.name} - {brand.subtitle}
         </span>
-
-        <Link
-          href="/admin/login"
-          className="inline-flex items-center justify-center gap-2 self-center rounded-full border border-brand-beige/10 bg-brand-ivory/4 px-3 py-1.5 text-[0.62rem] uppercase tracking-[0.24em] text-brand-ivory/52 transition hover:border-brand-gold/30 hover:bg-brand-ivory/6 hover:text-brand-gold lg:self-auto lg:mr-24"
-        >
-          <LockKeyhole className="size-3.5" />
-          Painel
-        </Link>
       </div>
     </footer>
   );

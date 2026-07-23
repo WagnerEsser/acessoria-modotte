@@ -14,6 +14,7 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "verify": "npm run typecheck && npm run lint && npm test",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "format": "prettier . --check",
@@ -25,7 +26,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.21.0",
-    "next": "16.2.9",
+    "next": "^16.2.11",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "simple-icons": "^16.24.0",
@@ -51,5 +52,10 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.62.0",
     "vitest": "4.1.9"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.7",
+    "postcss": "8.5.15",
+    "sharp": "0.35.0"
   }
 }

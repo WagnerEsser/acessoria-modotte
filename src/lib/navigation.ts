@@ -10,8 +10,10 @@ export type AdminNavigationItem = NavigationItem & {
 export const publicNavigation: NavigationItem[] = [
   { href: "/", label: "Início" },
   { href: "/imoveis", label: "Imóveis" },
+  { href: "/areas", label: "Áreas atendidas" },
   { href: "/sobre", label: "Sobre" },
   { href: "/servicos", label: "Serviços" },
+  { href: "/blog", label: "Blog" },
   { href: "/quero-vender", label: "Quero vender" },
   { href: "/contato", label: "Contato" },
 ];

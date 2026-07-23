@@ -42,6 +42,7 @@ type NeighborhoodRow = {
   seo_description: string | null;
   is_published: boolean;
   sort_order: number;
+  updated_at: string;
 };
 
 type PropertyImageRow = {
@@ -49,6 +50,8 @@ type PropertyImageRow = {
   alt_text: string | null;
   sort_order: number;
   is_cover: boolean;
+  width: number | null;
+  height: number | null;
 };
 
 type PropertyFeatureRow = {
@@ -94,6 +97,8 @@ type PropertyRow = {
   furnished: boolean;
   contact_phone: string | null;
   contact_whatsapp: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
   published_at: string | null;
   updated_at: string;
   neighborhood: PropertyNeighborhoodRow | PropertyNeighborhoodRow[] | null;
@@ -147,6 +152,7 @@ type PageRow = {
   seo_description: string | null;
   og_image_url: string | null;
   sort_order: number;
+  updated_at: string;
 };
 
 export type PublicSiteSettings = {
@@ -175,6 +181,8 @@ export type PublicPropertyImage = {
   altText: string | null;
   sortOrder: number;
   isCover: boolean;
+  width: number | null;
+  height: number | null;
 };
 
 export type PublicPropertyFeature = {
@@ -191,7 +199,10 @@ export type PublicPropertyCard = {
   location: string | null;
   city: string | null;
   neighborhoodSlug: string | null;
+  status: string;
   price: string;
+  priceValue: number | null;
+  priceOnRequest: boolean;
   summary: string | null;
   size: string | null;
   bedrooms: number | null;
@@ -202,6 +213,11 @@ export type PublicPropertyCard = {
   highlights: string[];
   coverImageUrl: string | null;
   coverImageAlt: string | null;
+  coverImageWidth: number | null;
+  coverImageHeight: number | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  updatedAt: string;
 };
 
 export type PublicPropertyDetail = PublicPropertyCard & {
@@ -237,6 +253,10 @@ export type PublicBlogCard = {
   publishedAt: string | null;
   summary: string[];
   coverImageUrl: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  ogImageUrl: string | null;
+  updatedAt: string;
 };
 
 export type PublicBlogPost = PublicBlogCard & {
@@ -252,6 +272,7 @@ export type PublicNeighborhood = {
   seoTitle: string | null;
   seoDescription: string | null;
   propertyCount: number;
+  updatedAt: string;
 };
 
 export type PublicPageBlock = {
@@ -274,6 +295,7 @@ export type PublicPageContent = {
   seoDescription: string | null;
   ogImageUrl: string | null;
   isPublished: boolean;
+  updatedAt: string;
   blocks: PublicPageBlock[];
 };
 
@@ -309,6 +331,12 @@ function normalizeNumericText(value: number | string | null | undefined) {
   }
 
   return String(numericValue);
+}
+
+function normalizeNumber(value: number | string | null | undefined) {
+  const normalized = normalizeNumericText(value);
+
+  return normalized === null ? null : Number(normalized);
 }
 
 function formatArea(value: number | string | null | undefined) {
@@ -360,7 +388,10 @@ function toArrayValue(value: unknown) {
   return Array.isArray(value) ? value : [];
 }
 
-function mapPropertyHighlights(features: PublicPropertyFeature[], property: PublicPropertyCard) {
+function mapPropertyHighlights(
+  features: PublicPropertyFeature[],
+  property: Pick<PublicPropertyCard, "bedrooms" | "bathrooms" | "garages">
+) {
   const highlights = features
     .map((feature) => {
       const label = normalizeText(feature.label);
@@ -401,6 +432,8 @@ function mapPropertyImage(row: PropertyImageRow): PublicPropertyImage {
     altText: normalizeText(row.alt_text),
     sortOrder: row.sort_order,
     isCover: row.is_cover,
+    width: row.width,
+    height: row.height,
   };
 }
 
@@ -422,6 +455,7 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
   });
   const coverImage = images.find((image) => image.isCover) ?? images[0] ?? null;
   const price = row.price_on_request ? "Sob consulta" : formatCurrencyBRL(row.price);
+  const priceValue = normalizeNumber(row.price);
   const card: PublicPropertyCard = {
     slug: row.slug,
     title: row.title,
@@ -430,7 +464,10 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     location: normalizeText(neighborhood?.name) ?? normalizeText(row.address),
     city: normalizeText(row.city) ?? normalizeText(neighborhood?.city),
     neighborhoodSlug: normalizeText(neighborhood?.slug),
+    status: row.status,
     price,
+    priceValue,
+    priceOnRequest: row.price_on_request,
     summary: normalizeText(row.description),
     size: formatArea(row.area_useful ?? row.area_total),
     bedrooms: row.bedrooms ?? null,
@@ -439,27 +476,17 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     featured: row.featured,
     accent: getPropertyAccent(row.slug, row.featured || index === 0),
     highlights: mapPropertyHighlights(features, {
-      slug: row.slug,
-      title: row.title,
-      type: row.property_type,
-      transactionType: row.transaction_type,
-      location: normalizeText(neighborhood?.name) ?? normalizeText(row.address),
-      city: normalizeText(row.city) ?? normalizeText(neighborhood?.city),
-      neighborhoodSlug: normalizeText(neighborhood?.slug),
-      price,
-      summary: normalizeText(row.description),
-      size: formatArea(row.area_useful ?? row.area_total),
       bedrooms: row.bedrooms ?? null,
       bathrooms: row.bathrooms ?? null,
       garages: row.garages ?? null,
-      featured: row.featured,
-      accent: getPropertyAccent(row.slug, row.featured || index === 0),
-      highlights: [],
-      coverImageUrl: coverImage?.url ?? null,
-      coverImageAlt: coverImage?.altText ?? null,
     }),
     coverImageUrl: coverImage?.url ?? null,
     coverImageAlt: coverImage?.altText ?? null,
+    coverImageWidth: coverImage?.width ?? null,
+    coverImageHeight: coverImage?.height ?? null,
+    seoTitle: normalizeText(row.seo_title),
+    seoDescription: normalizeText(row.seo_description),
+    updatedAt: row.updated_at,
   };
 
   return card;
@@ -542,6 +569,10 @@ function mapBlogPost(row: BlogPostRow): PublicBlogPost {
     publishedAt: row.published_at ?? row.created_at,
     summary: mapBlogSummary(row.body, row.excerpt),
     coverImageUrl: normalizeText(row.cover_image_url),
+    seoTitle: normalizeText(row.seo_title),
+    seoDescription: normalizeText(row.seo_description),
+    ogImageUrl: normalizeText(row.og_image_url),
+    updatedAt: row.updated_at,
     body: normalizeText(row.body),
   };
 }
@@ -556,6 +587,7 @@ function mapNeighborhoodRecord(row: NeighborhoodRow, propertyCount: number): Pub
     seoTitle: normalizeText(row.seo_title),
     seoDescription: normalizeText(row.seo_description),
     propertyCount,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -582,6 +614,7 @@ function mapPageRecord(row: PageRow, blocks: PageBlockRow[] = []): PublicPageCon
     seoDescription: normalizeText(row.seo_description),
     ogImageUrl: normalizeText(row.og_image_url),
     isPublished: row.is_published,
+    updatedAt: row.updated_at,
     blocks: blocks
       .filter((block) => block.is_active)
       .sort((left, right) => left.sort_order - right.sort_order)
@@ -637,7 +670,7 @@ export async function getPublicProperties() {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, city, state, bedrooms, bathrooms, garages, area_total, area_useful, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover), property_features(label, value, sort_order)"
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, city, state, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)"
     )
     .eq("is_published", true)
     .order("featured", { ascending: false })
@@ -658,7 +691,7 @@ export async function getPublicPropertyBySlug(slug: string) {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, contact_phone, contact_whatsapp, published_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover), property_features(label, value, sort_order)"
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, contact_phone, contact_whatsapp, seo_title, seo_description, published_at, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)"
     )
     .eq("slug", slug)
     .eq("is_published", true)
@@ -701,7 +734,7 @@ export async function getPublicNeighborhoods() {
   const [{ data: neighborhoods }, { data: properties }] = await Promise.all([
     supabase
       .from("neighborhoods")
-      .select("id, slug, name, city, state, intro_text, seo_title, seo_description, is_published, sort_order")
+      .select("id, slug, name, city, state, intro_text, seo_title, seo_description, is_published, sort_order, updated_at")
       .eq("is_published", true)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true }),
@@ -727,7 +760,7 @@ export async function getPublicNeighborhoodBySlug(slug: string) {
   const supabase = createSupabasePublicClient();
   const { data: neighborhood } = await supabase
     .from("neighborhoods")
-    .select("id, slug, name, city, state, intro_text, seo_title, seo_description, is_published, sort_order")
+    .select("id, slug, name, city, state, intro_text, seo_title, seo_description, is_published, sort_order, updated_at")
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
@@ -751,11 +784,24 @@ export async function getPublicNeighborhoodProperties(slug: string) {
   return properties.filter((property) => property.neighborhoodSlug === slug);
 }
 
+export async function getPublicPages() {
+  const supabase = createSupabasePublicClient();
+  const { data } = await supabase
+    .from("pages")
+    .select(
+      "id, slug, title, subtitle, body, page_type, hero_image_url, is_published, seo_title, seo_description, og_image_url, sort_order, updated_at"
+    )
+    .eq("is_published", true)
+    .order("sort_order", { ascending: true });
+
+  return ((data ?? []) as PageRow[]).map((page) => mapPageRecord(page));
+}
+
 export async function getPublicPageBySlug(slug: string) {
   const supabase = createSupabasePublicClient();
   const { data: page } = await supabase
     .from("pages")
-    .select("id, slug, title, subtitle, body, page_type, hero_image_url, is_published, seo_title, seo_description, og_image_url, sort_order")
+    .select("id, slug, title, subtitle, body, page_type, hero_image_url, is_published, seo_title, seo_description, og_image_url, sort_order, updated_at")
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();

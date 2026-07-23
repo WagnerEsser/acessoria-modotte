@@ -4,6 +4,7 @@ import { MapPinHouse, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
 import {
@@ -11,6 +12,7 @@ import {
   getPublicNeighborhoodProperties,
 } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
+import { buildBreadcrumbStructuredData } from "@/lib/structured-data";
 
 type NeighborhoodPageProps = {
   params: Promise<{
@@ -18,7 +20,7 @@ type NeighborhoodPageProps = {
   }>;
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -36,8 +38,12 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: neighborhood.seoTitle ?? neighborhood.name,
-    description: neighborhood.seoDescription ?? neighborhood.description ?? "Área da assessoria imobiliária.",
+    title:
+      neighborhood.seoTitle ?? `Imóveis em ${neighborhood.name}, ${neighborhood.city}`,
+    description:
+      neighborhood.seoDescription ??
+      neighborhood.description ??
+      `Conheça os imóveis e o atendimento da Luana Modotte Assessoria Imobiliária em ${neighborhood.name}, ${neighborhood.city}.`,
     path: `/areas/${neighborhood.slug}`,
   });
 }
@@ -54,8 +60,16 @@ export default async function NeighborhoodPage({ params }: NeighborhoodPageProps
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <JsonLd
+        data={buildBreadcrumbStructuredData([
+          { name: "Início", path: "/" },
+          { name: "Áreas atendidas", path: "/areas" },
+          { name: neighborhood.name, path: `/areas/${neighborhood.slug}` },
+        ])}
+      />
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Áreas"
           title={neighborhood.name}
           description={neighborhood.description ?? undefined}
@@ -71,8 +85,8 @@ export default async function NeighborhoodPage({ params }: NeighborhoodPageProps
               </p>
             </div>
             <p className="mt-4 text-sm leading-7 text-brand-ivory/70">
-              A página de área destaca zonas de interesse e conecta o bairro aos imóveis publicados
-              com esse vínculo no cadastro.
+              {neighborhood.description ??
+                `Encontre imóveis e atendimento imobiliário em ${neighborhood.name}, ${neighborhood.city}. A assessoria organiza as opções da região e acompanha cada etapa da negociação.`}
             </p>
           </Card>
 

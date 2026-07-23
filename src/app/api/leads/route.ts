@@ -1,9 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { applyNoStoreHeaders, getRequestOrigin } from "@/lib/auth";
-import { normalizePhoneDigits } from "@/lib/contact";
+import { applyNoStoreHeaders } from "@/lib/auth";
+import { sanitizeInternalRedirect } from "@/lib/form-utils";
+import { parseLeadSubmission } from "@/lib/lead-submission";
+import {
+  getClientIp,
+  getTrustedRedirectOrigin,
+  hashRateLimitIdentifier,
+  isTrustedMutationOrigin,
+  readLimitedUrlEncodedForm,
+} from "@/lib/security/request";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
-import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
+
+function redirectWithStatus(
+  request: NextRequest,
+  redirectTo: string,
+  status: "submitted=1" | `error=${string}`
+) {
+  const separator = redirectTo.includes("?") ? "&" : "?";
+  const response = NextResponse.redirect(
+    new URL(`${redirectTo}${separator}${status}`, getTrustedRedirectOrigin(request)),
+    303
+  );
+
+  return applyNoStoreHeaders(response);
+}
 
 async function resolvePropertyIdBySlug(slug: string) {
   if (!slug) {
@@ -22,61 +45,80 @@ async function resolvePropertyIdBySlug(slug: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-  const redirectTo = sanitizeInternalRedirect(readFormValue(formData, "redirect_to"), "/contato");
-  const requestOrigin = getRequestOrigin(request);
-  const name = readFormValue(formData, "name");
-  const email = readFormValue(formData, "email");
-  const phone = normalizePhoneDigits(readFormValue(formData, "phone"));
-  const source = readFormValue(formData, "source") || "site";
-  const pageSlug = readFormValue(formData, "page_slug") || null;
-  const interestType = readFormValue(formData, "interest_type") || null;
-  const propertySlug = readFormValue(formData, "property_slug") || null;
-  const propertyContext = readFormValue(formData, "property_context") || null;
-  const website = readFormValue(formData, "website");
-  const message = readFormValue(formData, "message");
-
-  if (website) {
-    const response = NextResponse.redirect(
-      new URL(`${redirectTo}?submitted=1`, requestOrigin),
-      303
+  if (!isTrustedMutationOrigin(request)) {
+    return applyNoStoreHeaders(
+      NextResponse.json({ error: "forbidden_origin" }, { status: 403 })
     );
-
-    return applyNoStoreHeaders(response);
   }
 
-  if (!name || (!email && !phone)) {
-    const response = NextResponse.redirect(
-      new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
-      303
-    );
+  let params: URLSearchParams;
 
-    return applyNoStoreHeaders(response);
+  try {
+    params = await readLimitedUrlEncodedForm(request);
+  } catch (error) {
+    const status = error instanceof Error && error.message === "payload_too_large" ? 413 : 415;
+
+    return applyNoStoreHeaders(NextResponse.json({ error: "invalid_request" }, { status }));
   }
 
-  const resolvedPropertyId = propertySlug ? await resolvePropertyIdBySlug(propertySlug) : null;
-  const mergedMessageParts = [propertyContext, message].filter(Boolean);
+  const redirectTo = sanitizeInternalRedirect(params.get("redirect_to"), "/contato");
+  const parsed = parseLeadSubmission(params);
 
-  const supabase = createSupabasePublicClient();
-  const { error } = await supabase.from("leads").insert({
-    name,
-    email: email || null,
-    phone: phone || null,
-    source,
-    interest_type: interestType,
+  if (!parsed.success) {
+    return redirectWithStatus(request, redirectTo, "error=invalid_data");
+  }
+
+  if (parsed.data.website) {
+    return redirectWithStatus(request, redirectTo, "submitted=1");
+  }
+
+  const clientIp = getClientIp(request);
+  let identifierHash: string;
+
+  try {
+    identifierHash = hashRateLimitIdentifier(clientIp);
+  } catch {
+    return redirectWithStatus(request, redirectTo, "error=configuration");
+  }
+
+  const serviceClient = createSupabaseServiceClient();
+  const { data: rateLimitAccepted, error: rateLimitError } = await serviceClient.rpc(
+    "consume_security_rate_limit",
+    {
+      p_identifier_hash: identifierHash,
+      p_limit: 5,
+      p_window_seconds: 600,
+    }
+  );
+
+  if (rateLimitError || rateLimitAccepted !== true) {
+    return redirectWithStatus(request, redirectTo, "error=rate_limited");
+  }
+
+  if (!(await verifyTurnstileToken(parsed.data.turnstileToken, clientIp))) {
+    return redirectWithStatus(request, redirectTo, "error=verification_failed");
+  }
+
+  const resolvedPropertyId = await resolvePropertyIdBySlug(parsed.data.propertySlug);
+  const mergedMessageParts = [
+    parsed.data.propertyContext,
+    parsed.data.message,
+  ].filter(Boolean);
+  const { error } = await serviceClient.from("leads").insert({
+    name: parsed.data.name,
+    email: parsed.data.email || null,
+    phone: parsed.data.phone || null,
+    source: parsed.data.source,
+    interest_type: parsed.data.interestType || null,
     property_id: resolvedPropertyId,
-    page_slug: pageSlug,
+    page_slug: parsed.data.pageSlug || null,
     message: mergedMessageParts.length ? mergedMessageParts.join("\n\n") : null,
     status: "new",
   });
 
-  const response = NextResponse.redirect(
-    new URL(
-      error ? `${redirectTo}?error=save_failed` : `${redirectTo}?submitted=1`,
-      requestOrigin
-    ),
-    303
+  return redirectWithStatus(
+    request,
+    redirectTo,
+    error ? "error=save_failed" : "submitted=1"
   );
-
-  return applyNoStoreHeaders(response);
 }

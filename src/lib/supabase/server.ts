@@ -11,6 +11,15 @@ type CookieUpdate = {
   options: CookieOptions;
 };
 
+export function getSupabaseAuthCookieOptions(): CookieOptions {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  };
+}
+
 export function createSupabaseServerContext(
   request: NextRequest
 ): {
@@ -47,6 +56,7 @@ export function createSupabaseServerContext(
   };
 
   const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+    cookieOptions: getSupabaseAuthCookieOptions(),
     cookies,
   });
 

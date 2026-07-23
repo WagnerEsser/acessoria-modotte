@@ -9,7 +9,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [siteSettings, page] = await Promise.all([
@@ -22,7 +22,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Quero vender",
       description: siteSettings.defaultSeoDescription,
       path: "/quero-vender",
-      noIndex: true,
     });
   }
 
@@ -30,6 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? page.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/quero-vender",
+    image: page.ogImageUrl ?? page.heroImageUrl,
+    imageAlt: page.title,
   });
 }
 
@@ -41,6 +42,7 @@ export default async function SellPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Vendedores"
           title={page?.title ?? "Se você quer vender, comece pelo essencial"}
           description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo para vendedores ainda não cadastrado."}
@@ -59,7 +61,10 @@ export default async function SellPage() {
               {paragraphs.length ? (
                 paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
               ) : (
-                <p>O texto desta página será preenchido no painel administrativo quando o conteúdo estiver pronto.</p>
+                <p>
+                  Receba uma análise inicial do imóvel, orientação de posicionamento e acompanhamento
+                  da preparação ao fechamento da venda.
+                </p>
               )}
             </div>
           </Card>
@@ -81,7 +86,8 @@ export default async function SellPage() {
               ))
             ) : (
               <Card className="p-5 text-sm leading-6 text-brand-ivory/68">
-                Os passos de venda serão cadastrados no painel.
+                Conte sua necessidade para a assessoria preparar uma estratégia de venda adequada ao
+                imóvel e ao seu momento.
               </Card>
             )}
           </div>

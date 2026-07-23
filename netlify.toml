@@ -1,0 +1,11 @@
+[build]
+  command = "npm run verify && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_VERSION = "11.13.0"
+
+[context.production]
+  command = "npm run verify && npm run build"
+

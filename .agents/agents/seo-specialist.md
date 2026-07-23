@@ -23,6 +23,8 @@ Cuida da indexacao, metadados, schema markup e leitura local do site.
 - manter consistencia entre pagina, titulo e intent
 - reforcar SEO local da assessoria
 - nao poluir com markup desnecessario
+- aplicar e revisar obrigatoriamente `.agents/workflows/seo.md`
+- bloquear a conclusao de entregas publicas que nao tenham validacao SEO proporcional ao impacto
 
 ## Pronto Quando
 

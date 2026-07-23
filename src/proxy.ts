@@ -3,27 +3,38 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   applyNoStoreHeaders,
   buildAdminLoginUrl,
+  getAdminRequestContext,
   getRequestOrigin,
+  isAdminApiPath,
   resolveAdminRouteAccess,
 } from "@/lib/auth";
-import { hasDevAdminSession } from "@/lib/dev-auth";
-import { hasSupabaseEnv } from "@/lib/env";
-import { canAccessAdmin } from "@/lib/supabase/admin";
-import { createSupabaseServerContext } from "@/lib/supabase/server";
 
-export async function middleware(request: NextRequest) {
-  const { supabase, applyCookies } = createSupabaseServerContext(request);
-  const hasDevAccess = hasDevAdminSession(request);
-  const hasSupabaseAccess =
-    !hasDevAccess && hasSupabaseEnv()
-      ? Boolean((await supabase.auth.getUser()).data.user) && (await canAccessAdmin(supabase))
-      : false;
-  const isAllowed = hasDevAccess || hasSupabaseAccess;
+export async function proxy(request: NextRequest) {
+  const {
+    applyCookies,
+    isAuthenticated,
+    isAuthorized,
+  } = await getAdminRequestContext(request);
   const requestOrigin = getRequestOrigin(request);
+
+  if (isAdminApiPath(request.nextUrl.pathname)) {
+    if (!isAuthorized) {
+      const error = isAuthenticated ? "forbidden" : "unauthorized";
+      const response = NextResponse.json(
+        { error },
+        { status: isAuthenticated ? 403 : 401 }
+      );
+
+      return applyNoStoreHeaders(applyCookies(response));
+    }
+
+    return applyNoStoreHeaders(applyCookies(NextResponse.next()));
+  }
+
   const decision = resolveAdminRouteAccess(
     request.nextUrl.pathname,
     request.nextUrl.searchParams,
-    isAllowed
+    isAuthorized
   );
 
   if (decision.kind === "allow") {
@@ -45,5 +56,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/api/admin", "/api/admin/:path*"],
 };

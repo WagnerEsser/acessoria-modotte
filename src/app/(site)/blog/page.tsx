@@ -15,7 +15,7 @@ export const metadata = buildMetadata({
   path: "/blog",
 });
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function BlogPage() {
   const posts = await getPublicBlogPosts();
@@ -24,9 +24,10 @@ export default async function BlogPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Blog"
           title="Conteúdos que ajudam o cliente e fortalecem a busca local"
-          description="Os artigos publicados no painel aparecem automaticamente aqui."
+          description="Informações para tomar decisões imobiliárias com mais clareza, segurança e conhecimento do mercado."
           action={
             <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
               Propor pauta

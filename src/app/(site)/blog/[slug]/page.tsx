@@ -6,12 +6,17 @@ import { ArrowRight, BookText, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { formatDateBRL } from "@/lib/formatters";
 import { getPublicBlogPostBySlug, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
+import {
+  buildArticleStructuredData,
+  buildBreadcrumbStructuredData,
+} from "@/lib/structured-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type BlogPostPageProps = {
   params: Promise<{
@@ -35,9 +40,18 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: post.title,
-    description: post.excerpt ?? post.summary[0] ?? "Artigo da assessoria imobiliária.",
+    title: post.seoTitle ?? post.title,
+    description:
+      post.seoDescription ??
+      post.excerpt ??
+      post.summary[0] ??
+      "Artigo da assessoria imobiliária.",
     path: `/blog/${post.slug}`,
+    image: post.ogImageUrl ?? post.coverImageUrl,
+    imageAlt: post.title,
+    type: "article",
+    publishedTime: post.publishedAt,
+    modifiedTime: post.updatedAt,
   });
 }
 
@@ -53,8 +67,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <JsonLd
+        data={[
+          buildBreadcrumbStructuredData([
+            { name: "Início", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+          buildArticleStructuredData(post),
+        ]}
+      />
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Artigo"
           title={post.title}
           description={post.excerpt ?? undefined}
@@ -80,6 +105,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <img
                   src={post.coverImageUrl}
                   alt={post.title}
+                  width={1200}
+                  height={630}
                   loading="lazy"
                   className="h-72 w-full object-cover"
                 />
@@ -95,7 +122,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               ) : post.summary.length ? (
                 post.summary.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
               ) : (
-                <p>O corpo deste artigo será preenchido no painel administrativo quando o conteúdo estiver pronto.</p>
+                <p>
+                  Este conteúdo está em atualização. Enquanto isso, fale com a assessoria para receber
+                  orientação sobre este tema.
+                </p>
               )}
             </div>
           </Card>

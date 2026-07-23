@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [siteSettings, page] = await Promise.all([
@@ -21,7 +22,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Serviços",
       description: siteSettings.defaultSeoDescription,
       path: "/servicos",
-      noIndex: true,
     });
   }
 
@@ -29,6 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? page.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/servicos",
+    image: page.ogImageUrl ?? page.heroImageUrl,
+    imageAlt: page.title,
   });
 }
 
@@ -40,6 +42,7 @@ export default async function ServicesPage() {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Serviços"
           title={page?.title ?? "Serviços essenciais"}
           description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo de serviços ainda não cadastrado."}
@@ -74,11 +77,23 @@ export default async function ServicesPage() {
                 {block.content ? (
                   <p className="mt-3 text-sm leading-7 text-brand-ivory/70">{block.content}</p>
                 ) : null}
+                <Link
+                  href={`/servicos/${block.blockKey}`}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    className: "mt-5",
+                  })}
+                >
+                  Conhecer o serviço
+                  <ArrowRight className="size-4" />
+                </Link>
               </Card>
             ))
           ) : (
             <Card className="p-6 text-sm leading-6 text-brand-ivory/68">
-              Os serviços serão publicados no painel administrativo.
+              Compra assistida, venda estratégica e apoio documental com acompanhamento próximo em
+              cada etapa.
             </Card>
           )}
         </div>

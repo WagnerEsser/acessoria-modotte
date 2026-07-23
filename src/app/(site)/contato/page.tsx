@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { TurnstileWidget } from "@/components/security/turnstile-widget";
 import {
   getPublicContactChannels,
   getPublicPageBySlug,
@@ -17,7 +18,7 @@ import {
 } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type ContactPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -42,7 +43,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Contato",
       description: siteSettings.defaultSeoDescription,
       path: "/contato",
-      noIndex: true,
     });
   }
 
@@ -50,6 +50,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? page.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/contato",
+    image: page.ogImageUrl ?? page.heroImageUrl,
+    imageAlt: page.title,
   });
 }
 
@@ -69,12 +71,13 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Contato"
           title={page?.title ?? "Fale com a assessoria e encaminhe sua demanda"}
           description={
             page?.subtitle ??
             pageParagraphs[0] ??
-            "Os contatos abaixo vêm do painel e podem ser atualizados sem alterar o código."
+            "Fale diretamente com a assessoria para comprar, vender, avaliar um imóvel ou esclarecer dúvidas."
           }
         />
 
@@ -159,6 +162,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                   placeholder="Conte sua necessidade"
                 />
               </div>
+
+              <TurnstileWidget />
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button type="submit" size="lg">

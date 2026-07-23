@@ -82,8 +82,8 @@ services:
       studio:
         condition: service_healthy
     ports:
-      - ${KONG_HTTP_PORT}:8000/tcp
-      - ${KONG_HTTPS_PORT}:8443/tcp
+      - 127.0.0.1:${KONG_HTTP_PORT}:8000/tcp
+      - 127.0.0.1:${KONG_HTTPS_PORT}:8443/tcp
     volumes:
       - ./volumes/api/kong.yml:/home/kong/temp.yml:ro,z
       - ./volumes/api/kong-entrypoint.sh:/home/kong/kong-entrypoint.sh:ro,z
@@ -143,6 +143,11 @@ services:
       GOTRUE_SITE_URL: ${SITE_URL}
       GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS}
       GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP}
+      GOTRUE_PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH}
+      GOTRUE_PASSWORD_REQUIRED_CHARACTERS: ${PASSWORD_REQUIRED_CHARACTERS}
+      GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED: ${REFRESH_TOKEN_ROTATION_ENABLED}
+      GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL: ${REFRESH_TOKEN_REUSE_INTERVAL}
+      GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION: ${SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION}
 
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated
@@ -177,6 +182,8 @@ services:
       GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${MAILER_URLPATHS_CONFIRMATION}
       GOTRUE_MAILER_URLPATHS_RECOVERY: ${MAILER_URLPATHS_RECOVERY}
       GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE}
+      GOTRUE_MAILER_NOTIFICATIONS_PASSWORD_CHANGED_ENABLED: ${MAILER_NOTIFICATIONS_PASSWORD_CHANGED_ENABLED}
+      GOTRUE_MAILER_NOTIFICATIONS_EMAIL_CHANGED_ENABLED: ${MAILER_NOTIFICATIONS_EMAIL_CHANGED_ENABLED}
 
       GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
       GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
@@ -212,12 +219,10 @@ services:
       # Test OTP mappings for development
       # GOTRUE_SMS_TEST_OTP: ${SMS_TEST_OTP}
 
-      # Uncomment to configure multi-factor authentication (MFA).
-      # GOTRUE_MFA_TOTP_ENROLL_ENABLED: ${MFA_TOTP_ENROLL_ENABLED}
-      # GOTRUE_MFA_TOTP_VERIFY_ENABLED: ${MFA_TOTP_VERIFY_ENABLED}
-      # GOTRUE_MFA_PHONE_ENROLL_ENABLED: ${MFA_PHONE_ENROLL_ENABLED}
-      # GOTRUE_MFA_PHONE_VERIFY_ENABLED: ${MFA_PHONE_VERIFY_ENABLED}
-      # GOTRUE_MFA_MAX_ENROLLED_FACTORS: ${MFA_MAX_ENROLLED_FACTORS}
+      GOTRUE_MFA_TOTP_ENROLL_ENABLED: "false"
+      GOTRUE_MFA_TOTP_VERIFY_ENABLED: "false"
+      GOTRUE_MFA_PHONE_ENROLL_ENABLED: "false"
+      GOTRUE_MFA_PHONE_VERIFY_ENABLED: "false"
 
       # SAML SSO
       # GOTRUE_SAML_ENABLED: ${SAML_ENABLED}
@@ -480,6 +485,8 @@ services:
     volumes:
       - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
       - ../migrations/0001_initial.sql:/docker-entrypoint-initdb.d/init-scripts/96-project-schema.sql:Z
+      - ../migrations/0002_security_hardening.sql:/docker-entrypoint-initdb.d/init-scripts/96b-project-security.sql:Z
+      - ../migrations/0003_admin_user_management.sql:/docker-entrypoint-initdb.d/init-scripts/96c-admin-user-management.sql:Z
       - ../seeds/0001_initial_seed.sql:/docker-entrypoint-initdb.d/init-scripts/97-project-seed.sql:Z
       # Must be superuser to create event trigger
       - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
@@ -535,8 +542,8 @@ services:
     image: supabase/supavisor:2.9.5
     restart: unless-stopped
     ports:
-      - ${POSTGRES_PORT}:5432
-      - ${POOLER_PROXY_PORT_TRANSACTION}:6543
+      - 127.0.0.1:${POSTGRES_PORT}:5432
+      - 127.0.0.1:${POOLER_PROXY_PORT_TRANSACTION}:6543
     volumes:
       - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
     healthcheck:

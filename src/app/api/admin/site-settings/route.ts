@@ -1,11 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 
-import { applyNoStoreHeaders, buildAdminLoginUrl, getRequestOrigin } from "@/lib/auth";
+import {
+  applyNoStoreHeaders,
+  buildAdminLoginUrl,
+  getAdminFormRequestRejection,
+  getAdminRequestContext,
+  getRequestOrigin,
+} from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { normalizePhoneDigits } from "@/lib/contact";
-import { hasDevAdminSession } from "@/lib/dev-auth";
 import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
-import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 type SiteSettingsRecord = {
   company_name: string | null;
@@ -28,6 +33,24 @@ type SiteSettingsRecord = {
   default_seo_description: string | null;
 };
 
+const siteSettingsInputSchema = z.object({
+  whatsappNumber: z
+    .string()
+    .max(15)
+    .refine((value) => !value || /^\d{8,15}$/.test(value)),
+  primaryPhone: z
+    .string()
+    .max(15)
+    .refine((value) => !value || /^\d{8,15}$/.test(value)),
+  email: z
+    .string()
+    .trim()
+    .max(254)
+    .refine((value) => !value || z.string().email().safeParse(value).success),
+  impactPhrase: z.string().trim().min(2).max(500),
+  instagram: z.string().trim().max(200),
+});
+
 function normalizeInstagramProfile(value: string) {
   const trimmed = value.trim();
 
@@ -36,7 +59,20 @@ function normalizeInstagramProfile(value: string) {
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed.replace(/\/+$/, "");
+    try {
+      const url = new URL(trimmed);
+
+      if (
+        url.protocol !== "https:" ||
+        (url.hostname !== "instagram.com" && url.hostname !== "www.instagram.com")
+      ) {
+        return null;
+      }
+
+      return url.toString().replace(/\/+$/, "");
+    } catch {
+      return null;
+    }
   }
 
   const normalizedHandle = trimmed
@@ -65,30 +101,58 @@ function mergeSocialLinks(
 }
 
 export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-  const redirectTo = sanitizeInternalRedirect(
-    readFormValue(formData, "redirect_to"),
-    "/admin/conteudos"
-  );
-  const { supabase, applyCookies } = createSupabaseServerContext(request);
   const requestOrigin = getRequestOrigin(request);
 
-  const hasAccess = hasDevAdminSession(request);
+  const requestRejection = getAdminFormRequestRejection(request);
 
-  if (!hasAccess) {
+  if (requestRejection) {
+    return applyNoStoreHeaders(
+      NextResponse.json(
+        { error: requestRejection.error },
+        { status: requestRejection.status }
+      )
+    );
+  }
+
+  const { supabase, applyCookies, isAuthorized } =
+    await getAdminRequestContext(request);
+
+  if (!isAuthorized) {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), requestOrigin),
+      new URL(buildAdminLoginUrl("/admin/conteudos", "session_expired"), requestOrigin),
       303
     );
 
     return applyNoStoreHeaders(applyCookies(response));
   }
 
-  const whatsappNumber = normalizePhoneDigits(readFormValue(formData, "whatsapp_number")) || null;
-  const primaryPhone = normalizePhoneDigits(readFormValue(formData, "primary_phone")) || null;
-  const email = readFormValue(formData, "email") || null;
-  const impactPhrase = readFormValue(formData, "impact_phrase") || brand.slogan;
-  const instagramProfile = normalizeInstagramProfile(readFormValue(formData, "instagram"));
+  const formData = await request.formData();
+  const redirectTo = sanitizeInternalRedirect(
+    readFormValue(formData, "redirect_to"),
+    "/admin/conteudos"
+  );
+  const parsed = siteSettingsInputSchema.safeParse({
+    whatsappNumber: normalizePhoneDigits(readFormValue(formData, "whatsapp_number")),
+    primaryPhone: normalizePhoneDigits(readFormValue(formData, "primary_phone")),
+    email: readFormValue(formData, "email"),
+    impactPhrase: readFormValue(formData, "impact_phrase") || brand.slogan,
+    instagram: readFormValue(formData, "instagram"),
+  });
+
+  if (!parsed.success) {
+    const response = NextResponse.redirect(
+      new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
+      303
+    );
+
+    return applyNoStoreHeaders(applyCookies(response));
+  }
+
+  const whatsappNumber = parsed.data.whatsappNumber || null;
+  const primaryPhone = parsed.data.primaryPhone || null;
+  const email = parsed.data.email || null;
+  const impactPhrase = parsed.data.impactPhrase;
+  const instagramProfile = normalizeInstagramProfile(parsed.data.instagram);
 
   const { data: existingSettings } = await supabase
     .from("site_settings")

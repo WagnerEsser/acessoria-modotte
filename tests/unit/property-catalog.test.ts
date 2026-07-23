@@ -17,7 +17,10 @@ function createProperty(overrides: Partial<PublicPropertyCard>): PublicPropertyC
     location: "Centro",
     city: "Balneário Camboriú",
     neighborhoodSlug: "centro",
+    status: "published",
     price: "R$ 1.500.000",
+    priceValue: 1500000,
+    priceOnRequest: false,
     summary: "Resumo base.",
     size: "180 m²",
     bedrooms: 3,
@@ -28,6 +31,11 @@ function createProperty(overrides: Partial<PublicPropertyCard>): PublicPropertyC
     highlights: [],
     coverImageUrl: null,
     coverImageAlt: null,
+    coverImageWidth: null,
+    coverImageHeight: null,
+    seoTitle: null,
+    seoDescription: null,
+    updatedAt: "2026-07-23T00:00:00.000Z",
     ...overrides,
   };
 }

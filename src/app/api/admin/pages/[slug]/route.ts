@@ -1,9 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 
-import { applyNoStoreHeaders, buildAdminLoginUrl, getRequestOrigin } from "@/lib/auth";
-import { hasDevAdminSession } from "@/lib/dev-auth";
+import {
+  applyNoStoreHeaders,
+  buildAdminLoginUrl,
+  getAdminFormRequestRejection,
+  getAdminRequestContext,
+  getRequestOrigin,
+} from "@/lib/auth";
 import { readFormBoolean, readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
-import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 const EDITABLE_PAGE_DEFAULTS = {
   sobre: {
@@ -17,6 +22,23 @@ const EDITABLE_PAGE_DEFAULTS = {
     sortOrder: 20,
   },
 } as const;
+
+const pageInputSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  subtitle: z.string().trim().max(320).nullable(),
+  body: z.string().trim().max(20_000).nullable(),
+  pageType: z.enum(["institutional", "services", "landing"]),
+  seoTitle: z.string().trim().max(120).nullable(),
+  seoDescription: z.string().trim().max(320).nullable(),
+  isPublished: z.boolean(),
+});
+const pageBlockSchema = z.object({
+  block_key: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  title: z.string().trim().max(160).nullable(),
+  content: z.string().trim().max(5000).nullable(),
+  sort_order: z.number().int().min(0).max(19),
+  is_active: z.boolean(),
+});
 
 type EditablePageSlug = keyof typeof EDITABLE_PAGE_DEFAULTS;
 
@@ -58,8 +80,9 @@ function parseBlockPayload(formData: FormData) {
     }
   }
 
-  return Array.from(indexes)
+  const candidates = Array.from(indexes)
     .sort((left, right) => left - right)
+    .slice(0, 20)
     .map((index) => {
       const blockKey = readFormValue(formData, `block_${index}_key`);
       const title = toNullableText(readFormValue(formData, `block_${index}_title`));
@@ -74,16 +97,42 @@ function parseBlockPayload(formData: FormData) {
       };
     })
     .filter((block) => block.block_key);
+
+  return z.array(pageBlockSchema).max(20).safeParse(candidates);
 }
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
   const { slug } = await params;
+  const requestOrigin = getRequestOrigin(request);
+
+  const requestRejection = getAdminFormRequestRejection(request);
+
+  if (requestRejection) {
+    return applyNoStoreHeaders(
+      NextResponse.json(
+        { error: requestRejection.error },
+        { status: requestRejection.status }
+      )
+    );
+  }
+
+  const { supabase, applyCookies, isAuthorized } =
+    await getAdminRequestContext(request);
+
+  if (!isAuthorized) {
+    const response = NextResponse.redirect(
+      new URL(buildAdminLoginUrl("/admin/conteudos", "session_expired"), requestOrigin),
+      303
+    );
+
+    return applyNoStoreHeaders(applyCookies(response));
+  }
+
   const formData = await request.formData();
   const redirectTo = sanitizeInternalRedirect(
     readFormValue(formData, "redirect_to"),
     "/admin/conteudos"
   );
-  const requestOrigin = getRequestOrigin(request);
 
   if (!isEditablePageSlug(slug)) {
     const response = NextResponse.redirect(
@@ -92,18 +141,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     );
 
     return applyNoStoreHeaders(response);
-  }
-
-  const { supabase, applyCookies } = createSupabaseServerContext(request);
-  const hasAccess = hasDevAdminSession(request);
-
-  if (!hasAccess) {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), requestOrigin),
-      303
-    );
-
-    return applyNoStoreHeaders(applyCookies(response));
   }
 
   const existingPageResult = await supabase
@@ -116,26 +153,47 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const title = readFormValue(formData, "title") || defaults.title;
   const subtitle = toNullableText(readFormValue(formData, "subtitle"));
   const body = toNullableText(readFormValue(formData, "body"));
-  const pageType = readFormValue(formData, "page_type") || existingPage?.page_type || defaults.pageType;
+  const pageType =
+    readFormValue(formData, "page_type") || existingPage?.page_type || defaults.pageType;
   const seoTitle = toNullableText(readFormValue(formData, "seo_title")) ?? existingPage?.seo_title ?? null;
   const seoDescription =
     toNullableText(readFormValue(formData, "seo_description")) ?? existingPage?.seo_description ?? null;
   const isPublished = readFormBoolean(formData, "is_published");
-  const blocks = parseBlockPayload(formData);
+  const pageInput = pageInputSchema.safeParse({
+    title,
+    subtitle,
+    body,
+    pageType,
+    seoTitle,
+    seoDescription,
+    isPublished,
+  });
+  const blocksResult = parseBlockPayload(formData);
+
+  if (!pageInput.success || !blocksResult.success) {
+    const response = NextResponse.redirect(
+      new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
+      303
+    );
+
+    return applyNoStoreHeaders(applyCookies(response));
+  }
+
+  const blocks = blocksResult.data;
 
   const { data: savedPage, error: pageError } = await supabase
     .from("pages")
     .upsert(
       {
         slug,
-        title,
-        subtitle,
-        body,
-        page_type: pageType,
+        title: pageInput.data.title,
+        subtitle: pageInput.data.subtitle,
+        body: pageInput.data.body,
+        page_type: pageInput.data.pageType,
         hero_image_url: existingPage?.hero_image_url ?? null,
-        is_published: isPublished,
-        seo_title: seoTitle,
-        seo_description: seoDescription,
+        is_published: pageInput.data.isPublished,
+        seo_title: pageInput.data.seoTitle,
+        seo_description: pageInput.data.seoDescription,
         og_image_url: existingPage?.og_image_url ?? null,
         sort_order: existingPage?.sort_order ?? defaults.sortOrder,
       },

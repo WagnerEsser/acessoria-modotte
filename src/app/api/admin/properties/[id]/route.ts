@@ -1,10 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { applyNoStoreHeaders, buildAdminLoginUrl, getRequestOrigin } from "@/lib/auth";
-import { hasDevAdminSession } from "@/lib/dev-auth";
+import {
+  applyNoStoreHeaders,
+  buildAdminLoginUrl,
+  getAdminFormRequestRejection,
+  getAdminRequestContext,
+  getRequestOrigin,
+} from "@/lib/auth";
 import { parsePropertyFormData, upsertNeighborhoodForProperty } from "@/lib/admin-property-form";
 import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
-import { createSupabaseServerContext } from "@/lib/supabase/server";
 
 type RouteContext = {
   params: Promise<{
@@ -14,24 +18,36 @@ type RouteContext = {
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
-  const formData = await request.formData();
-  const redirectTo = sanitizeInternalRedirect(
-    readFormValue(formData, "redirect_to"),
-    "/admin/imoveis"
-  );
-  const { supabase, applyCookies } = createSupabaseServerContext(request);
   const requestOrigin = getRequestOrigin(request);
 
-  const hasAccess = hasDevAdminSession(request);
+  const requestRejection = getAdminFormRequestRejection(request);
 
-  if (!hasAccess) {
+  if (requestRejection) {
+    return applyNoStoreHeaders(
+      NextResponse.json(
+        { error: requestRejection.error },
+        { status: requestRejection.status }
+      )
+    );
+  }
+
+  const { supabase, applyCookies, isAuthorized } =
+    await getAdminRequestContext(request);
+
+  if (!isAuthorized) {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "session_expired"), requestOrigin),
+      new URL(buildAdminLoginUrl("/admin/imoveis", "session_expired"), requestOrigin),
       303
     );
 
     return applyNoStoreHeaders(applyCookies(response));
   }
+
+  const formData = await request.formData();
+  const redirectTo = sanitizeInternalRedirect(
+    readFormValue(formData, "redirect_to"),
+    "/admin/imoveis"
+  );
 
   const parsed = parsePropertyFormData(formData);
 

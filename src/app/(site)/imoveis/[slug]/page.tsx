@@ -6,12 +6,17 @@ import { ArrowRight, Bath, BedDouble, CarFront, MapPin, MessageCircle, Square } 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppHref } from "@/lib/contact";
 import { buildMetadata } from "@/lib/seo";
+import {
+  buildBreadcrumbStructuredData,
+  buildPropertyStructuredData,
+} from "@/lib/structured-data";
 import { getPublicPropertyBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type PropertyPageProps = {
   params: Promise<{
@@ -60,9 +65,12 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: property.title,
-    description: property.summary ?? property.description ?? property.price,
+    title: property.seoTitle ?? property.title,
+    description:
+      property.seoDescription ?? property.summary ?? property.description ?? property.price,
     path: `/imoveis/${property.slug}`,
+    image: property.coverImageUrl,
+    imageAlt: property.coverImageAlt ?? property.title,
   });
 }
 
@@ -110,8 +118,19 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <JsonLd
+        data={[
+          buildBreadcrumbStructuredData([
+            { name: "Início", path: "/" },
+            { name: "Imóveis", path: "/imoveis" },
+            { name: property.title, path: `/imoveis/${property.slug}` },
+          ]),
+          buildPropertyStructuredData(property),
+        ]}
+      />
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Detalhe do imóvel"
           title={property.title}
           description={property.summary ?? undefined}
@@ -130,6 +149,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                 <img
                   src={property.coverImageUrl}
                   alt={property.coverImageAlt ?? property.title}
+                  width={property.coverImageWidth ?? 1600}
+                  height={property.coverImageHeight ?? 900}
                   loading="eager"
                   className="absolute inset-0 h-full w-full object-cover opacity-45"
                 />
@@ -145,10 +166,20 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
                 <div className="space-y-3">
                   {locationLabel ? (
-                    <div className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72">
-                      <MapPin className="size-4" />
-                      {locationLabel}
-                    </div>
+                    property.neighborhoodSlug ? (
+                      <Link
+                        href={`/areas/${property.neighborhoodSlug}`}
+                        className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72 transition hover:text-brand-gold"
+                      >
+                        <MapPin className="size-4" />
+                        {locationLabel}
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72">
+                        <MapPin className="size-4" />
+                        {locationLabel}
+                      </div>
+                    )
                   ) : null}
                   <h2 className="max-w-2xl font-display text-4xl font-semibold leading-tight text-brand-ivory sm:text-5xl">
                     {property.title}
@@ -290,6 +321,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                   <img
                     src={image.url}
                     alt={image.altText ?? property.title}
+                    width={image.width ?? 1600}
+                    height={image.height ?? 900}
                     loading="lazy"
                     className="h-64 w-full object-cover"
                   />

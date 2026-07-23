@@ -9,10 +9,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { TurnstileWidget } from "@/components/security/turnstile-widget";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type EvaluationPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -37,7 +38,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Avaliação",
       description: siteSettings.defaultSeoDescription,
       path: "/avaliacao",
-      noIndex: true,
     });
   }
 
@@ -45,6 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: page.seoTitle ?? page.title,
     description: page.seoDescription ?? page.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/avaliacao",
+    image: page.ogImageUrl ?? page.heroImageUrl,
+    imageAlt: page.title,
   });
 }
 
@@ -59,6 +61,7 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
         <SectionHeading
+          as="h1"
           eyebrow="Avaliação"
           title={page?.title ?? "Solicite uma leitura comercial do seu imóvel"}
           description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo de avaliação ainda não cadastrado."}
@@ -81,7 +84,8 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
               </div>
             ) : (
               <p className="text-sm leading-7 text-brand-ivory/70">
-                A explicação da página será publicada no painel quando o conteúdo estiver pronto.
+                A avaliação considera características do imóvel, localização, conservação e contexto
+                de mercado para orientar uma decisão mais segura.
               </p>
             )}
 
@@ -105,7 +109,7 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed border-brand-beige/18 bg-brand-ivory/4 p-6 text-sm text-brand-ivory/68">
-                  O fluxo de avaliação será detalhado no painel administrativo.
+                  Envie os dados essenciais do imóvel para receber uma análise inicial da assessoria.
                 </div>
               )}
             </div>
@@ -160,6 +164,8 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
                   placeholder="Descreva o imóvel e a urgência"
                 />
               </div>
+
+              <TurnstileWidget />
 
               <div className="flex flex-wrap gap-3">
                 <Button type="submit" size="lg">

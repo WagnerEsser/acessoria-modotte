@@ -61,21 +61,11 @@ export function getSupabaseAnonKey(): string {
   return value;
 }
 
-export function getAdminLoginEmail(): string {
-  const value = getOptionalEnv("ADMIN_LOGIN_EMAIL");
+export function getSupabaseServiceRoleKey(): string {
+  const value = getFirstConfiguredEnv(["SUPABASE_SECRET_KEY", "SERVICE_ROLE_KEY"]);
 
   if (!value) {
-    throw new Error("Missing required environment variable: ADMIN_LOGIN_EMAIL");
-  }
-
-  return value;
-}
-
-export function getAdminLoginPassword(): string {
-  const value = getOptionalEnv("ADMIN_LOGIN_PASSWORD");
-
-  if (!value) {
-    throw new Error("Missing required environment variable: ADMIN_LOGIN_PASSWORD");
+    throw new Error("Missing required server-only Supabase secret key");
   }
 
   return value;

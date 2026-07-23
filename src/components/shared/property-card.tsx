@@ -4,6 +4,7 @@ import { ArrowRight, Bath, BedDouble, CarFront, Square } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { slugify } from "@/lib/form-utils";
 import type { PublicPropertyCard } from "@/lib/public-content";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,8 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <img
             src={property.coverImageUrl}
             alt={property.coverImageAlt ?? property.title}
+            width={property.coverImageWidth ?? 1600}
+            height={property.coverImageHeight ?? 900}
             loading="lazy"
             className="absolute inset-0 h-full w-full object-cover opacity-40"
           />
@@ -54,15 +57,33 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className={cn("absolute inset-0 bg-gradient-to-br", property.accent)} />
         <div className="relative p-5">
           <div className="flex items-start justify-between gap-3">
-            <Badge variant="soft">{property.type}</Badge>
+            <Link href={`/imoveis/tipo/${slugify(property.type)}`}>
+              <Badge variant="soft">{property.type}</Badge>
+            </Link>
             {property.featured ? <Badge variant="gold">Destaque</Badge> : null}
           </div>
 
           <div className="mt-16 space-y-2">
             {locationLabel ? (
-              <div className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68">
-                {locationLabel}
-              </div>
+              property.neighborhoodSlug ? (
+                <Link
+                  href={`/areas/${property.neighborhoodSlug}`}
+                  className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68 transition hover:text-brand-gold"
+                >
+                  {locationLabel}
+                </Link>
+              ) : property.city ? (
+                <Link
+                  href={`/imoveis/cidade/${slugify(property.city)}`}
+                  className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68 transition hover:text-brand-gold"
+                >
+                  {locationLabel}
+                </Link>
+              ) : (
+                <div className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68">
+                  {locationLabel}
+                </div>
+              )
             ) : null}
             <h3 className="max-w-lg font-display text-2xl font-semibold leading-tight text-brand-ivory">
               {property.title}
