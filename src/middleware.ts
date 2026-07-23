@@ -2,12 +2,17 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import {
   applyNoStoreHeaders,
+  applySensitiveResponseHeaders,
   buildAdminLoginUrl,
   getAdminRequestContext,
   getRequestOrigin,
   isAdminApiPath,
   resolveAdminRouteAccess,
 } from "@/lib/auth";
+
+function protectAdminResponse(response: NextResponse): NextResponse {
+  return applySensitiveResponseHeaders(applyNoStoreHeaders(response));
+}
 
 export async function middleware(request: NextRequest) {
   const {
@@ -25,10 +30,10 @@ export async function middleware(request: NextRequest) {
         { status: isAuthenticated ? 403 : 401 }
       );
 
-      return applyNoStoreHeaders(applyCookies(response));
+      return protectAdminResponse(applyCookies(response));
     }
 
-    return applyNoStoreHeaders(applyCookies(NextResponse.next()));
+    return protectAdminResponse(applyCookies(NextResponse.next()));
   }
 
   const decision = resolveAdminRouteAccess(
@@ -38,7 +43,7 @@ export async function middleware(request: NextRequest) {
   );
 
   if (decision.kind === "allow") {
-    return applyNoStoreHeaders(applyCookies(NextResponse.next()));
+    return protectAdminResponse(applyCookies(NextResponse.next()));
   }
 
   if (decision.kind === "redirect-login") {
@@ -47,12 +52,12 @@ export async function middleware(request: NextRequest) {
       307
     );
 
-    return applyNoStoreHeaders(applyCookies(response));
+    return protectAdminResponse(applyCookies(response));
   }
 
   const response = NextResponse.redirect(new URL(decision.target, requestOrigin), 307);
 
-  return applyNoStoreHeaders(applyCookies(response));
+  return protectAdminResponse(applyCookies(response));
 }
 
 export const config = {

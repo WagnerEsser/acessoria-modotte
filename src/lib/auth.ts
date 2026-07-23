@@ -4,10 +4,18 @@ import { type NextRequest, type NextResponse } from "next/server";
 import { canAccessAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServerContext } from "@/lib/supabase/server";
 import { siteUrl } from "@/lib/site";
+import { getSecurityHeaders } from "../../security-headers.mjs";
 
 export const ADMIN_LOGIN_PATH = "/admin/login";
 export const ADMIN_DEFAULT_PATH = "/admin/dashboard";
 export const ADMIN_FORM_MAX_BYTES = 256 * 1024;
+
+const sensitiveResponseHeaders = [
+  ...getSecurityHeaders(process.env.NODE_ENV === "production").map(
+    ({ key, value }) => [key, value] as const
+  ),
+  ["X-Robots-Tag", "noindex, nofollow, noarchive"],
+] as const;
 
 export type MutationRequestRejection = {
   error: "forbidden" | "payload_too_large" | "unsupported_media_type";
@@ -250,6 +258,16 @@ export function applyNoStoreHeaders(response: NextResponse): NextResponse {
   );
   response.headers.set("Pragma", "no-cache");
   response.headers.set("Expires", "0");
+
+  return response;
+}
+
+export function applySensitiveResponseHeaders(
+  response: NextResponse
+): NextResponse {
+  for (const [name, value] of sensitiveResponseHeaders) {
+    response.headers.set(name, value);
+  }
 
   return response;
 }

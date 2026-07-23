@@ -54,6 +54,14 @@ describe("admin middleware", () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({ error: "unauthorized" });
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(response.headers.get("content-security-policy")).toContain(
+      "frame-ancestors 'none'"
+    );
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("x-robots-tag")).toBe(
+      "noindex, nofollow, noarchive"
+    );
   });
 
   it("ignores the removed fixed development cookie", async () => {
