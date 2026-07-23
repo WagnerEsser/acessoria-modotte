@@ -487,6 +487,7 @@ services:
       - ../migrations/0001_initial.sql:/docker-entrypoint-initdb.d/init-scripts/96-project-schema.sql:Z
       - ../migrations/0002_security_hardening.sql:/docker-entrypoint-initdb.d/init-scripts/96b-project-security.sql:Z
       - ../migrations/0003_admin_user_management.sql:/docker-entrypoint-initdb.d/init-scripts/96c-admin-user-management.sql:Z
+      - ../migrations/0004_explicit_data_api_grants.sql:/docker-entrypoint-initdb.d/init-scripts/96d-explicit-data-api-grants.sql:Z
       - ../seeds/0001_initial_seed.sql:/docker-entrypoint-initdb.d/init-scripts/97-project-seed.sql:Z
       # Must be superuser to create event trigger
       - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z

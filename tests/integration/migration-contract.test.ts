@@ -43,6 +43,42 @@ describe("migration and seed contract", () => {
     expect(sql).toContain("revoke insert, update, delete, truncate on table public.audit_logs");
   });
 
+  it("uses explicit least-privilege grants for the cloud Data API", () => {
+    const sql = readFileSync(
+      path.resolve("supabase/migrations/0004_explicit_data_api_grants.sql"),
+      "utf8"
+    );
+
+    expect(sql).toContain(
+      "revoke all on all tables in schema public from anon, authenticated, service_role"
+    );
+    expect(sql).toContain("public.properties");
+    expect(sql).toContain("to anon;");
+    expect(sql).toContain("public.leads");
+    expect(sql).toContain("to authenticated;");
+    expect(sql).toContain(
+      "grant insert on table public.leads to service_role"
+    );
+    expect(sql).toContain(
+      "grant select, insert, update on table public.users to service_role"
+    );
+    expect(sql).toContain(
+      'alter policy "Properties public read" on public.properties'
+    );
+    expect(sql).toContain(
+      'alter policy "Properties admin manage" on public.properties'
+    );
+    expect(sql).toContain(
+      "grant execute on function public.current_user_is_admin() to authenticated"
+    );
+    expect(sql).toContain(
+      "grant execute on function public.consume_security_rate_limit(text, integer, integer)"
+    );
+    expect(sql).not.toContain(
+      "grant select, insert, update, delete on all tables in schema public"
+    );
+  });
+
   it("ships editorial seed data for the first boot", () => {
     const sql = readFileSync(
       path.resolve("supabase/seeds/0001_initial_seed.sql"),
@@ -68,6 +104,7 @@ describe("migration and seed contract", () => {
     expect(compose).toContain("../migrations/0001_initial.sql");
     expect(compose).toContain("../migrations/0002_security_hardening.sql");
     expect(compose).toContain("../migrations/0003_admin_user_management.sql");
+    expect(compose).toContain("../migrations/0004_explicit_data_api_grants.sql");
     expect(compose).toContain("../seeds/0001_initial_seed.sql");
     expect(compose).toContain("/docker-entrypoint-initdb.d/init-scripts/96-project-schema.sql");
     expect(compose).toContain("/docker-entrypoint-initdb.d/init-scripts/97-project-seed.sql");
