@@ -1,0 +1,6 @@
+project_id = "corretora"
+
+[db.seed]
+enabled = true
+sql_paths = ["./seeds/*.sql"]
+
