@@ -31,3 +31,6 @@ tmp/
 
 # Supabase CLI local link metadata
 supabase/.temp/
+
+# Local Netlify folder
+.netlify
