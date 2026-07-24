@@ -15,7 +15,8 @@ type BuildMetadataOptions = {
   modifiedTime?: string | null;
 };
 
-const defaultSocialImage = "/brand/luana-modotte-logo-lockup.png";
+const defaultSocialImage = "/images/luana-modotte-portrait-pro.png";
+const defaultSocialImageAlt = "Retrato profissional de Luana Modotte";
 
 export function formatMetadataTitle(title: string) {
   const normalizedTitle = title.trim();
@@ -40,7 +41,8 @@ export function buildMetadata({
   const canonical = absoluteSiteUrl(path);
   const metadataTitle = formatMetadataTitle(title);
   const socialImage = absoluteSiteUrl(image || defaultSocialImage);
-  const socialImageAlt = imageAlt?.trim() || metadataTitle;
+  const socialImageAlt =
+    imageAlt?.trim() || (image ? metadataTitle : defaultSocialImageAlt);
   const openGraph: Metadata["openGraph"] =
     type === "article"
       ? {

@@ -50,8 +50,8 @@ describe("SEO metadata", () => {
       type: "website",
       images: [
         {
-          url: absoluteSiteUrl("/brand/luana-modotte-logo-lockup.png"),
-          alt: `Imóveis | ${brand.name}`,
+          url: absoluteSiteUrl("/images/luana-modotte-portrait-pro.png"),
+          alt: "Retrato profissional de Luana Modotte",
         },
       ],
     });
@@ -60,8 +60,8 @@ describe("SEO metadata", () => {
       title: `Imóveis | ${brand.name}`,
       images: [
         {
-          url: absoluteSiteUrl("/brand/luana-modotte-logo-lockup.png"),
-          alt: `Imóveis | ${brand.name}`,
+          url: absoluteSiteUrl("/images/luana-modotte-portrait-pro.png"),
+          alt: "Retrato profissional de Luana Modotte",
         },
       ],
     });
