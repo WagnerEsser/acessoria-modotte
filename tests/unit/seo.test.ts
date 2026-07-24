@@ -50,8 +50,8 @@ describe("SEO metadata", () => {
       type: "website",
       images: [
         {
-          url: absoluteSiteUrl("/images/luana-modotte-portrait-pro.png"),
-          alt: "Retrato profissional de Luana Modotte",
+          url: absoluteSiteUrl("/brand/lm-monogram-header.png"),
+          alt: "Monograma LM da Luana Modotte Assessoria Imobiliária",
         },
       ],
     });
@@ -60,8 +60,8 @@ describe("SEO metadata", () => {
       title: `Imóveis | ${brand.name}`,
       images: [
         {
-          url: absoluteSiteUrl("/images/luana-modotte-portrait-pro.png"),
-          alt: "Retrato profissional de Luana Modotte",
+          url: absoluteSiteUrl("/brand/lm-monogram-header.png"),
+          alt: "Monograma LM da Luana Modotte Assessoria Imobiliária",
         },
       ],
     });

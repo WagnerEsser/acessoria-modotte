@@ -15,8 +15,8 @@ type BuildMetadataOptions = {
   modifiedTime?: string | null;
 };
 
-const defaultSocialImage = "/images/luana-modotte-portrait-pro.png";
-const defaultSocialImageAlt = "Retrato profissional de Luana Modotte";
+const defaultSocialImage = "/brand/lm-monogram-header.png";
+const defaultSocialImageAlt = "Monograma LM da Luana Modotte Assessoria Imobiliária";
 
 export function formatMetadataTitle(title: string) {
   const normalizedTitle = title.trim();

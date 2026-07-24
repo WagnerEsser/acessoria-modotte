@@ -32,10 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       homePage?.seoDescription ?? homePage?.subtitle ?? siteSettings.defaultSeoDescription,
     path: "/",
-    image: homePage?.ogImageUrl ?? "/images/luana-modotte-portrait-pro.png",
-    imageAlt: homePage?.ogImageUrl
-      ? (homePage.title ?? siteSettings.brandName)
-      : "Retrato profissional de Luana Modotte",
+    image: homePage?.ogImageUrl,
+    imageAlt: homePage?.ogImageUrl ? (homePage.title ?? siteSettings.brandName) : null,
   });
 }
 
