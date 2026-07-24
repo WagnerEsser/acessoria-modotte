@@ -42,14 +42,20 @@ describe("public content helpers", () => {
       impactPhrase: "Descrição institucional curta.",
       defaultSeoTitle: "Luana Modotte | Assessoria Imobiliária",
       defaultSeoDescription: "Descrição padrão.",
+      showBlogNavigation: false,
+      showAreasNavigation: false,
     } satisfies PublicSiteSettings;
 
     const channels = getPublicContactChannels(settings);
 
     expect(channels[0].label).toBe("WhatsApp comercial");
     expect(channels[0].value).toBe("+55 47 98818-8967");
-    expect(channels.some((channel) => channel.label === "E-mail institucional")).toBe(true);
-    expect(channels.some((channel) => channel.label === "Instagram")).toBe(true);
+    expect(
+      channels.some((channel) => channel.label === "E-mail institucional"),
+    ).toBe(true);
+    expect(channels.some((channel) => channel.label === "Instagram")).toBe(
+      true,
+    );
     expect(channels.some((channel) => channel.label === "Telefone")).toBe(true);
   });
 
@@ -73,11 +79,15 @@ describe("public content helpers", () => {
       impactPhrase: "Descrição institucional curta.",
       defaultSeoTitle: "Luana Modotte | Assessoria Imobiliária",
       defaultSeoDescription: "Descrição padrão.",
+      showBlogNavigation: false,
+      showAreasNavigation: false,
     } satisfies PublicSiteSettings;
 
     const channels = getPublicContactChannels(settings);
 
-    expect(channels.some((channel) => channel.label === "WhatsApp comercial")).toBe(false);
+    expect(
+      channels.some((channel) => channel.label === "WhatsApp comercial"),
+    ).toBe(false);
     expect(channels.some((channel) => channel.label === "Telefone")).toBe(true);
   });
 
@@ -97,5 +107,7 @@ describe("public content helpers", () => {
     expect(settings.impactPhrase).toBe(brand.slogan);
     expect(settings.defaultSeoDescription).toBe(brand.slogan);
     expect(settings.whatsappNumber).toBeNull();
+    expect(settings.showBlogNavigation).toBe(false);
+    expect(settings.showAreasNavigation).toBe(false);
   });
 });

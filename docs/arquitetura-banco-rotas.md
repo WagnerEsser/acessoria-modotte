@@ -59,6 +59,8 @@ Campos principais:
 - `state`
 - `social_links`
 - `opening_hours`
+- `show_blog_navigation`
+- `show_areas_navigation`
 - `default_seo_title`
 - `default_seo_description`
 
@@ -356,19 +358,19 @@ As rotas publicas devem viver sob um grupo de site e usar dados do banco com ren
 
 ### Mapa de rotas
 
-| Rota | Funcao | Fonte principal | Observacao |
-| --- | --- | --- | --- |
-| `/` | Home | `site_settings`, `properties`, `testimonials`, `page_blocks` | rota de conversao principal |
-| `/imoveis` | Lista de imoveis | `properties`, `neighborhoods` | filtros por query string |
-| `/imoveis/[slug]` | Detalhe do imovel | `properties`, `property_images`, `property_features` | pagina SEO forte |
-| `/sobre` | Sobre a assessoria | `pages` | conteudo institucional |
-| `/servicos` | Servicos | `pages` | explicacao comercial |
-| `/quero-vender` | Captacao de proprietarios | `pages`, `leads` | conversao de venda |
-| `/avaliacao` | Avaliacao de imovel | `pages`, `leads` | lead qualificado |
-| `/areas/[slug]` | SEO local | `neighborhoods`, `pages` | pagina por bairro/regiao |
-| `/blog` | Listagem editorial | `blog_posts` | opcional no MVP |
-| `/blog/[slug]` | Post editorial | `blog_posts` | opcional no MVP |
-| `/contato` | Contato direto | `site_settings`, `leads` | telefone, whatsapp e formulario |
+| Rota              | Funcao                    | Fonte principal                                              | Observacao                      |
+| ----------------- | ------------------------- | ------------------------------------------------------------ | ------------------------------- |
+| `/`               | Home                      | `site_settings`, `properties`, `testimonials`, `page_blocks` | rota de conversao principal     |
+| `/imoveis`        | Lista de imoveis          | `properties`, `neighborhoods`                                | filtros por query string        |
+| `/imoveis/[slug]` | Detalhe do imovel         | `properties`, `property_images`, `property_features`         | pagina SEO forte                |
+| `/sobre`          | Sobre a assessoria        | `pages`                                                      | conteudo institucional          |
+| `/servicos`       | Servicos                  | `pages`                                                      | explicacao comercial            |
+| `/quero-vender`   | Captacao de proprietarios | `pages`, `leads`                                             | conversao de venda              |
+| `/avaliacao`      | Avaliacao de imovel       | `pages`, `leads`                                             | lead qualificado                |
+| `/areas/[slug]`   | SEO local                 | `neighborhoods`, `pages`                                     | pagina por bairro/regiao        |
+| `/blog`           | Listagem editorial        | `blog_posts`                                                 | opcional no MVP                 |
+| `/blog/[slug]`    | Post editorial            | `blog_posts`                                                 | opcional no MVP                 |
+| `/contato`        | Contato direto            | `site_settings`, `leads`                                     | telefone, whatsapp e formulario |
 
 ## Rotas Administrativas
 
@@ -378,18 +380,18 @@ As rotas administrativas devem ficar em grupo separado e exigir autenticacao.
 
 ### Mapa de rotas
 
-| Rota | Funcao | Auth | Fonte principal |
-| --- | --- | --- | --- |
-| `/admin/login` | Login | nao | auth |
-| `/admin` | Entrada do painel | sim | `leads`, `properties`, `pages` |
-| `/admin/dashboard` | Resumo operacional | sim | agregacoes do banco |
-| `/admin/imoveis` | Lista de imoveis | sim | `properties` |
-| `/admin/imoveis/novo` | Novo imovel | sim | `properties` |
-| `/admin/imoveis/[id]/editar` | Editar imovel | sim | `properties`, `property_images`, `property_features` |
-| `/admin/conteudos` | Paginas e blocos | sim | `pages`, `page_blocks` |
-| `/admin/leads` | Gerenciar leads | sim | `leads`, `lead_notes` |
-| `/admin/usuarios` | Usuarios e papeis | sim | `users` |
-| `/admin/seo` | Metadados e indexacao | sim | `pages`, `properties`, `blog_posts` |
+| Rota                         | Funcao                | Auth | Fonte principal                                      |
+| ---------------------------- | --------------------- | ---- | ---------------------------------------------------- |
+| `/admin/login`               | Login                 | nao  | auth                                                 |
+| `/admin`                     | Entrada do painel     | sim  | `leads`, `properties`, `pages`                       |
+| `/admin/dashboard`           | Resumo operacional    | sim  | agregacoes do banco                                  |
+| `/admin/imoveis`             | Lista de imoveis      | sim  | `properties`                                         |
+| `/admin/imoveis/novo`        | Novo imovel           | sim  | `properties`                                         |
+| `/admin/imoveis/[id]/editar` | Editar imovel         | sim  | `properties`, `property_images`, `property_features` |
+| `/admin/conteudos`           | Paginas e blocos      | sim  | `pages`, `page_blocks`                               |
+| `/admin/leads`               | Gerenciar leads       | sim  | `leads`, `lead_notes`                                |
+| `/admin/usuarios`            | Usuarios e papeis     | sim  | `users`                                              |
+| `/admin/seo`                 | Metadados e indexacao | sim  | `pages`, `properties`, `blog_posts`                  |
 
 ## Endpoints e Server Actions
 
@@ -416,11 +418,11 @@ As rotas administrativas devem ficar em grupo separado e exigir autenticacao.
 
 ### APIs sugeridas
 
-| Endpoint | Metodo | Funcao |
-| --- | --- | --- |
-| `/api/leads` | `POST` | criar lead publico |
-| `/api/revalidate` | `POST` | revalidar rotas afetadas |
-| `/api/webhooks/contact` | `POST` | integrações futuras |
+| Endpoint                | Metodo | Funcao                               |
+| ----------------------- | ------ | ------------------------------------ |
+| `/api/leads`            | `POST` | criar lead publico                   |
+| `/api/revalidate`       | `POST` | revalidar rotas afetadas             |
+| `/api/webhooks/contact` | `POST` | integrações futuras                  |
 | `/api/webhooks/storage` | `POST` | eventos de storage quando necessario |
 
 ## Revalidacao e Cache

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import {
@@ -10,7 +11,11 @@ import {
 } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { normalizePhoneDigits } from "@/lib/contact";
-import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
+import {
+  readFormBoolean,
+  readFormValue,
+  sanitizeInternalRedirect,
+} from "@/lib/form-utils";
 
 type SiteSettingsRecord = {
   company_name: string | null;
@@ -31,6 +36,8 @@ type SiteSettingsRecord = {
   impact_phrase: string | null;
   default_seo_title: string | null;
   default_seo_description: string | null;
+  show_blog_navigation: boolean;
+  show_areas_navigation: boolean;
 };
 
 const siteSettingsInputSchema = z.object({
@@ -49,6 +56,8 @@ const siteSettingsInputSchema = z.object({
     .refine((value) => !value || z.string().email().safeParse(value).success),
   impactPhrase: z.string().trim().min(2).max(500),
   instagram: z.string().trim().max(200),
+  showBlogNavigation: z.boolean(),
+  showAreasNavigation: z.boolean(),
 });
 
 function normalizeInstagramProfile(value: string) {
@@ -64,7 +73,8 @@ function normalizeInstagramProfile(value: string) {
 
       if (
         url.protocol !== "https:" ||
-        (url.hostname !== "instagram.com" && url.hostname !== "www.instagram.com")
+        (url.hostname !== "instagram.com" &&
+          url.hostname !== "www.instagram.com")
       ) {
         return null;
       }
@@ -87,7 +97,7 @@ function normalizeInstagramProfile(value: string) {
 
 function mergeSocialLinks(
   currentLinks: Record<string, string> | null | undefined,
-  instagramProfile: string | null
+  instagramProfile: string | null,
 ) {
   const nextLinks = { ...(currentLinks ?? {}) };
 
@@ -109,8 +119,8 @@ export async function POST(request: NextRequest) {
     return applyNoStoreHeaders(
       NextResponse.json(
         { error: requestRejection.error },
-        { status: requestRejection.status }
-      )
+        { status: requestRejection.status },
+      ),
     );
   }
 
@@ -119,8 +129,11 @@ export async function POST(request: NextRequest) {
 
   if (!isAuthorized) {
     const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl("/admin/conteudos", "session_expired"), requestOrigin),
-      303
+      new URL(
+        buildAdminLoginUrl("/admin/conteudos", "session_expired"),
+        requestOrigin,
+      ),
+      303,
     );
 
     return applyNoStoreHeaders(applyCookies(response));
@@ -129,20 +142,26 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const redirectTo = sanitizeInternalRedirect(
     readFormValue(formData, "redirect_to"),
-    "/admin/conteudos"
+    "/admin/conteudos",
   );
   const parsed = siteSettingsInputSchema.safeParse({
-    whatsappNumber: normalizePhoneDigits(readFormValue(formData, "whatsapp_number")),
-    primaryPhone: normalizePhoneDigits(readFormValue(formData, "primary_phone")),
+    whatsappNumber: normalizePhoneDigits(
+      readFormValue(formData, "whatsapp_number"),
+    ),
+    primaryPhone: normalizePhoneDigits(
+      readFormValue(formData, "primary_phone"),
+    ),
     email: readFormValue(formData, "email"),
     impactPhrase: readFormValue(formData, "impact_phrase") || brand.slogan,
     instagram: readFormValue(formData, "instagram"),
+    showBlogNavigation: readFormBoolean(formData, "show_blog_navigation"),
+    showAreasNavigation: readFormBoolean(formData, "show_areas_navigation"),
   });
 
   if (!parsed.success) {
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
-      303
+      303,
     );
 
     return applyNoStoreHeaders(applyCookies(response));
@@ -154,13 +173,23 @@ export async function POST(request: NextRequest) {
   const impactPhrase = parsed.data.impactPhrase;
   const instagramProfile = normalizeInstagramProfile(parsed.data.instagram);
 
-  const { data: existingSettings } = await supabase
-    .from("site_settings")
-    .select(
-      "company_name, brand_name, legal_name, logo_url, primary_color, secondary_color, accent_color, primary_phone, whatsapp_number, email, address, city, state, social_links, opening_hours, impact_phrase, default_seo_title, default_seo_description"
-    )
-    .eq("singleton_key", "main")
-    .maybeSingle();
+  const { data: existingSettings, error: existingSettingsError } =
+    await supabase
+      .from("site_settings")
+      .select(
+        "company_name, brand_name, legal_name, logo_url, primary_color, secondary_color, accent_color, primary_phone, whatsapp_number, email, address, city, state, social_links, opening_hours, impact_phrase, default_seo_title, default_seo_description, show_blog_navigation, show_areas_navigation",
+      )
+      .eq("singleton_key", "main")
+      .maybeSingle();
+
+  if (existingSettingsError) {
+    const response = NextResponse.redirect(
+      new URL(`${redirectTo}?error=save_failed`, requestOrigin),
+      303,
+    );
+
+    return applyNoStoreHeaders(applyCookies(response));
+  }
 
   const settings = (existingSettings as SiteSettingsRecord | null) ?? null;
 
@@ -183,15 +212,28 @@ export async function POST(request: NextRequest) {
       social_links: mergeSocialLinks(settings?.social_links, instagramProfile),
       opening_hours: settings?.opening_hours ?? [],
       impact_phrase: impactPhrase,
-      default_seo_title: settings?.default_seo_title ?? `${brand.name} | ${brand.subtitle}`,
-      default_seo_description: settings?.default_seo_description ?? impactPhrase,
+      default_seo_title:
+        settings?.default_seo_title ?? `${brand.name} | ${brand.subtitle}`,
+      default_seo_description:
+        settings?.default_seo_description ?? impactPhrase,
+      show_blog_navigation: parsed.data.showBlogNavigation,
+      show_areas_navigation: parsed.data.showAreasNavigation,
     },
-    { onConflict: "singleton_key" }
+    { onConflict: "singleton_key" },
   );
 
+  if (!error) {
+    revalidatePath("/", "layout");
+  }
+
   const response = NextResponse.redirect(
-    new URL(error ? `${redirectTo}?error=save_failed` : `${redirectTo}?status=updated`, requestOrigin),
-    303
+    new URL(
+      error
+        ? `${redirectTo}?error=save_failed`
+        : `${redirectTo}?status=updated`,
+      requestOrigin,
+    ),
+    303,
   );
 
   return applyNoStoreHeaders(applyCookies(response));

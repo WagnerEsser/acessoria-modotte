@@ -18,6 +18,27 @@ export const publicNavigation: NavigationItem[] = [
   { href: "/contato", label: "Contato" },
 ];
 
+export type PublicNavigationVisibility = {
+  showBlogNavigation: boolean;
+  showAreasNavigation: boolean;
+};
+
+export function getVisiblePublicNavigation(
+  visibility: PublicNavigationVisibility,
+) {
+  return publicNavigation.filter((item) => {
+    if (item.href === "/blog") {
+      return visibility.showBlogNavigation;
+    }
+
+    if (item.href === "/areas") {
+      return visibility.showAreasNavigation;
+    }
+
+    return true;
+  });
+}
+
 export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "layout-dashboard" },
   { href: "/admin/imoveis", label: "Imóveis", icon: "building-2" },

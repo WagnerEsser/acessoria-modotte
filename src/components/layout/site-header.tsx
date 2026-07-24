@@ -6,12 +6,16 @@ import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { buttonVariants } from "@/components/ui/button";
-import { publicNavigation } from "@/lib/navigation";
+import {
+  getVisiblePublicNavigation,
+  type PublicNavigationVisibility,
+} from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
-export function SiteHeader() {
+export function SiteHeader(navigationVisibility: PublicNavigationVisibility) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerNavigation = getVisiblePublicNavigation(navigationVisibility);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -36,7 +40,7 @@ export function SiteHeader() {
             </Link>
 
             <nav className="hidden items-center gap-1 text-sm text-brand-ivory/78 lg:flex">
-              {publicNavigation.map((item) => (
+              {headerNavigation.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -49,7 +53,10 @@ export function SiteHeader() {
           </div>
 
           <div className="hidden items-center gap-3 lg:ml-auto lg:flex">
-            <Link href="/quero-vender" className={buttonVariants({ size: "sm" })}>
+            <Link
+              href="/quero-vender"
+              className={buttonVariants({ size: "sm" })}
+            >
               Quero vender
             </Link>
           </div>
@@ -58,13 +65,17 @@ export function SiteHeader() {
             type="button"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "ml-auto lg:hidden"
+              "ml-auto lg:hidden",
             )}
             aria-expanded={mobileMenuOpen}
             aria-controls="site-mobile-menu"
             onClick={() => setMobileMenuOpen((open) => !open)}
           >
-            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+            {mobileMenuOpen ? (
+              <X className="size-4" />
+            ) : (
+              <Menu className="size-4" />
+            )}
             Menu
           </button>
         </div>
@@ -73,12 +84,12 @@ export function SiteHeader() {
           id="site-mobile-menu"
           className={cn(
             "lg:hidden",
-            mobileMenuOpen ? "mt-4 block" : "pointer-events-none hidden"
+            mobileMenuOpen ? "mt-4 block" : "pointer-events-none hidden",
           )}
         >
           <div className="rounded-3xl border border-brand-beige/12 bg-brand-ink/96 p-4 shadow-2xl shadow-black/25">
             <nav className="grid gap-2 text-sm text-brand-ivory/80">
-              {publicNavigation.map((item) => (
+              {headerNavigation.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -90,7 +101,10 @@ export function SiteHeader() {
             </nav>
 
             <div className="mt-4 grid gap-3 border-t border-brand-beige/10 pt-4">
-              <Link href="/quero-vender" className={buttonVariants({ size: "sm" })}>
+              <Link
+                href="/quero-vender"
+                className={buttonVariants({ size: "sm" })}
+              >
                 Quero vender
               </Link>
               <Link

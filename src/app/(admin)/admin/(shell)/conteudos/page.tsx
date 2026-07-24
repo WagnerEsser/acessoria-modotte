@@ -15,7 +15,8 @@ import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
 export const metadata = buildMetadata({
   title: "Conteúdos",
-  description: "Textos institucionais, contatos principais e blocos editáveis do site.",
+  description:
+    "Textos institucionais, contatos principais e blocos editáveis do site.",
   path: "/admin/conteudos",
   noIndex: true,
 });
@@ -99,7 +100,9 @@ function getBlock(blocks: PageBlockRecord[], blockKey: string) {
   return blocks.find((block) => block.block_key === blockKey) ?? null;
 }
 
-export default async function AdminContentPage({ searchParams }: AdminContentPageProps) {
+export default async function AdminContentPage({
+  searchParams,
+}: AdminContentPageProps) {
   const resolvedSearchParams = await searchParams;
   const status = getFirstValue(resolvedSearchParams.status);
   const error = getFirstValue(resolvedSearchParams.error);
@@ -111,7 +114,9 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
 
   const { data: pagesData } = await supabase
     .from("pages")
-    .select("id, slug, title, subtitle, body, page_type, is_published, seo_title, seo_description, updated_at")
+    .select(
+      "id, slug, title, subtitle, body, page_type, is_published, seo_title, seo_description, updated_at",
+    )
     .order("updated_at", { ascending: false });
 
   const pages = (pagesData ?? []) as PageRecord[];
@@ -131,7 +136,9 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
   const primaryPhoneDisplay = siteSettings.primaryPhone
     ? formatBrazilianPhoneDisplayNumber(siteSettings.primaryPhone)
     : "";
-  const instagramDisplay = getInstagramInputValue(siteSettings.socialLinks.instagram);
+  const instagramDisplay = getInstagramInputValue(
+    siteSettings.socialLinks.instagram,
+  );
   const aboutPage = pages.find((page) => page.slug === "sobre") ?? null;
   const aboutBlocks = getPageBlocks(pageBlocks, aboutPage?.id);
   const servicesPage = pages.find((page) => page.slug === "servicos") ?? null;
@@ -167,19 +174,30 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
               Dados principais da assessoria
             </h2>
             <p className="max-w-2xl text-sm leading-6 text-brand-ivory/68">
-              WhatsApp, telefone, e-mail, Instagram e frase institucional passam a sair do banco.
+              WhatsApp, telefone, e-mail, Instagram e frase institucional passam
+              a sair do banco.
             </p>
           </div>
 
           <Badge
-            variant={siteSettings.whatsappNumber || siteSettings.email ? "gold" : "outline"}
+            variant={
+              siteSettings.whatsappNumber || siteSettings.email
+                ? "gold"
+                : "outline"
+            }
             className="normal-case tracking-normal"
           >
-            {siteSettings.whatsappNumber || siteSettings.email ? "Configurado" : "Pendente"}
+            {siteSettings.whatsappNumber || siteSettings.email
+              ? "Configurado"
+              : "Pendente"}
           </Badge>
         </div>
 
-        <form action="/api/admin/site-settings" method="post" className="space-y-5">
+        <form
+          action="/api/admin/site-settings"
+          method="post"
+          className="space-y-5"
+        >
           <input type="hidden" name="redirect_to" value="/admin/conteudos" />
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -247,8 +265,55 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
             />
           </div>
 
+          <fieldset className="space-y-3 rounded-3xl border border-brand-beige/12 bg-brand-ivory/4 p-4">
+            <legend className="px-2 text-xs uppercase tracking-[0.28em] text-brand-beige/55">
+              Navegação pública
+            </legend>
+
+            <p className="text-sm leading-6 text-brand-ivory/68">
+              Escolha quais páginas aparecem no menu superior e no rodapé. As
+              páginas continuam disponíveis por URL quando estiverem ocultas.
+            </p>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/45 p-4">
+                <input
+                  type="checkbox"
+                  name="show_blog_navigation"
+                  defaultChecked={siteSettings.showBlogNavigation}
+                  className="mt-1 size-4 accent-brand-gold"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-brand-ivory">
+                    Exibir Blog
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-brand-ivory/60">
+                    Mostra o link Blog no cabeçalho e no rodapé.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/45 p-4">
+                <input
+                  type="checkbox"
+                  name="show_areas_navigation"
+                  defaultChecked={siteSettings.showAreasNavigation}
+                  className="mt-1 size-4 accent-brand-gold"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-brand-ivory">
+                    Exibir Áreas atendidas
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-brand-ivory/60">
+                    Mostra o link Áreas atendidas no cabeçalho e no rodapé.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
           <Button type="submit" size="lg">
-            Salvar dados principais
+            Salvar dados e navegação
           </Button>
         </form>
       </Card>
@@ -256,10 +321,13 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
       <Card className="space-y-6 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
+              Página
+            </p>
             <h2 className="font-display text-3xl text-brand-ivory">Sobre</h2>
             <p className="max-w-2xl text-sm leading-6 text-brand-ivory/68">
-              Texto institucional e os três blocos de direção exibidos na página pública.
+              Texto institucional e os três blocos de direção exibidos na página
+              pública.
             </p>
           </div>
 
@@ -271,14 +339,20 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
           </Badge>
         </div>
 
-        <form action="/api/admin/pages/sobre" method="post" className="space-y-5">
+        <form
+          action="/api/admin/pages/sobre"
+          method="post"
+          className="space-y-5"
+        >
           <input type="hidden" name="redirect_to" value="/admin/conteudos" />
           <input type="hidden" name="page_type" value="institutional" />
           <input type="hidden" name="is_published" value="true" />
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">Título</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
+                Título
+              </p>
               <Input
                 name="title"
                 defaultValue={aboutPage?.title ?? "Sobre a assessoria"}
@@ -316,7 +390,11 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
 
               return (
                 <div key={blockKey} className="space-y-2">
-                  <input type="hidden" name={`block_${index + 1}_key`} value={blockKey} />
+                  <input
+                    type="hidden"
+                    name={`block_${index + 1}_key`}
+                    value={blockKey}
+                  />
                   <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
                     Direção {index + 1}
                   </p>
@@ -325,7 +403,11 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
                     defaultValue={block?.title ?? ""}
                     placeholder={`Direção ${index + 1}`}
                   />
-                  <input type="hidden" name={`block_${index + 1}_content`} value={block?.content ?? ""} />
+                  <input
+                    type="hidden"
+                    name={`block_${index + 1}_content`}
+                    value={block?.content ?? ""}
+                  />
                 </div>
               );
             })}
@@ -346,7 +428,9 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
       <Card className="space-y-6 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
+              Página
+            </p>
             <h2 className="font-display text-3xl text-brand-ivory">Serviços</h2>
             <p className="max-w-2xl text-sm leading-6 text-brand-ivory/68">
               Introdução da página e os cards de serviços exibidos no site.
@@ -361,14 +445,20 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
           </Badge>
         </div>
 
-        <form action="/api/admin/pages/servicos" method="post" className="space-y-5">
+        <form
+          action="/api/admin/pages/servicos"
+          method="post"
+          className="space-y-5"
+        >
           <input type="hidden" name="redirect_to" value="/admin/conteudos" />
           <input type="hidden" name="page_type" value="services" />
           <input type="hidden" name="is_published" value="true" />
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">Título</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
+                Título
+              </p>
               <Input
                 name="title"
                 defaultValue={servicesPage?.title ?? "Serviços essenciais"}
@@ -405,8 +495,15 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
               const block = getBlock(serviceBlocks, blockKey);
 
               return (
-                <div key={blockKey} className="space-y-3 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4">
-                  <input type="hidden" name={`block_${index + 1}_key`} value={blockKey} />
+                <div
+                  key={blockKey}
+                  className="space-y-3 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"
+                >
+                  <input
+                    type="hidden"
+                    name={`block_${index + 1}_key`}
+                    value={blockKey}
+                  />
                   <div className="space-y-2">
                     <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
                       Serviço {index + 1}
@@ -444,7 +541,8 @@ export default async function AdminContentPage({ searchParams }: AdminContentPag
         {pages.length ? (
           pages.map((page) => {
             const isSeoComplete =
-              Boolean(page.seo_title?.trim()) && Boolean(page.seo_description?.trim());
+              Boolean(page.seo_title?.trim()) &&
+              Boolean(page.seo_description?.trim());
 
             return (
               <Card key={page.id} className="p-5">

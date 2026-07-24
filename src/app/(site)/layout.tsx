@@ -10,7 +10,11 @@ import {
   buildWebsiteStructuredData,
 } from "@/lib/structured-data";
 
-export default async function SiteLayout({ children }: { children: ReactNode }) {
+export default async function SiteLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const siteSettings = await getPublicSiteSettings();
 
   return (
@@ -21,7 +25,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           buildWebsiteStructuredData(siteSettings),
         ]}
       />
-      <SiteHeader />
+      <SiteHeader
+        showBlogNavigation={siteSettings.showBlogNavigation}
+        showAreasNavigation={siteSettings.showAreasNavigation}
+      />
       <main className="flex-1">{children}</main>
       <SiteFooter siteSettings={siteSettings} />
       <WhatsAppBubble whatsappNumber={siteSettings.whatsappNumber} />
