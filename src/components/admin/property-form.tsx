@@ -24,6 +24,9 @@ export type PropertyFormValues = {
   contactWhatsapp?: string;
   featured?: boolean;
   isPublished?: boolean;
+  // Mantidos para preservar os dados existentes; não são exibidos no painel.
+  seoTitle?: string;
+  seoDescription?: string;
   description?: string;
 };
 
