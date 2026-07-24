@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -28,12 +28,6 @@ export default async function BlogPage() {
           eyebrow="Blog"
           title="Conteúdos que ajudam o cliente e fortalecem a busca local"
           description="Informações para tomar decisões imobiliárias com mais clareza, segurança e conhecimento do mercado."
-          action={
-            <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
-              Propor pauta
-              <ArrowRight className="size-4" />
-            </Link>
-          }
         />
 
         {posts.length ? (
