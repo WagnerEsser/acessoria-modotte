@@ -142,7 +142,7 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
 
         <Link
           href="/admin/login"
-          className="inline-flex items-center justify-center gap-2 self-center rounded-full border border-brand-beige/10 bg-brand-ivory/4 px-3 py-1.5 text-[0.62rem] uppercase tracking-[0.24em] text-brand-ivory/52 transition hover:border-brand-gold/30 hover:bg-brand-ivory/6 hover:text-brand-gold lg:self-auto"
+          className="inline-flex items-center justify-center gap-2 self-center rounded-full border border-brand-beige/10 bg-brand-ivory/4 px-3 py-1.5 text-[0.62rem] uppercase tracking-[0.24em] text-brand-ivory/52 transition hover:border-brand-gold/30 hover:bg-brand-ivory/6 hover:text-brand-gold lg:mr-20 lg:self-auto"
         >
           <LockKeyhole className="size-3.5" />
           Painel
