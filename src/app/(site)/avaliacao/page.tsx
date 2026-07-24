@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -168,10 +168,10 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
               <TurnstileWidget />
 
               <div className="flex flex-wrap gap-3">
-                <Button type="submit" size="lg">
+                <SubmitButton size="lg" pendingLabel="Enviando pedido...">
                   Enviar pedido
                   <ArrowRight className="size-4" />
-                </Button>
+                </SubmitButton>
                 <Link href="/contato" className={buttonVariants({ variant: "outline" })}>
                   Falar com a assessoria
                 </Link>

@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -166,10 +166,10 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               <TurnstileWidget />
 
               <div className="flex flex-wrap items-center gap-3">
-                <Button type="submit" size="lg">
+                <SubmitButton size="lg" pendingLabel="Enviando mensagem...">
                   Enviar mensagem
                   <ArrowRight className="size-4" />
-                </Button>
+                </SubmitButton>
                 <Link href="/quero-vender" className={buttonVariants({ variant: "outline" })}>
                   Quero vender
                 </Link>

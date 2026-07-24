@@ -6,9 +6,10 @@ import { ArrowRight, Building2, Store } from "lucide-react";
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { brand } from "@/lib/brand";
 import { getPropertyCities, getPropertyTypes } from "@/lib/property-catalog";
 import {
@@ -160,10 +161,14 @@ export default async function HomePage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button type="submit" size="lg" className="w-full sm:w-auto">
+                  <SubmitButton
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    pendingLabel="Buscando imóveis..."
+                  >
                     Buscar imóveis
                     <ArrowRight className="size-4" />
-                  </Button>
+                  </SubmitButton>
                 </div>
               </form>
             </Card>

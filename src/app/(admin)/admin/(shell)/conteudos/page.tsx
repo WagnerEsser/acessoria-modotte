@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -312,9 +312,9 @@ export default async function AdminContentPage({
             </div>
           </fieldset>
 
-          <Button type="submit" size="lg">
+          <SubmitButton size="lg" pendingLabel="Salvando configurações...">
             Salvar dados e navegação
-          </Button>
+          </SubmitButton>
         </form>
       </Card>
 
@@ -413,9 +413,9 @@ export default async function AdminContentPage({
             })}
           </div>
 
-          <Button type="submit" size="lg">
+          <SubmitButton size="lg" pendingLabel="Salvando página...">
             Salvar página Sobre
-          </Button>
+          </SubmitButton>
         </form>
 
         {aboutPage?.updated_at ? (
@@ -525,9 +525,9 @@ export default async function AdminContentPage({
             })}
           </div>
 
-          <Button type="submit" size="lg">
+          <SubmitButton size="lg" pendingLabel="Salvando página...">
             Salvar página Serviços
-          </Button>
+          </SubmitButton>
         </form>
 
         {servicesPage?.updated_at ? (

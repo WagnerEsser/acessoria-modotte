@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowRight, LockKeyhole } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getLoginErrorMessage, sanitizeAdminRedirect } from "@/lib/auth";
@@ -99,10 +100,14 @@ export default async function AdminLoginPage({
             <p className="text-sm text-brand-ivory/56">
               {brand.name} - {brand.subtitle}
             </p>
-            <Button type="submit" size="lg" className="w-full cursor-pointer sm:w-auto">
+            <SubmitButton
+              size="lg"
+              className="w-full cursor-pointer sm:w-auto"
+              pendingLabel="Entrando..."
+            >
               Entrar
               <ArrowRight className="size-4" />
-            </Button>
+            </SubmitButton>
           </div>
         </form>
       </Card>

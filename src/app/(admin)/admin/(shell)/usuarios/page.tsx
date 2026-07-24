@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -123,9 +123,9 @@ export default async function AdminUsersPage({
           </label>
 
           <div className="md:col-span-2">
-            <Button type="submit" className="cursor-pointer">
+            <SubmitButton className="cursor-pointer" pendingLabel="Criando usuário...">
               Criar usuario
-            </Button>
+            </SubmitButton>
           </div>
         </form>
       </Card>

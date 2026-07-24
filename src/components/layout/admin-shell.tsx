@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { BrandMark } from "@/components/layout/brand-mark";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { adminNavigation } from "@/lib/navigation";
 
 const iconMap = {
@@ -59,10 +59,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="gold">Ambiente protegido</Badge>
               <form action="/api/auth/sign-out" method="post">
-                <Button type="submit" variant="outline" size="sm">
+                <SubmitButton
+                  variant="outline"
+                  size="sm"
+                  pendingLabel="Saindo..."
+                >
                   Sair
                   <LogOut className="size-4" />
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </div>

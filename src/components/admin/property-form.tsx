@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 
 export type PropertyFormValues = {
@@ -209,9 +209,9 @@ export function PropertyForm({
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" size="lg">
+        <SubmitButton size="lg" pendingLabel="Salvando imóvel...">
           {submitLabel}
-        </Button>
+        </SubmitButton>
       </div>
     </form>
   );
