@@ -6,21 +6,20 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getPublicNeighborhoods } from "@/lib/public-content";
+import { getPublicNeighborhoods, getPublicPageBySlug, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 import { buildBreadcrumbStructuredData } from "@/lib/structured-data";
 
-export const metadata = buildMetadata({
-  title: "Áreas atendidas",
-  description:
-    "Conheça as cidades e bairros atendidos pela Luana Modotte Assessoria Imobiliária e encontre imóveis por região.",
-  path: "/areas",
-});
-
 export const revalidate = 300;
 
+export async function generateMetadata() {
+  const page = await getPublicPageBySlug("areas");
+  return buildMetadata({ title: page?.seoTitle ?? page?.title ?? "Áreas atendidas", description: page?.seoDescription ?? page?.subtitle ?? "Cidades e bairros atendidos pela assessoria.", path: "/areas" });
+}
+
 export default async function AreasPage() {
-  const neighborhoods = await getPublicNeighborhoods();
+  const [neighborhoods, page] = await Promise.all([getPublicNeighborhoods(), getPublicPageBySlug("areas")]);
+  const paragraphs = splitParagraphs(page?.body);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -35,8 +34,8 @@ export default async function AreasPage() {
         <SectionHeading
           as="h1"
           eyebrow="Atuação local"
-          title="Cidades e bairros atendidos pela assessoria"
-          description="Explore as regiões com imóveis publicados e encontre informações organizadas para sua busca."
+          title={page?.title ?? "Cidades e bairros atendidos pela assessoria"}
+          description={page?.subtitle ?? paragraphs[0] ?? "Explore as regiões com imóveis publicados e encontre informações organizadas para sua busca."}
           action={
             <Link href="/imoveis" className={buttonVariants({ variant: "gold" })}>
               Ver todos os imóveis

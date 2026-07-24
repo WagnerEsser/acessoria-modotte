@@ -6,19 +6,19 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { formatDateBRL } from "@/lib/formatters";
-import { getPublicBlogPosts } from "@/lib/public-content";
+import { getPublicBlogPosts, getPublicPageBySlug, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
-
-export const metadata = buildMetadata({
-  title: "Blog",
-  description: "Conteúdos editoriais e SEO local para a assessoria imobiliária.",
-  path: "/blog",
-});
 
 export const revalidate = 300;
 
+export async function generateMetadata() {
+  const page = await getPublicPageBySlug("blog");
+  return buildMetadata({ title: page?.seoTitle ?? page?.title ?? "Blog", description: page?.seoDescription ?? page?.subtitle ?? "Conteúdos editoriais para a assessoria imobiliária.", path: "/blog" });
+}
+
 export default async function BlogPage() {
-  const posts = await getPublicBlogPosts();
+  const [posts, page] = await Promise.all([getPublicBlogPosts(), getPublicPageBySlug("blog")]);
+  const paragraphs = splitParagraphs(page?.body);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -26,8 +26,8 @@ export default async function BlogPage() {
         <SectionHeading
           as="h1"
           eyebrow="Blog"
-          title="Conteúdos que ajudam o cliente e fortalecem a busca local"
-          description="Informações para tomar decisões imobiliárias com mais clareza, segurança e conhecimento do mercado."
+          title={page?.title ?? "Conteúdos que ajudam o cliente e fortalecem a busca local"}
+          description={page?.subtitle ?? paragraphs[0] ?? "Informações para tomar decisões imobiliárias com mais clareza e segurança."}
         />
 
         {posts.length ? (

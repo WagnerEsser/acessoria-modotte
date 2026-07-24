@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getPublicProperties } from "@/lib/public-content";
+import { getPublicPageBySlug, getPublicProperties, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 import {
   filterProperties,
@@ -40,10 +40,10 @@ export async function generateMetadata({ searchParams }: PropertiesPageProps) {
   );
   const path = !hasFilters && currentPage > 1 ? `/imoveis?pagina=${currentPage}` : "/imoveis";
 
+  const page = await getPublicPageBySlug("imoveis");
   return buildMetadata({
-    title: currentPage > 1 ? `Imóveis - página ${currentPage}` : "Imóveis",
-    description:
-      "Encontre imóveis com atendimento próximo, informações claras e orientação da Luana Modotte Assessoria Imobiliária.",
+    title: currentPage > 1 ? `${page?.title ?? "Imóveis"} - página ${currentPage}` : page?.seoTitle ?? page?.title ?? "Imóveis",
+    description: page?.seoDescription ?? page?.subtitle ?? "Encontre imóveis com atendimento próximo e informações claras.",
     path,
     noIndex: hasFilters,
   });
@@ -84,7 +84,8 @@ function buildPropertiesHref(options: {
 }
 
 export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
-  const properties = await getPublicProperties();
+  const [properties, page] = await Promise.all([getPublicProperties(), getPublicPageBySlug("imoveis")]);
+  const paragraphs = splitParagraphs(page?.body);
   const resolvedSearchParams = await searchParams;
   const activeType = getFirstValue(resolvedSearchParams.tipo);
   const activeCity = getFirstValue(resolvedSearchParams.cidade);
@@ -130,8 +131,8 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         <SectionHeading
           as="h1"
           eyebrow="Catálogo"
-          title="Imóveis selecionados para a assessoria apresentar com clareza"
-          description="Use os filtros para encontrar oportunidades alinhadas à região e ao tipo de imóvel que você procura."
+          title={page?.title ?? "Imóveis selecionados para a assessoria apresentar com clareza"}
+          description={page?.subtitle ?? paragraphs[0] ?? "Use os filtros para encontrar oportunidades alinhadas à região e ao tipo de imóvel que você procura."}
           action={
             <Link href="/contato" className={buttonVariants({ variant: "outline" })}>
               Solicitar atendimento

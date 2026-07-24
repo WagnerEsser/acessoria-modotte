@@ -28,9 +28,9 @@ type UserRecord = {
 
 const errorMessages: Record<string, string> = {
   invalid_input:
-    "Revise os dados. A senha precisa ter 14 caracteres, maiuscula, minuscula, numero e simbolo.",
-  email_in_use: "Ja existe uma conta cadastrada com esse e-mail.",
-  creation_failed: "Nao foi possivel criar o usuario. Tente novamente.",
+    "Revise os dados. A senha precisa ter 14 caracteres, maiúscula, minúscula, número e símbolo.",
+  email_in_use: "Já existe uma conta cadastrada com esse e-mail.",
+  creation_failed: "Não foi possível criar o usuário. Tente novamente.",
 };
 
 export default async function AdminUsersPage({
@@ -59,16 +59,16 @@ export default async function AdminUsersPage({
 
       <Card className="p-6">
         <h2 className="font-display text-2xl text-brand-ivory">
-          Cadastrar novo usuario
+          Cadastrar novo usuário
         </h2>
         <p className="mt-2 text-sm leading-6 text-brand-ivory/68">
-          A nova conta tera o mesmo acesso administrativo ao painel e podera entrar
+          A nova conta terá o mesmo acesso administrativo ao painel e poderá entrar
           imediatamente com o e-mail e a senha informados.
         </p>
 
         {status === "created" ? (
           <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-            Usuario criado e ativado com sucesso.
+            Usuário criado e ativado com sucesso.
           </div>
         ) : null}
 
@@ -124,7 +124,7 @@ export default async function AdminUsersPage({
 
           <div className="md:col-span-2">
             <SubmitButton className="cursor-pointer" pendingLabel="Criando usuário...">
-              Criar usuario
+              Criar usuário
             </SubmitButton>
           </div>
         </form>
@@ -144,7 +144,7 @@ export default async function AdminUsersPage({
               </div>
               <h2 className="mt-4 font-display text-2xl text-brand-ivory">{member.full_name}</h2>
               <p className="mt-2 break-all text-sm text-brand-ivory/72">
-                {member.email ?? "E-mail nao informado"}
+                {member.email ?? "E-mail não informado"}
               </p>
               <p className="mt-2 text-sm text-brand-ivory/68">
                 Atualizado {formatDateTimeBRL(member.updated_at)}

@@ -81,10 +81,7 @@ export default async function ServicesPage() {
           {page?.blocks.length ? (
             page.blocks.map((block) => (
               <Card key={block.id} className="p-6">
-                <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
-                  {block.blockKey}
-                </p>
-                <h3 className="mt-5 font-display text-2xl font-semibold text-brand-ivory">
+                <h3 className="font-display text-2xl font-semibold text-brand-ivory">
                   {block.title ?? "Bloco"}
                 </h3>
                 {block.content ? (

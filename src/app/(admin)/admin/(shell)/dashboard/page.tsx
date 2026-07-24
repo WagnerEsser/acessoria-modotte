@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, Inbox, Layers3, Sparkles } from "lucide-react";
+import { ArrowRight, Building2, Inbox, Layers3 } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -51,8 +51,6 @@ type DashboardPage = {
   slug: string;
   page_type: string;
   is_published: boolean;
-  seo_title: string | null;
-  seo_description: string | null;
   updated_at: string;
 };
 
@@ -94,7 +92,7 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("pages")
-      .select("id, title, slug, page_type, is_published, seo_title, seo_description, updated_at")
+      .select("id, title, slug, page_type, is_published, updated_at")
       .order("updated_at", { ascending: false }),
     supabase
       .from("page_blocks")
@@ -115,13 +113,6 @@ export default async function DashboardPage() {
   const publishedProperties = properties.filter((property) => property.is_published);
   const todayLeads = leads.filter((lead) => new Date(lead.created_at) >= today);
   const activePageBlocks = pageBlocks.filter((block) => block.is_active);
-  const publishedPages = pages.filter((page) => page.is_published);
-  const seoReadyPages = publishedPages.filter(
-    (page) => Boolean(page.seo_title?.trim()) && Boolean(page.seo_description?.trim())
-  );
-  const seoPercent = publishedPages.length
-    ? Math.round((seoReadyPages.length / publishedPages.length) * 100)
-    : 0;
 
   const quickStats = [
     {
@@ -141,12 +132,6 @@ export default async function DashboardPage() {
       value: String(activePageBlocks.length),
       description: "Conteúdos e seções controlados no banco.",
       icon: <Layers3 className="size-4" />,
-    },
-    {
-      label: "SEO pronto",
-      value: `${seoPercent}%`,
-      description: "Páginas publicadas com title e description.",
-      icon: <Sparkles className="size-4" />,
     },
   ];
 
@@ -190,8 +175,6 @@ export default async function DashboardPage() {
           <div className="mt-6 space-y-4">
             {pages.slice(0, 4).length ? (
               pages.slice(0, 4).map((page) => {
-                const isComplete = Boolean(page.seo_title?.trim()) && Boolean(page.seo_description?.trim());
-
                 return (
                   <div
                     key={page.id}
@@ -209,9 +192,6 @@ export default async function DashboardPage() {
                       </Badge>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <Badge variant={isComplete ? "gold" : "outline"} className="normal-case tracking-normal">
-                        {isComplete ? "SEO completo" : "SEO pendente"}
-                      </Badge>
                       <span className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
                         Atualizado {formatDateTimeBRL(page.updated_at)}
                       </span>

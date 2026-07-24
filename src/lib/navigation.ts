@@ -21,6 +21,8 @@ export const publicNavigation: NavigationItem[] = [
 export type PublicNavigationVisibility = {
   showBlogNavigation: boolean;
   showAreasNavigation: boolean;
+  showServicesNavigation?: boolean;
+  showSellNavigation?: boolean;
 };
 
 export function getVisiblePublicNavigation(
@@ -35,6 +37,9 @@ export function getVisiblePublicNavigation(
       return visibility.showAreasNavigation;
     }
 
+    if (item.href === "/servicos") return visibility.showServicesNavigation !== false;
+    if (item.href === "/quero-vender") return visibility.showSellNavigation !== false;
+
     return true;
   });
 }
@@ -44,6 +49,5 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/imoveis", label: "Imóveis", icon: "building-2" },
   { href: "/admin/leads", label: "Leads", icon: "inbox" },
   { href: "/admin/conteudos", label: "Conteúdos", icon: "file-text" },
-  { href: "/admin/seo", label: "SEO", icon: "sparkles" },
   { href: "/admin/usuarios", label: "Usuários", icon: "users" },
 ];

@@ -52,14 +52,7 @@ export function SiteHeader(navigationVisibility: PublicNavigationVisibility) {
             </nav>
           </div>
 
-          <div className="hidden items-center gap-3 lg:ml-auto lg:flex">
-            <Link
-              href="/quero-vender"
-              className={buttonVariants({ size: "sm" })}
-            >
-              Quero vender
-            </Link>
-          </div>
+          {navigationVisibility.showSellNavigation !== false ? <div className="hidden items-center gap-3 lg:ml-auto lg:flex"><Link href="/quero-vender" className={buttonVariants({ size: "sm" })}>Quero vender</Link></div> : null}
 
           <button
             type="button"
@@ -101,12 +94,7 @@ export function SiteHeader(navigationVisibility: PublicNavigationVisibility) {
             </nav>
 
             <div className="mt-4 grid gap-3 border-t border-brand-beige/10 pt-4">
-              <Link
-                href="/quero-vender"
-                className={buttonVariants({ size: "sm" })}
-              >
-                Quero vender
-              </Link>
+              {navigationVisibility.showSellNavigation !== false ? <Link href="/quero-vender" className={buttonVariants({ size: "sm" })}>Quero vender</Link> : null}
               <Link
                 href="/contato"
                 className={buttonVariants({ variant: "outline", size: "sm" })}

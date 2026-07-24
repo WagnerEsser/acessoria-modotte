@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import {
@@ -21,6 +22,11 @@ const EDITABLE_PAGE_DEFAULTS = {
     pageType: "services",
     sortOrder: 20,
   },
+  "quero-vender": { title: "Quero vender seu imóvel", pageType: "landing", sortOrder: 30 },
+  contato: { title: "Fale com a assessoria", pageType: "landing", sortOrder: 40 },
+  imoveis: { title: "Imóveis", pageType: "landing", sortOrder: 50 },
+  blog: { title: "Blog", pageType: "landing", sortOrder: 60 },
+  areas: { title: "Áreas atendidas", pageType: "landing", sortOrder: 70 },
 } as const;
 
 const pageInputSchema = z.object({
@@ -82,7 +88,7 @@ function parseBlockPayload(formData: FormData) {
 
   const candidates = Array.from(indexes)
     .sort((left, right) => left - right)
-    .slice(0, 20)
+    .slice(0, 50)
     .map((index) => {
       const blockKey = readFormValue(formData, `block_${index}_key`);
       const title = toNullableText(readFormValue(formData, `block_${index}_title`));
@@ -98,7 +104,7 @@ function parseBlockPayload(formData: FormData) {
     })
     .filter((block) => block.block_key);
 
-  return z.array(pageBlockSchema).max(20).safeParse(candidates);
+  return z.array(pageBlockSchema.extend({ sort_order: z.number().int().min(0).max(49) })).max(50).safeParse(candidates);
 }
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
@@ -180,6 +186,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   }
 
   const blocks = blocksResult.data;
+  const profileTitle = toNullableText(readFormValue(formData, "profile_title"))?.slice(0, 160) ?? null;
+  const profileDescription = toNullableText(readFormValue(formData, "profile_description"))?.slice(0, 5000) ?? null;
+  const submittedBlocks = slug === "sobre"
+    ? [{ block_key: "about-profile", title: profileTitle, content: profileDescription, sort_order: 0, is_active: Boolean(profileTitle || profileDescription) }, ...blocks.map((block, index) => ({ ...block, sort_order: index + 1 }))]
+    : blocks;
 
   const { data: savedPage, error: pageError } = await supabase
     .from("pages")
@@ -211,9 +222,15 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return applyNoStoreHeaders(applyCookies(response));
   }
 
-  if (blocks.length) {
-    const { error: blocksError } = await supabase.from("page_blocks").upsert(
-      blocks.map((block) => ({
+  const { error: clearBlocksError } = await supabase.from("page_blocks").delete().eq("page_id", savedPage.id);
+  if (clearBlocksError) {
+    const response = NextResponse.redirect(new URL(`${redirectTo}?error=save_failed`, requestOrigin), 303);
+    return applyNoStoreHeaders(applyCookies(response));
+  }
+
+  if (submittedBlocks.length) {
+    const { error: blocksError } = await supabase.from("page_blocks").insert(
+      submittedBlocks.map((block) => ({
         page_id: savedPage.id,
         block_key: block.block_key,
         title: block.title,
@@ -222,7 +239,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         sort_order: block.sort_order,
         is_active: block.is_active,
       })),
-      { onConflict: "page_id,block_key" }
     );
 
     if (blocksError) {
@@ -234,6 +250,14 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return applyNoStoreHeaders(applyCookies(response));
     }
   }
+
+  if (slug === "blog" || slug === "areas") {
+    await supabase.from("site_settings").update({
+      ...(slug === "blog" ? { show_blog_navigation: pageInput.data.isPublished } : {}),
+      ...(slug === "areas" ? { show_areas_navigation: pageInput.data.isPublished } : {}),
+    }).eq("singleton_key", "main");
+  }
+  for (const path of ["/", "/sobre", "/servicos", "/quero-vender", "/contato", "/imoveis", "/blog", "/areas", "/sitemap.xml"]) revalidatePath(path);
 
   const response = NextResponse.redirect(
     new URL(`${redirectTo}?status=updated`, requestOrigin),

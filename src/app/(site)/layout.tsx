@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { WhatsAppBubble } from "@/components/layout/whatsapp-bubble";
 import { JsonLd } from "@/components/seo/json-ld";
-import { getPublicSiteSettings } from "@/lib/public-content";
+import { getPublicPageBySlug, getPublicSiteSettings } from "@/lib/public-content";
 import {
   buildOrganizationStructuredData,
   buildWebsiteStructuredData,
@@ -15,7 +15,11 @@ export default async function SiteLayout({
 }: {
   children: ReactNode;
 }) {
-  const siteSettings = await getPublicSiteSettings();
+  const [siteSettings, servicesPage, sellPage] = await Promise.all([
+    getPublicSiteSettings(),
+    getPublicPageBySlug("servicos"),
+    getPublicPageBySlug("quero-vender"),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -28,6 +32,8 @@ export default async function SiteLayout({
       <SiteHeader
         showBlogNavigation={siteSettings.showBlogNavigation}
         showAreasNavigation={siteSettings.showAreasNavigation}
+        showServicesNavigation={servicesPage !== null}
+        showSellNavigation={sellPage !== null}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter siteSettings={siteSettings} />

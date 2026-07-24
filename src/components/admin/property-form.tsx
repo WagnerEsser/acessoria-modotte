@@ -24,8 +24,6 @@ export type PropertyFormValues = {
   contactWhatsapp?: string;
   featured?: boolean;
   isPublished?: boolean;
-  seoTitle?: string;
-  seoDescription?: string;
   description?: string;
 };
 
@@ -184,19 +182,6 @@ export function PropertyForm({
             </span>
           </span>
         </label>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Input
-          name="seo_title"
-          placeholder="SEO title"
-          defaultValue={getFieldValue(values?.seoTitle)}
-        />
-        <Input
-          name="seo_description"
-          placeholder="SEO description"
-          defaultValue={getFieldValue(values?.seoDescription)}
-        />
       </div>
 
       <div className="space-y-2">

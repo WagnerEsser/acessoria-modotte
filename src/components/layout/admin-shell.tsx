@@ -68,7 +68,7 @@ export function AdminShell({ children, currentUser }: AdminShellProps) {
                 Luana Modotte
               </p>
               <h1 className="font-display text-2xl font-semibold text-brand-ivory">
-                Operacao central da assessoria
+                Operação central da assessoria
               </h1>
             </div>
             <div className="flex flex-wrap items-center gap-3">
