@@ -75,6 +75,32 @@ Para parar:
 
 As migrações ficam em `supabase/migrations/` e os seeds em `supabase/seeds/`.
 
+## Acessar Banco Pelo DBeaver
+
+Depois de subir o backend local com `make backend` ou `.\scripts\supabase\start.ps1`, crie uma nova conexão PostgreSQL no DBeaver com:
+
+```text
+Host: localhost
+Porta: 5432
+Database: postgres
+Usuário: postgres.local
+Senha: valor de POSTGRES_PASSWORD no arquivo .env
+```
+
+Neste projeto, a porta local `5432` passa pelo pooler do Supabase. Por isso o usuário precisa incluir o tenant local no final: `postgres.local`. Se usar apenas `postgres`, o DBeaver pode exibir o erro `no tenant identifier provided`.
+
+Você também pode testar pela porta `6543`, que é o pooler em modo transacional:
+
+```text
+Host: localhost
+Porta: 6543
+Database: postgres
+Usuário: postgres.local
+Senha: valor de POSTGRES_PASSWORD no arquivo .env
+```
+
+Se você alterar `POSTGRES_DB`, `POSTGRES_PORT`, `POOLER_PROXY_PORT_TRANSACTION`, `POOLER_TENANT_ID` ou `POSTGRES_PASSWORD` no `.env`, use os mesmos valores na conexão do DBeaver. O formato do usuário é `postgres.<POOLER_TENANT_ID>`.
+
 ## Scripts
 
 ```powershell
