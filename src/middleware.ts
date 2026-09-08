@@ -9,6 +9,22 @@ import {
   isAdminApiPath,
   resolveAdminRouteAccess,
 } from "@/lib/auth";
+import { getCurrentAdminRole } from "@/lib/admin-authorization";
+
+function isSuperadminOnlyPath(pathname: string) {
+  return ["/admin/conteudos", "/admin/usuarios"].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+function addPermissionToast(response: NextResponse) {
+  response.cookies.set(
+    "admin-toast",
+    encodeURIComponent(JSON.stringify({ type: "error", message: "Você não tem permissão para acessar esta página." })),
+    { httpOnly: false, maxAge: 10, path: "/", sameSite: "lax", secure: process.env.NODE_ENV === "production" },
+  );
+  return response;
+}
 
 function protectAdminResponse(response: NextResponse): NextResponse {
   return applySensitiveResponseHeaders(applyNoStoreHeaders(response));
@@ -16,6 +32,7 @@ function protectAdminResponse(response: NextResponse): NextResponse {
 
 export async function middleware(request: NextRequest) {
   const {
+    supabase,
     applyCookies,
     isAuthenticated,
     isAuthorized,
@@ -41,6 +58,16 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.searchParams,
     isAuthorized
   );
+
+  if (
+    decision.kind === "allow" &&
+    isAuthorized &&
+    isSuperadminOnlyPath(request.nextUrl.pathname) &&
+    (await getCurrentAdminRole(supabase)) !== "superadmin"
+  ) {
+    const response = NextResponse.redirect(new URL("/admin/dashboard", requestOrigin), 307);
+    return protectAdminResponse(addPermissionToast(applyCookies(response)));
+  }
 
   if (decision.kind === "allow") {
     return protectAdminResponse(applyCookies(NextResponse.next()));

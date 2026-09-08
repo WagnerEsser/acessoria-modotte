@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckCircle2, Info, TriangleAlert, X, XCircle } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 type ToastType = "success" | "error" | "info" | "warning";
 
@@ -26,6 +27,7 @@ const toastStyles: Record<ToastType, { icon: typeof Info; className: string }> =
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const pathname = usePathname();
 
   const removeToast = useCallback((id: number) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
@@ -38,6 +40,33 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [removeToast]);
 
   const value = useMemo(() => ({ showToast }), [showToast]);
+
+  useEffect(() => {
+    const cookie = document.cookie
+      .split("; ")
+      .find((entry) => entry.startsWith("admin-toast="));
+
+    if (!cookie) {
+      return;
+    }
+
+    document.cookie = "admin-toast=; Max-Age=0; path=/";
+
+    try {
+      const toast = JSON.parse(
+        decodeURIComponent(cookie.slice("admin-toast=".length)),
+      ) as Partial<Toast>;
+
+      if (
+        typeof toast.message === "string" &&
+        (toast.type === "success" || toast.type === "error" || toast.type === "info" || toast.type === "warning")
+      ) {
+        showToast(toast.type, toast.message);
+      }
+    } catch {
+      // Ignore malformed flash cookies.
+    }
+  }, [pathname, showToast]);
 
   return (
     <ToastContext.Provider value={value}>
