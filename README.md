@@ -82,7 +82,18 @@ Para parar:
 .\scripts\supabase\stop.ps1
 ```
 
-As migrações ficam em `supabase/migrations/` e os seeds em `supabase/seeds/`.
+Para limpar completamente o ambiente local, incluindo containers, volumes e
+dados do banco:
+
+```powershell
+make dev-reset
+```
+
+Esse comando remove somente os dados do Supabase local deste projeto. Depois,
+execute `make up` para recriar o ambiente do zero.
+
+O schema fica consolidado em `supabase/migrations/0001_initial.sql` e os seeds
+em `supabase/seeds/`.
 
 No Docker Desktop, o grupo do Compose aparece como `luanamodotte-supabase`.
 
@@ -101,9 +112,8 @@ A senha precisa ter entre 14 e 128 caracteres, com maiúscula, minúscula, núme
 Ao executar `make backend` ou `make up`, o projeto:
 
 1. sobe o Supabase local;
-2. aplica a migração local que habilita o papel `superadmin`;
-3. cria ou atualiza o usuário no Supabase Auth;
-4. marca o perfil correspondente em `public.users` como `superadmin` e ativo.
+2. cria ou atualiza o usuário no Supabase Auth;
+3. marca o perfil correspondente em `public.users` como `superadmin` e ativo.
 
 Para reaplicar esse processo sem reiniciar o backend:
 

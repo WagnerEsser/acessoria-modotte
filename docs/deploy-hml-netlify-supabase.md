@@ -56,10 +56,7 @@ Crie um projeto gratuito, preferencialmente na regiao mais proxima da cliente.
 No SQL Editor, execute nesta ordem:
 
 1. `supabase/migrations/0001_initial.sql`;
-2. `supabase/migrations/0002_security_hardening.sql`;
-3. `supabase/migrations/0003_admin_user_management.sql`;
-4. `supabase/migrations/0004_explicit_data_api_grants.sql`;
-5. `supabase/seeds/0001_initial_seed.sql`.
+2. `supabase/seeds/0001_initial_seed.sql`.
 
 Em **Authentication > URL Configuration**:
 
