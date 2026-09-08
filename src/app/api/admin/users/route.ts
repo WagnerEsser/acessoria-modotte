@@ -9,6 +9,7 @@ import {
 } from "@/lib/auth";
 import { readLimitedUrlEncodedForm } from "@/lib/security/request";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { isCurrentSuperAdmin } from "@/lib/admin-authorization";
 
 const userSchema = z.object({
   full_name: z.string().trim().min(2).max(100),
@@ -48,9 +49,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { isAuthorized } = await getAdminRequestContext(request);
+  const { supabase, isAuthorized } = await getAdminRequestContext(request);
 
-  if (!isAuthorized) {
+  if (!isAuthorized || (supabase && !(await isCurrentSuperAdmin(supabase)))) {
     return applyNoStoreHeaders(
       NextResponse.json({ error: "forbidden" }, { status: 403 })
     );

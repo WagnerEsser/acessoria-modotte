@@ -89,6 +89,7 @@ describe("verified admin identity", () => {
       identity: {
         name: "Maria Gestora",
         email: "admin@example.com",
+        role: "admin",
       },
     });
     expect(from).toHaveBeenCalledWith("users");

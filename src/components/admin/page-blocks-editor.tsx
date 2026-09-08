@@ -66,10 +66,11 @@ export function PageBlocksEditor({
   return (
     <div className="space-y-4">
       {blocks.length ? (
-        blocks.map((block, index) => (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {blocks.map((block, index) => (
           <div
             key={`${block.blockKey}-${index}`}
-            className="space-y-3 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"
+            className="flex h-full flex-col space-y-3 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs uppercase tracking-[0.28em] text-brand-beige/55">
@@ -99,7 +100,8 @@ export function PageBlocksEditor({
               placeholder={contentLabel}
             />
           </div>
-        ))
+        ))}
+        </div>
       ) : (
         <p className="rounded-2xl border border-dashed border-brand-beige/15 p-5 text-sm text-brand-ivory/60">
           {emptyLabel}

@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { normalizePhoneDigits } from "@/lib/contact";
+import { isCurrentSuperAdmin } from "@/lib/admin-authorization";
 import {
   readFormBoolean,
   readFormValue,
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
   const { supabase, applyCookies, isAuthorized } =
     await getAdminRequestContext(request);
 
-  if (!isAuthorized) {
+  if (!isAuthorized || !(await isCurrentSuperAdmin(supabase))) {
     const response = NextResponse.redirect(
       new URL(
         buildAdminLoginUrl("/admin/conteudos", "session_expired"),

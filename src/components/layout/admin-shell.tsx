@@ -32,6 +32,10 @@ type AdminShellProps = {
 };
 
 export function AdminShell({ children, currentUser }: AdminShellProps) {
+  const visibleNavigation = adminNavigation.filter((item) =>
+    currentUser.role === "superadmin" ||
+    !["/admin/conteudos", "/admin/usuarios"].includes(item.href),
+  );
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] text-brand-ivory">
       <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
@@ -44,7 +48,7 @@ export function AdminShell({ children, currentUser }: AdminShellProps) {
           </div>
 
           <nav className="mt-8 space-y-2">
-            {adminNavigation.map((item) => {
+            {visibleNavigation.map((item) => {
               const Icon = iconMap[item.icon as keyof typeof iconMap];
 
               return (
@@ -85,7 +89,6 @@ export function AdminShell({ children, currentUser }: AdminShellProps) {
                   </span>
                 </span>
               </div>
-              <Badge variant="gold">Ambiente protegido</Badge>
               <form action="/api/auth/sign-out" method="post">
                 <SubmitButton
                   variant="outline"

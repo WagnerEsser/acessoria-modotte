@@ -10,6 +10,7 @@ import {
   getRequestOrigin,
 } from "@/lib/auth";
 import { readFormBoolean, readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
+import { isCurrentSuperAdmin } from "@/lib/admin-authorization";
 
 const EDITABLE_PAGE_DEFAULTS = {
   sobre: {
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const { supabase, applyCookies, isAuthorized } =
     await getAdminRequestContext(request);
 
-  if (!isAuthorized) {
+  if (!isAuthorized || !(await isCurrentSuperAdmin(supabase))) {
     const response = NextResponse.redirect(
       new URL(buildAdminLoginUrl("/admin/conteudos", "session_expired"), requestOrigin),
       303

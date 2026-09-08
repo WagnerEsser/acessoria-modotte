@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const settingsMocks = vi.hoisted(() => ({
   getAdminRequestContext: vi.fn(),
   maybeSingle: vi.fn(),
+  roleMaybeSingle: vi.fn(),
   upsert: vi.fn(),
   revalidatePath: vi.fn(),
 }));
@@ -25,10 +26,19 @@ import { POST } from "@/app/api/admin/site-settings/route";
 
 function createSupabaseMock() {
   return {
-    from: () => ({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "superadmin-user" } },
+        error: null,
+      }),
+    },
+    from: (table: string) => ({
       select: () => ({
         eq: () => ({
-          maybeSingle: settingsMocks.maybeSingle,
+          maybeSingle:
+            table === "users"
+              ? settingsMocks.roleMaybeSingle
+              : settingsMocks.maybeSingle,
         }),
       }),
       upsert: settingsMocks.upsert,
@@ -69,6 +79,10 @@ describe("site settings navigation visibility", () => {
         social_links: {},
         opening_hours: [],
       },
+      error: null,
+    });
+    settingsMocks.roleMaybeSingle.mockResolvedValue({
+      data: { role: "superadmin", is_active: true },
       error: null,
     });
     settingsMocks.upsert.mockResolvedValue({ error: null });

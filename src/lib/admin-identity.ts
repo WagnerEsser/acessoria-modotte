@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AdminRole } from "@/lib/admin-authorization";
 
 export type AdminIdentity = {
   name: string;
   email: string;
+  role?: AdminRole;
 };
 
 export type AdminIdentityResult =
@@ -13,7 +15,7 @@ export type AdminIdentityResult =
 type AdminProfile = {
   full_name: string;
   email: string | null;
-  role: string;
+  role: AdminRole;
   is_active: boolean;
 };
 
@@ -39,7 +41,7 @@ export async function getVerifiedAdminIdentity(
   if (
     profileError ||
     !profile ||
-    profile.role !== "admin" ||
+    !["admin", "superadmin"].includes(profile.role) ||
     !profile.is_active
   ) {
     return { status: "unauthorized" };
@@ -51,6 +53,7 @@ export async function getVerifiedAdminIdentity(
       name: profile.full_name.trim() || "Administrador",
       email:
         user.email?.trim() || profile.email?.trim() || "E-mail não informado",
+      role: profile.role,
     },
   };
 }

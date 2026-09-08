@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { redirect } from "next/navigation";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { formatDateTimeBRL } from "@/lib/formatters";
 import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
+import { getVerifiedAdminIdentity } from "@/lib/admin-identity";
 
 export const metadata = buildMetadata({
   title: "Usuários",
@@ -21,7 +23,7 @@ type UserRecord = {
   auth_user_id: string;
   full_name: string;
   email: string | null;
-  role: "admin" | "editor";
+  role: "superadmin" | "admin" | "editor";
   is_active: boolean;
   updated_at: string;
 };
@@ -31,6 +33,11 @@ const errorMessages: Record<string, string> = {
     "Revise os dados. A senha precisa ter 14 caracteres, maiúscula, minúscula, número e símbolo.",
   email_in_use: "Já existe uma conta cadastrada com esse e-mail.",
   creation_failed: "Não foi possível criar o usuário. Tente novamente.",
+  updated: "Usuário atualizado com sucesso.",
+  deleted: "Usuário excluído com sucesso.",
+  operation_failed: "Não foi possível concluir a operação.",
+  protected_user: "A conta principal não pode ser alterada.",
+  not_found: "Usuário não encontrado.",
 };
 
 export default async function AdminUsersPage({
@@ -42,6 +49,8 @@ export default async function AdminUsersPage({
   const status = Array.isArray(params.status) ? params.status[0] : params.status;
   const error = Array.isArray(params.error) ? params.error[0] : params.error;
   const supabase = await createSupabaseRscClient();
+  const identity = await getVerifiedAdminIdentity(supabase);
+  if (identity.status !== "authenticated" || identity.identity.role !== "superadmin") redirect("/admin/dashboard");
   const { data } = await supabase
     .from("users")
     .select("id, auth_user_id, full_name, email, role, is_active, updated_at")
@@ -69,6 +78,12 @@ export default async function AdminUsersPage({
         {status === "created" ? (
           <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
             Usuário criado e ativado com sucesso.
+          </div>
+        ) : null}
+
+        {status === "updated" || status === "deleted" ? (
+          <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+            {errorMessages[status]}
           </div>
         ) : null}
 
@@ -138,9 +153,16 @@ export default async function AdminUsersPage({
                 <Badge variant="outline" className="w-fit normal-case tracking-normal">
                   {member.role}
                 </Badge>
-                <Badge variant={member.is_active ? "gold" : "outline"} className="w-fit normal-case tracking-normal">
-                  {member.is_active ? "Ativo" : "Inativo"}
-                </Badge>
+                {member.role !== "superadmin" ? (
+                  <form action={`/api/admin/users/${member.id}`} method="post" className="flex items-center gap-2">
+                    <input type="hidden" name="action" value="toggle_active" />
+                    <label className="relative inline-flex cursor-pointer items-center" title={member.is_active ? "Desativar acesso" : "Ativar acesso"}>
+                      <input name="is_active" type="checkbox" className="peer sr-only" defaultChecked={member.is_active} onChange={(event) => event.currentTarget.form?.requestSubmit()} />
+                      <span className="h-6 w-11 rounded-full bg-brand-ivory/20 transition peer-checked:bg-brand-gold/80 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-gold/70 after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
+                    </label>
+                    <span className="text-xs text-brand-ivory/65">{member.is_active ? "Ativo" : "Inativo"}</span>
+                  </form>
+                ) : <Badge variant="gold" className="w-fit normal-case tracking-normal">Superadmin</Badge>}
               </div>
               <h2 className="mt-4 font-display text-2xl text-brand-ivory">{member.full_name}</h2>
               <p className="mt-2 break-all text-sm text-brand-ivory/72">
@@ -152,6 +174,19 @@ export default async function AdminUsersPage({
               <p className="mt-3 break-all text-xs uppercase tracking-[0.22em] text-brand-beige/55">
                 {member.auth_user_id}
               </p>
+              {member.role !== "superadmin" ? (
+                <div className="mt-5 space-y-3 border-t border-brand-beige/10 pt-4">
+                  <form action={`/api/admin/users/${member.id}`} method="post" className="space-y-3">
+                    <input type="hidden" name="action" value="update" />
+                    <Input name="full_name" defaultValue={member.full_name} aria-label="Nome" required />
+                    <Input name="email" type="email" defaultValue={member.email ?? ""} aria-label="E-mail" required />
+                    <Input name="password" type="password" placeholder="Nova senha (opcional)" minLength={14} autoComplete="new-password" />
+                    <label className="flex items-center gap-2 text-sm text-brand-ivory/70"><input name="is_active" type="checkbox" defaultChecked={member.is_active} className="size-4 accent-brand-gold" /> Usuário ativo</label>
+                    <SubmitButton size="sm" pendingLabel="Salvando...">Salvar alterações</SubmitButton>
+                  </form>
+                  <form action={`/api/admin/users/${member.id}`} method="post"><input type="hidden" name="action" value="delete" /><SubmitButton size="sm" variant="outline" pendingLabel="Excluindo...">Excluir usuário</SubmitButton></form>
+                </div>
+              ) : null}
             </Card>
           ))
         ) : (
