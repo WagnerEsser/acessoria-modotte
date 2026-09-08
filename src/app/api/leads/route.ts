@@ -17,8 +17,28 @@ import { createSupabaseServiceClient } from "@/lib/supabase/service";
 function redirectWithStatus(
   request: NextRequest,
   redirectTo: string,
-  status: "submitted=1" | `error=${string}`
+  status: "submitted=1" | `error=${string}`,
+  fieldErrors: Record<string, string> = {},
 ) {
+  if (request.headers.get("accept")?.includes("application/json")) {
+    const messages: Record<string, string> = {
+      "submitted=1": "Mensagem enviada com sucesso. A equipe vai retornar em breve.",
+      "error=invalid_data": "Revise os campos do formulário.",
+      "error=configuration": "Não foi possível processar o formulário agora.",
+      "error=rate_limited": "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+      "error=verification_failed": "Não foi possível confirmar o envio. Tente novamente.",
+      "error=save_failed": "Não foi possível enviar o formulário. Tente novamente.",
+    };
+    const isError = status.startsWith("error=");
+
+    return applyNoStoreHeaders(
+      NextResponse.json(
+        { status: isError ? "error" : "success", message: messages[status], fieldErrors },
+        { status: isError ? 400 : 200 },
+      ),
+    );
+  }
+
   const separator = redirectTo.includes("?") ? "&" : "?";
   const response = NextResponse.redirect(
     new URL(`${redirectTo}${separator}${status}`, getTrustedRedirectOrigin(request)),
@@ -65,7 +85,21 @@ export async function POST(request: NextRequest) {
   const parsed = parseLeadSubmission(params);
 
   if (!parsed.success) {
-    return redirectWithStatus(request, redirectTo, "error=invalid_data");
+    const fieldNames: Record<string, string> = {
+      name: "name",
+      email: "email",
+      phone: "phone",
+      interestType: "interest_type",
+      propertyContext: "property_context",
+      message: "message",
+    };
+    const fieldErrors = Object.fromEntries(
+      parsed.error.issues
+        .filter((issue) => typeof issue.path[0] === "string")
+        .map((issue) => [fieldNames[String(issue.path[0])] ?? String(issue.path[0]), "Revise este campo."]),
+    );
+
+    return redirectWithStatus(request, redirectTo, "error=invalid_data", fieldErrors);
   }
 
   if (parsed.data.website) {

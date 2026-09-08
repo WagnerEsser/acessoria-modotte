@@ -17,6 +17,14 @@ export async function POST(request: NextRequest) {
   const { supabase, applyCookies } = createSupabaseServerContext(request);
   await supabase.auth.signOut({ scope: "local" });
 
+  if (request.headers.get("accept")?.includes("application/json")) {
+    return applyNoStoreHeaders(
+      applyCookies(
+        NextResponse.json({ status: "success", message: "Você saiu do painel.", redirect: "/admin/login" }),
+      ),
+    );
+  }
+
   const response = NextResponse.redirect(new URL("/admin/login", getRequestOrigin(request)), 303);
 
   return applyNoStoreHeaders(applyCookies(response));

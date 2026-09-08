@@ -111,6 +111,7 @@ function parseBlockPayload(formData: FormData) {
 export async function POST(request: NextRequest, { params }: RouteContext) {
   const { slug } = await params;
   const requestOrigin = getRequestOrigin(request);
+  const wantsJson = request.headers.get("accept")?.includes("application/json") ?? false;
 
   const requestRejection = getAdminFormRequestRejection(request);
 
@@ -127,6 +128,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     await getAdminRequestContext(request);
 
   if (!isAuthorized || !(await isCurrentSuperAdmin(supabase))) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Sua sessão expirou. Entre novamente." }, { status: 401 }));
+    }
     const response = NextResponse.redirect(
       new URL(buildAdminLoginUrl("/admin/conteudos", "session_expired"), requestOrigin),
       303
@@ -142,6 +146,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   );
 
   if (!isEditablePageSlug(slug)) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Página não encontrada." }, { status: 404 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=not_found`, requestOrigin),
       303
@@ -178,6 +185,35 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const blocksResult = parseBlockPayload(formData);
 
   if (!pageInput.success || !blocksResult.success) {
+    if (wantsJson) {
+      const fieldErrors: Record<string, string> = {};
+      const pageFieldNames: Record<string, string> = {
+        title: "title",
+        subtitle: "subtitle",
+        body: "body",
+        pageType: "page_type",
+        seoTitle: "seo_title",
+        seoDescription: "seo_description",
+      };
+
+      if (!pageInput.success) {
+        for (const issue of pageInput.error.issues) {
+          const field = pageFieldNames[String(issue.path[0])];
+          if (field && !fieldErrors[field]) fieldErrors[field] = "Revise este campo.";
+        }
+      }
+
+      if (!blocksResult.success) {
+        for (const issue of blocksResult.error.issues) {
+          const [index, field] = issue.path;
+          if (typeof index === "number" && typeof field === "string") {
+            fieldErrors[`block_${index}_${field}`] = "Revise este campo.";
+          }
+        }
+      }
+
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Revise os campos antes de salvar.", fieldErrors }, { status: 400 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
       303
@@ -215,6 +251,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     .single();
 
     if (pageError || !savedPage) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Não foi possível salvar o conteúdo." }, { status: 500 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=save_failed`, requestOrigin),
       303
@@ -225,6 +264,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
   const { error: clearBlocksError } = await supabase.from("page_blocks").delete().eq("page_id", savedPage.id);
   if (clearBlocksError) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Não foi possível salvar os blocos de conteúdo." }, { status: 500 }));
+    }
     const response = NextResponse.redirect(new URL(`${redirectTo}?error=save_failed`, requestOrigin), 303);
     return applyNoStoreHeaders(applyCookies(response));
   }
@@ -243,6 +285,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     );
 
     if (blocksError) {
+      if (wantsJson) {
+        return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Não foi possível salvar os blocos de conteúdo." }, { status: 500 }));
+      }
       const response = NextResponse.redirect(
         new URL(`${redirectTo}?error=save_failed`, requestOrigin),
         303
@@ -264,6 +309,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     new URL(`${redirectTo}?status=updated`, requestOrigin),
     303
   );
+
+  if (wantsJson) {
+    return applyNoStoreHeaders(NextResponse.json({ status: "success", message: "Conteúdo salvo com sucesso." }));
+  }
 
   return applyNoStoreHeaders(applyCookies(response));
 }

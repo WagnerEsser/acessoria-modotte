@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminForm } from "@/components/admin/admin-form";
 
 export type PropertyFormValues = {
   title?: string;
@@ -58,7 +59,7 @@ export function PropertyForm({
   ];
 
   return (
-    <form action={action} method="post" className="space-y-6">
+    <AdminForm action={action} className="space-y-6">
       <input type="hidden" name="redirect_to" value={redirectTo} />
 
       <div className="rounded-3xl border border-brand-beige/12 bg-brand-ivory/4 p-5">
@@ -201,6 +202,6 @@ export function PropertyForm({
           {submitLabel}
         </SubmitButton>
       </div>
-    </form>
+    </AdminForm>
   );
 }

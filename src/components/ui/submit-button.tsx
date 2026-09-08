@@ -5,6 +5,7 @@ import { flushSync, useFormStatus } from "react-dom";
 import { LoaderCircle } from "lucide-react";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
+import { useAdminFormPending } from "@/components/admin/admin-form-context";
 
 type SubmitButtonProps = Omit<ButtonProps, "children" | "type"> & {
   children: ReactNode;
@@ -20,13 +21,14 @@ export function SubmitButton({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [nativeSubmissionPending, setNativeSubmissionPending] = useState(false);
   const { pending: actionPending } = useFormStatus();
-  const pending = nativeSubmissionPending || actionPending;
+  const adminFormPending = useAdminFormPending();
+  const pending = nativeSubmissionPending || actionPending || adminFormPending;
   const isDisabled = Boolean(disabled || pending);
 
   useEffect(() => {
     const form = buttonRef.current?.form;
 
-    if (!form) {
+    if (!form || form.dataset.asyncSubmit === "true") {
       return;
     }
 

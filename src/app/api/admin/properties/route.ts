@@ -12,6 +12,7 @@ import { readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
 
 export async function POST(request: NextRequest) {
   const requestOrigin = getRequestOrigin(request);
+  const wantsJson = request.headers.get("accept")?.includes("application/json") ?? false;
 
   const requestRejection = getAdminFormRequestRejection(request);
 
@@ -28,6 +29,9 @@ export async function POST(request: NextRequest) {
     await getAdminRequestContext(request);
 
   if (!isAuthorized) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Sua sessão expirou. Entre novamente." }, { status: 401 }));
+    }
     const response = NextResponse.redirect(
       new URL(buildAdminLoginUrl("/admin/imoveis", "session_expired"), requestOrigin),
       303
@@ -45,6 +49,9 @@ export async function POST(request: NextRequest) {
   const parsed = parsePropertyFormData(formData);
 
   if (!parsed.ok) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Revise os campos obrigatórios do imóvel.", fieldErrors: parsed.fieldErrors }, { status: 400 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=missing_required_fields`, requestOrigin),
       303
@@ -96,6 +103,10 @@ export async function POST(request: NextRequest) {
     ),
     303
   );
+
+  if (wantsJson) {
+    return applyNoStoreHeaders(NextResponse.json({ status: error ? "error" : "success", message: error ? "Não foi possível salvar o imóvel." : "Imóvel salvo com sucesso.", redirect: error ? undefined : "/admin/imoveis" }, { status: error ? 500 : 200 }));
+  }
 
   return applyNoStoreHeaders(applyCookies(response));
 }

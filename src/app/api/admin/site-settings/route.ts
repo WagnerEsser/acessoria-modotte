@@ -113,6 +113,7 @@ function mergeSocialLinks(
 
 export async function POST(request: NextRequest) {
   const requestOrigin = getRequestOrigin(request);
+  const wantsJson = request.headers.get("accept")?.includes("application/json") ?? false;
 
   const requestRejection = getAdminFormRequestRejection(request);
 
@@ -129,6 +130,9 @@ export async function POST(request: NextRequest) {
     await getAdminRequestContext(request);
 
   if (!isAuthorized || !(await isCurrentSuperAdmin(supabase))) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Sua sessão expirou. Entre novamente." }, { status: 401 }));
+    }
     const response = NextResponse.redirect(
       new URL(
         buildAdminLoginUrl("/admin/conteudos", "session_expired"),
@@ -160,6 +164,31 @@ export async function POST(request: NextRequest) {
   });
 
   if (!parsed.success) {
+    if (wantsJson) {
+      const fieldErrors: Record<string, string> = {};
+
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+
+        if (field === "email") {
+          fieldErrors.email = "Informe um e-mail válido.";
+        }
+        if (field === "whatsappNumber") {
+          fieldErrors.whatsapp_number = "Informe um WhatsApp válido com DDD.";
+        }
+        if (field === "primaryPhone") {
+          fieldErrors.primary_phone = "Informe um telefone válido com DDD.";
+        }
+        if (field === "impactPhrase") {
+          fieldErrors.impact_phrase = "Informe uma frase com pelo menos 2 caracteres.";
+        }
+        if (field === "instagram") {
+          fieldErrors.instagram = "Informe um perfil do Instagram válido.";
+        }
+      }
+
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Revise os dados informados.", fieldErrors }, { status: 400 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=invalid_data`, requestOrigin),
       303,
@@ -184,6 +213,9 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
   if (existingSettingsError) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Não foi possível carregar as configurações atuais." }, { status: 500 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=save_failed`, requestOrigin),
       303,
@@ -236,6 +268,10 @@ export async function POST(request: NextRequest) {
     ),
     303,
   );
+
+  if (wantsJson) {
+    return applyNoStoreHeaders(NextResponse.json({ status: error ? "error" : "success", message: error ? "Não foi possível salvar as configurações." : "Configurações salvas com sucesso." }, { status: error ? 500 : 200 }));
+  }
 
   return applyNoStoreHeaders(applyCookies(response));
 }

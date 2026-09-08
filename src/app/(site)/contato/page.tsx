@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { TurnstileWidget } from "@/components/security/turnstile-widget";
+import { AdminForm } from "@/components/admin/admin-form";
 import {
   getPublicContactChannels,
   getPublicPageBySlug,
@@ -19,18 +20,6 @@ import {
 import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 300;
-
-type ContactPageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-function getFirstValue(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-
-  return value;
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const [siteSettings, page] = await Promise.all([
@@ -55,15 +44,11 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function ContactPage({ searchParams }: ContactPageProps) {
+export default async function ContactPage() {
   const [siteSettings, page] = await Promise.all([
     getPublicSiteSettings(),
     getPublicPageBySlug("contato"),
   ]);
-  const resolvedSearchParams = await searchParams;
-  const submitted = getFirstValue(resolvedSearchParams.submitted) === "1";
-  const error = getFirstValue(resolvedSearchParams.error);
-
   const contactChannels = getPublicContactChannels(siteSettings);
   const pageParagraphs = splitParagraphs(page?.body);
 
@@ -104,18 +89,6 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           </Card>
 
           <Card className="p-6">
-            {submitted ? (
-              <div className="mb-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm leading-6 text-emerald-100">
-                Mensagem enviada com sucesso. A equipe vai retornar em breve.
-              </div>
-            ) : null}
-
-            {error ? (
-              <div className="mb-5 rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-100">
-                Não foi possível enviar o formulário. Verifique os campos e tente novamente.
-              </div>
-            ) : null}
-
             {pageParagraphs.length ? (
               <div className="space-y-4">
                 <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
@@ -129,7 +102,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               </div>
             ) : null}
 
-            <form action="/api/leads" method="post" className="mt-6 space-y-5">
+            <AdminForm action="/api/leads" className="mt-6 space-y-5">
               <input type="hidden" name="redirect_to" value="/contato" />
               <input type="hidden" name="source" value="contato" />
               <input type="hidden" name="page_slug" value="contato" />
@@ -174,7 +147,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
                   Quero vender
                 </Link>
               </div>
-            </form>
+            </AdminForm>
           </Card>
         </div>
       </div>

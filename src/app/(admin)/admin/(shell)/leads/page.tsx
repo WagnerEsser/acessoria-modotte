@@ -42,7 +42,7 @@ export default async function AdminLeadsPage() {
       <SectionHeading
         eyebrow="Leads"
         title="Contato gerado pelo site e distribuição do atendimento"
-        description="Os contatos exibidos aqui agora saem da tabela leads do banco."
+        description="Acompanhe as pessoas que entraram em contato com a assessoria."
       />
 
       <Card className="p-6">

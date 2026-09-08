@@ -118,9 +118,40 @@ export function parsePropertyFormData(formData: FormData) {
   });
 
   if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    const fieldNames: Record<string, string> = {
+      title: "title",
+      slug: "slug",
+      transactionType: "transaction_type",
+      propertyType: "property_type",
+      city: "city",
+      state: "state",
+      neighborhoodName: "neighborhood_name",
+      address: "address",
+      zipCode: "zip_code",
+      price: "price",
+      bedrooms: "bedrooms",
+      bathrooms: "bathrooms",
+      garages: "garages",
+      areaTotal: "area_total",
+      areaUseful: "area_useful",
+      contactPhone: "contact_phone",
+      contactWhatsapp: "contact_whatsapp",
+      description: "description",
+    };
+
+    for (const issue of parsed.error.issues) {
+      const name = fieldNames[String(issue.path[0])];
+
+      if (name && !fieldErrors[name]) {
+        fieldErrors[name] = "Revise este campo.";
+      }
+    }
+
     return {
       ok: false as const,
       error: "invalid_fields",
+      fieldErrors,
     };
   }
 

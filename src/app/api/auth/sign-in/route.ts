@@ -22,9 +22,49 @@ function readFormValue(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export async function POST(request: NextRequest) {
-  const requestOrigin = getRequestOrigin(request);
+function loginResponse(
+  request: NextRequest,
+  redirectTo: string,
+  error: string | null,
+  applyCookies?: (response: NextResponse) => NextResponse,
+) {
+  const messages: Record<string, string> = {
+    missing_credentials: "Informe e-mail e senha para continuar.",
+    configuration_missing: "O ambiente de acesso não está configurado.",
+    rate_limited: "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+    invalid_credentials: "E-mail ou senha inválidos.",
+    unauthorized: "Seu usuário não tem acesso ao painel.",
+  };
+  const wantsJson = request.headers.get("accept")?.includes("application/json") ?? false;
 
+  if (wantsJson) {
+    const fieldErrors = error === "missing_credentials"
+      ? { email: "Informe o e-mail.", password: "Informe a senha." }
+      : {};
+    const response = NextResponse.json(
+      error
+        ? { status: "error", message: messages[error] ?? "Não foi possível entrar.", fieldErrors }
+        : { status: "success", message: "Login realizado com sucesso.", redirect: redirectTo },
+      { status: error ? 401 : 200 },
+    );
+
+    return applyNoStoreHeaders(applyCookies ? applyCookies(response) : response);
+  }
+
+  const response = NextResponse.redirect(
+    new URL(
+      error
+        ? buildAdminLoginUrl(redirectTo, error)
+        : redirectTo,
+      getRequestOrigin(request),
+    ),
+    303,
+  );
+
+  return applyNoStoreHeaders(applyCookies ? applyCookies(response) : response);
+}
+
+export async function POST(request: NextRequest) {
   const requestRejection = getAdminFormRequestRejection(request);
 
   if (requestRejection) {
@@ -42,21 +82,11 @@ export async function POST(request: NextRequest) {
   const redirectTo = sanitizeAdminRedirect(readFormValue(formData, "redirectTo"));
 
   if (!email || !password) {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "missing_credentials"), requestOrigin),
-      303
-    );
-
-    return applyNoStoreHeaders(response);
+    return loginResponse(request, redirectTo, "missing_credentials");
   }
 
   if (!hasSupabaseEnv()) {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "configuration_missing"), requestOrigin),
-      303
-    );
-
-    return applyNoStoreHeaders(response);
+    return loginResponse(request, redirectTo, "configuration_missing");
   }
 
   let authRateLimitIdentifier: string;
@@ -66,12 +96,7 @@ export async function POST(request: NextRequest) {
       `${getClientIp(request)}:${email.toLocaleLowerCase("pt-BR")}`
     );
   } catch {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "configuration_missing"), requestOrigin),
-      303
-    );
-
-    return applyNoStoreHeaders(response);
+    return loginResponse(request, redirectTo, "configuration_missing");
   }
 
   const serviceClient = createSupabaseServiceClient();
@@ -85,12 +110,7 @@ export async function POST(request: NextRequest) {
   );
 
   if (rateLimitError || rateLimitAccepted !== true) {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "rate_limited"), requestOrigin),
-      303
-    );
-
-    return applyNoStoreHeaders(response);
+    return loginResponse(request, redirectTo, "rate_limited");
   }
 
   const { supabase, applyCookies } = createSupabaseServerContext(request);
@@ -100,12 +120,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (signInError) {
-    const response = NextResponse.redirect(
-      new URL(buildAdminLoginUrl(redirectTo, "invalid_credentials"), requestOrigin),
-      303
-    );
-
-    return applyNoStoreHeaders(applyCookies(response));
+    return loginResponse(request, redirectTo, "invalid_credentials", applyCookies);
   }
 
   const {
@@ -117,18 +132,8 @@ export async function POST(request: NextRequest) {
   if (!hasAdminProfile) {
     await supabase.auth.signOut({ scope: "local" });
 
-    const response = NextResponse.redirect(
-      new URL(
-        buildAdminLoginUrl(redirectTo, "unauthorized"),
-        requestOrigin
-      ),
-      303
-    );
-
-    return applyNoStoreHeaders(applyCookies(response));
+    return loginResponse(request, redirectTo, "unauthorized", applyCookies);
   }
 
-  const response = NextResponse.redirect(new URL(redirectTo, requestOrigin), 303);
-
-  return applyNoStoreHeaders(applyCookies(response));
+  return loginResponse(request, redirectTo, null, applyCookies);
 }

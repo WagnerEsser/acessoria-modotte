@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { PageBlocksEditor, type EditableBlock } from "@/components/admin/page-blocks-editor";
+import { SiteSettingsForm } from "@/components/admin/site-settings-form";
+import { AdminForm } from "@/components/admin/admin-form";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppDisplayNumber } from "@/lib/contact";
 import { formatDateTimeBRL } from "@/lib/formatters";
 import { getPublicSiteSettings } from "@/lib/public-content";
@@ -15,11 +17,9 @@ import { getVerifiedAdminIdentity } from "@/lib/admin-identity";
 export const metadata = buildMetadata({ title: "Conteúdos", description: "Edite os conteúdos públicos da assessoria.", path: "/admin/conteudos", noIndex: true });
 export const dynamic = "force-dynamic";
 
-type SearchParams = Record<string, string | string[] | undefined>;
 type PageRecord = { id: string; slug: string; title: string; subtitle: string | null; body: string | null; page_type: string; is_published: boolean; updated_at: string };
 type PageBlockRecord = { id: string; page_id: string; block_key: string; title: string | null; content: string | null; sort_order: number; is_active: boolean };
 
-function first(value: string | string[] | undefined) { return Array.isArray(value) ? value[0] : value; }
 function instagramValue(value: string | undefined) { return value?.match(/instagram\.com\/([^/?#]+)/i)?.[1] ?? value?.replace(/^@/, "") ?? ""; }
 function pageBlocks(all: PageBlockRecord[], page?: PageRecord | null) { return page ? all.filter((b) => b.page_id === page.id).sort((a, z) => a.sort_order - z.sort_order) : []; }
 function editableBlocks(blocks: PageBlockRecord[], predicate?: (block: PageBlockRecord) => boolean): EditableBlock[] { return blocks.filter((b) => predicate ? predicate(b) : true).map((b) => ({ blockKey: b.block_key, title: b.title ?? "", content: b.content ?? "" })); }
@@ -49,20 +49,19 @@ function PageEditor({ page, definition }: { page: PageRecord | null; definition:
         <div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /{definition.slug}</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">{definition.label}</h2><p className="mt-2 text-sm text-brand-ivory/68">Título, textos e publicação desta página.</p></div>
         <PublishSwitch formId={`form-${definition.slug}`} checked={page?.is_published ?? true} />
       </div>
-      <form id={`form-${definition.slug}`} action={`/api/admin/pages/${definition.slug}`} method="post" className="space-y-5">
+      <AdminForm id={`form-${definition.slug}`} action={`/api/admin/pages/${definition.slug}`} className="space-y-5">
         <input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value={definition.type} />
         <div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={page?.title ?? definition.fallback} placeholder="Título" required /><Input name="subtitle" defaultValue={page?.subtitle ?? ""} placeholder="Subtítulo" /></div>
         <Textarea name="body" rows={6} defaultValue={page?.body ?? ""} placeholder="Texto principal da página" />
         {definition.slug === "sobre" ? null : null}
         <SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página</SubmitButton>
-      </form>
+      </AdminForm>
       {page?.updated_at ? <p className="text-sm text-brand-ivory/60">Última atualização: {formatDateTimeBRL(page.updated_at)}</p> : null}
     </Card>
   );
 }
 
-export default async function AdminContentPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const params = await searchParams;
+export default async function AdminContentPage() {
   const supabase = await createSupabaseRscClient();
   const identity = await getVerifiedAdminIdentity(supabase);
   if (identity.status !== "authenticated" || identity.identity.role !== "superadmin") redirect("/admin/dashboard");
@@ -78,30 +77,28 @@ export default async function AdminContentPage({ searchParams }: { searchParams:
   const profile = aboutPageBlocks.find((b) => b.block_key === "about-profile");
   const directions = editableBlocks(aboutPageBlocks, (b) => b.block_key !== "about-profile");
   const serviceBlocks = editableBlocks(pageBlocks(blocks, services));
-  const status = first(params.status);
-  const error = first(params.error);
-
   return <div className="space-y-8">
     <SectionHeading eyebrow="Conteúdos" title="Conteúdos públicos em edição centralizada" description="Edite os textos exibidos no site e escolha quais páginas aparecem na navegação." />
-    {status === "updated" ? <Card className="border border-emerald-400/30 bg-emerald-500/10 p-4 text-sm text-emerald-100">Conteúdo salvo com sucesso.</Card> : null}
-    {error ? <Card className="border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-100">Não foi possível salvar os dados. Revise os campos.</Card> : null}
 
     <Card className="space-y-5 p-6"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Contato e marca</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Dados principais da assessoria</h2></div>
-      <form action="/api/admin/site-settings" method="post" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" />
-        <div className="grid gap-4 md:grid-cols-2"><Input name="whatsapp_number" placeholder="WhatsApp" defaultValue={settings.whatsappNumber ? getWhatsAppDisplayNumber(settings.whatsappNumber) : ""} /><Input name="primary_phone" placeholder="Telefone" defaultValue={settings.primaryPhone ? formatBrazilianPhoneDisplayNumber(settings.primaryPhone) : ""} /><Input name="email" type="email" placeholder="E-mail" defaultValue={settings.email ?? ""} /><Input name="instagram" placeholder="Instagram" defaultValue={instagramValue(settings.socialLinks.instagram)} /></div>
-        <Textarea name="impact_phrase" rows={3} defaultValue={settings.impactPhrase} placeholder="Frase institucional" />
-        <SubmitButton size="lg" pendingLabel="Salvando configurações...">Salvar contato e marca</SubmitButton>
-      </form>
+      <SiteSettingsForm
+        action="/api/admin/site-settings"
+        email={settings.email ?? ""}
+        impactPhrase={settings.impactPhrase}
+        instagram={instagramValue(settings.socialLinks.instagram)}
+        primaryPhone={settings.primaryPhone ? formatBrazilianPhoneDisplayNumber(settings.primaryPhone) : ""}
+        whatsappNumber={settings.whatsappNumber ? getWhatsAppDisplayNumber(settings.whatsappNumber) : ""}
+      />
     </Card>
 
     <Card className="space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /sobre</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Sobre</h2></div><PublishSwitch formId="form-sobre" checked={about?.is_published ?? true} /></div>
-      <form id="form-sobre" action="/api/admin/pages/sobre" method="post" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="institutional" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={about?.title ?? "Sobre a assessoria"} placeholder="Título" required /><Input name="subtitle" defaultValue={about?.subtitle ?? ""} placeholder="Subtítulo" /></div><Textarea name="body" rows={7} defaultValue={about?.body ?? ""} placeholder="Texto principal" />
+      <AdminForm id="form-sobre" action="/api/admin/pages/sobre" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="institutional" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={about?.title ?? "Sobre a assessoria"} placeholder="Título" required /><Input name="subtitle" defaultValue={about?.subtitle ?? ""} placeholder="Subtítulo" /></div><Textarea name="body" rows={7} defaultValue={about?.body ?? ""} placeholder="Texto principal" />
         <div className="rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"><p className="mb-3 text-xs uppercase tracking-[0.28em] text-brand-beige/55">Perfil da Luana</p><input type="hidden" name="profile_key" value="about-profile" /><Input name="profile_title" defaultValue={profile?.title ?? "Atendimento próximo, leitura técnica e condução direta."} placeholder="Título do perfil" /><Textarea name="profile_description" rows={4} defaultValue={profile?.content ?? ""} placeholder="Descrição do perfil" /></div>
-        <div><p className="mb-3 text-xs uppercase tracking-[0.28em] text-brand-beige/55">Direção</p><PageBlocksEditor initialBlocks={directions} label="Direção" addLabel="Adicionar direção" emptyLabel="Nenhum texto de direção será exibido no site." /></div><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Sobre</SubmitButton></form>
+        <div><p className="mb-3 text-xs uppercase tracking-[0.28em] text-brand-beige/55">Direção</p><PageBlocksEditor initialBlocks={directions} label="Direção" addLabel="Adicionar direção" emptyLabel="Nenhum texto de direção será exibido no site." /></div><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Sobre</SubmitButton></AdminForm>
     </Card>
 
     <Card className="space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /servicos</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Serviços</h2></div><PublishSwitch formId="form-servicos" checked={services?.is_published ?? true} /></div>
-      <form id="form-servicos" action="/api/admin/pages/servicos" method="post" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="services" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={services?.title ?? "Serviços essenciais"} placeholder="Título" required /><Input name="subtitle" defaultValue={services?.subtitle ?? ""} placeholder="Subtítulo" /></div><Textarea name="body" rows={6} defaultValue={services?.body ?? ""} placeholder="Texto principal" /><PageBlocksEditor initialBlocks={serviceBlocks} label="Serviço" addLabel="Adicionar serviço" emptyLabel="Nenhum serviço será exibido no site." /><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Serviços</SubmitButton></form>
+      <AdminForm id="form-servicos" action="/api/admin/pages/servicos" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="services" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={services?.title ?? "Serviços essenciais"} placeholder="Título" required /><Input name="subtitle" defaultValue={services?.subtitle ?? ""} placeholder="Subtítulo" /></div><Textarea name="body" rows={6} defaultValue={services?.body ?? ""} placeholder="Texto principal" /><PageBlocksEditor initialBlocks={serviceBlocks} label="Serviço" addLabel="Adicionar serviço" emptyLabel="Nenhum serviço será exibido no site." /><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Serviços</SubmitButton></AdminForm>
     </Card>
 
     {pageDefinitions.map((definition) => <PageEditor key={definition.slug} definition={definition} page={pages.find((p) => p.slug === definition.slug) ?? null} />)}

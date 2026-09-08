@@ -19,6 +19,7 @@ type RouteContext = {
 export async function POST(request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
   const requestOrigin = getRequestOrigin(request);
+  const wantsJson = request.headers.get("accept")?.includes("application/json") ?? false;
 
   const requestRejection = getAdminFormRequestRejection(request);
 
@@ -35,6 +36,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     await getAdminRequestContext(request);
 
   if (!isAuthorized) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Sua sessão expirou. Entre novamente." }, { status: 401 }));
+    }
     const response = NextResponse.redirect(
       new URL(buildAdminLoginUrl("/admin/imoveis", "session_expired"), requestOrigin),
       303
@@ -52,6 +56,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const parsed = parsePropertyFormData(formData);
 
   if (!parsed.ok) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Revise os campos obrigatórios do imóvel.", fieldErrors: parsed.fieldErrors }, { status: 400 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=missing_required_fields`, requestOrigin),
       303
@@ -67,6 +74,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     .maybeSingle();
 
   if (!existingProperty) {
+    if (wantsJson) {
+      return applyNoStoreHeaders(NextResponse.json({ status: "error", message: "Imóvel não encontrado." }, { status: 404 }));
+    }
     const response = NextResponse.redirect(
       new URL(`${redirectTo}?error=not_found`, requestOrigin),
       303
@@ -124,6 +134,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     ),
     303
   );
+
+  if (wantsJson) {
+    return applyNoStoreHeaders(NextResponse.json({ status: error ? "error" : "success", message: error ? "Não foi possível salvar o imóvel." : "Imóvel atualizado com sucesso.", redirect: error ? undefined : "/admin/imoveis" }, { status: error ? 500 : 200 }));
+  }
 
   return applyNoStoreHeaders(applyCookies(response));
 }

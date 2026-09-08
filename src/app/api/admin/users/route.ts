@@ -28,6 +28,26 @@ function redirectToUsers(
   request: NextRequest,
   params: Record<string, string>
 ) {
+  if (request.headers.get("accept")?.includes("application/json")) {
+    const messages: Record<string, string> = {
+      created: "Usuário criado e ativado com sucesso.",
+      invalid_input: "Revise os dados informados.",
+      email_in_use: "Já existe uma conta cadastrada com esse e-mail.",
+      creation_failed: "Não foi possível criar o usuário.",
+    };
+    const key = params.status ?? params.error ?? "creation_failed";
+
+    return applyNoStoreHeaders(
+      NextResponse.json(
+        {
+          status: params.status ? "success" : "error",
+          message: messages[key] ?? "Não foi possível concluir a operação.",
+        },
+        { status: params.status ? 200 : 400 },
+      ),
+    );
+  }
+
   const url = new URL("/admin/usuarios", getRequestOrigin(request));
 
   for (const [key, value] of Object.entries(params)) {
@@ -72,6 +92,18 @@ export async function POST(request: NextRequest) {
   });
 
   if (!parsed.success) {
+    if (request.headers.get("accept")?.includes("application/json")) {
+      const fieldErrors = Object.fromEntries(
+        parsed.error.issues.map((issue) => [String(issue.path[0]), "Revise este campo."]),
+      );
+
+      return applyNoStoreHeaders(
+        NextResponse.json(
+          { status: "error", message: "Revise os dados informados.", fieldErrors },
+          { status: 400 },
+        ),
+      );
+    }
     return redirectToUsers(request, { error: "invalid_input" });
   }
 

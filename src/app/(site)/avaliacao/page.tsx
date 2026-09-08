@@ -10,22 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { TurnstileWidget } from "@/components/security/turnstile-widget";
+import { AdminForm } from "@/components/admin/admin-form";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 300;
-
-type EvaluationPageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-function getFirstValue(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-
-  return value;
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const [siteSettings, page] = await Promise.all([
@@ -50,13 +39,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function EvaluationPage({ searchParams }: EvaluationPageProps) {
+export default async function EvaluationPage() {
   const page = await getPublicPageBySlug("avaliacao");
   const paragraphs = splitParagraphs(page?.body);
-  const resolvedSearchParams = await searchParams;
-  const submitted = getFirstValue(resolvedSearchParams.submitted) === "1";
-  const error = getFirstValue(resolvedSearchParams.error);
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="space-y-10">
@@ -116,22 +101,10 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
           </Card>
 
           <Card className="space-y-5 p-6">
-            {submitted ? (
-              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm leading-6 text-emerald-100">
-                Pedido enviado com sucesso. A avaliação será retornada em breve.
-              </div>
-            ) : null}
-
-            {error ? (
-              <div className="rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-100">
-                Não foi possível enviar o formulário. Verifique os campos e tente novamente.
-              </div>
-            ) : null}
-
             <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
               Formulário base
             </p>
-            <form action="/api/leads" method="post" className="space-y-5">
+            <AdminForm action="/api/leads" className="space-y-5">
               <input type="hidden" name="redirect_to" value="/avaliacao" />
               <input type="hidden" name="source" value="avaliacao" />
               <input type="hidden" name="page_slug" value="avaliacao" />
@@ -176,7 +149,7 @@ export default async function EvaluationPage({ searchParams }: EvaluationPagePro
                   Falar com a assessoria
                 </Link>
               </div>
-            </form>
+            </AdminForm>
           </Card>
         </div>
       </div>
