@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("migration and seed contract", () => {
-  it("keeps the initial schema closed to public admin bootstrap and direct lead insert", () => {
+  it("keeps the consolidated initial schema closed to public admin bootstrap and direct lead insert", () => {
     const sql = readFileSync(
       path.resolve("supabase/migrations/0001_initial.sql"),
       "utf8",
@@ -34,7 +34,7 @@ describe("migration and seed contract", () => {
 
   it("ships rate limiting, private lead ingestion, and audit logging hardening", () => {
     const sql = readFileSync(
-      path.resolve("supabase/migrations/0002_security_hardening.sql"),
+      path.resolve("supabase/migrations/0001_initial.sql"),
       "utf8",
     );
 
@@ -63,7 +63,7 @@ describe("migration and seed contract", () => {
 
   it("uses explicit least-privilege grants for the cloud Data API", () => {
     const sql = readFileSync(
-      path.resolve("supabase/migrations/0004_explicit_data_api_grants.sql"),
+      path.resolve("supabase/migrations/0001_initial.sql"),
       "utf8",
     );
 
@@ -97,9 +97,7 @@ describe("migration and seed contract", () => {
 
   it("adds navigation visibility settings with disabled defaults", () => {
     const sql = readFileSync(
-      path.resolve(
-        "supabase/migrations/0005_navigation_visibility_settings.sql",
-      ),
+      path.resolve("supabase/migrations/0001_initial.sql"),
       "utf8",
     );
 
@@ -136,12 +134,12 @@ describe("migration and seed contract", () => {
     );
 
     expect(compose).toContain("../migrations/0001_initial.sql");
-    expect(compose).toContain("../migrations/0002_security_hardening.sql");
-    expect(compose).toContain("../migrations/0003_admin_user_management.sql");
-    expect(compose).toContain(
+    expect(compose).not.toContain("../migrations/0002_security_hardening.sql");
+    expect(compose).not.toContain("../migrations/0003_admin_user_management.sql");
+    expect(compose).not.toContain(
       "../migrations/0004_explicit_data_api_grants.sql",
     );
-    expect(compose).toContain(
+    expect(compose).not.toContain(
       "../migrations/0005_navigation_visibility_settings.sql",
     );
     expect(compose).toContain("../seeds/0001_initial_seed.sql");
