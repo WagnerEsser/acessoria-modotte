@@ -1,0 +1,121 @@
+# Luana Modotte Web App
+
+Site institucional e painel administrativo para uma assessoria imobiliária. O projeto usa Next.js, TypeScript, Tailwind CSS e Supabase para banco, autenticação e dados administrativos.
+
+## Requisitos
+
+- Node.js `>=20.18.0`
+- npm `11.13.0` ou versão compatível
+- Docker Desktop, apenas se for usar o Supabase local
+
+## Como Rodar Localmente
+
+1. Instale as dependências:
+
+```powershell
+npm install
+```
+
+2. Crie o arquivo de ambiente:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+3. Preencha o `.env` com os valores do ambiente local ou do Supabase usado no projeto.
+
+Para uma execução simples do frontend, as variáveis mais importantes são:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SITE_URL=http://localhost:3000
+```
+
+As chaves secretas devem ficar somente no `.env` local ou no painel do provedor de deploy. Não versionar senhas, service keys ou tokens.
+
+4. Inicie o servidor de desenvolvimento:
+
+```powershell
+npm run dev
+```
+
+5. Acesse:
+
+- Site público: `http://localhost:3000`
+- Admin: `http://localhost:3000/admin`
+- Login do admin: `http://localhost:3000/admin/login`
+
+## Subida com Makefile
+
+Para facilitar a execução do projeto, use:
+
+```powershell
+make frontend      # sobe somente o frontend
+make backend       # sobe somente o backend local com Supabase
+make up            # instala dependências, sobe backend e frontend
+make stop-backend  # para o backend local
+```
+
+## Supabase Local
+
+Se precisar rodar a pilha local do Supabase, preencha o `.env` com os valores exigidos em `.env.example` e execute:
+
+```powershell
+.\scripts\supabase\start.ps1
+```
+
+Para parar:
+
+```powershell
+.\scripts\supabase\stop.ps1
+```
+
+As migrações ficam em `supabase/migrations/` e os seeds em `supabase/seeds/`.
+
+## Scripts
+
+```powershell
+npm run dev          # inicia o ambiente de desenvolvimento
+npm run build        # gera o build de produção
+npm run start        # executa o build de produção
+npm run lint         # valida padrões de código
+npm run typecheck    # valida TypeScript
+npm test             # executa testes unitários com Vitest
+npm run test:e2e     # executa testes end-to-end com Playwright
+npm run verify       # roda typecheck, lint e testes unitários
+```
+
+## Estrutura Principal
+
+```text
+src/app/          rotas públicas, rotas administrativas e APIs
+src/components/   componentes reutilizáveis
+src/features/     módulos por domínio
+src/lib/          helpers, validações, Supabase e regras compartilhadas
+src/server/       actions, repositórios e serviços de servidor
+supabase/         migrações, seeds e stack local
+tests/            testes unitários, integração, e2e e visuais
+docs/             especificações, arquitetura e guias operacionais
+```
+
+## Deploy
+
+O projeto está configurado para Netlify. O build usa:
+
+```powershell
+npm run verify && npm run build
+```
+
+As variáveis de ambiente de homologação estão descritas em `deploy/netlify/.env.hml.example` e o fluxo completo está em `docs/deploy-hml-netlify-supabase.md`.
+
+## Documentação
+
+Os documentos principais do projeto estão em:
+
+- `docs/especificacao-mestre-site-assessoria-imobiliaria.md`
+- `docs/arquitetura-banco-rotas.md`
+- `docs/estrutura-inicial-do-projeto.md`
+- `docs/backlog-por-sprints.md`
