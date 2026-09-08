@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { RichText } from "@/components/shared/rich-text";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
@@ -55,7 +56,7 @@ export default async function AboutPage() {
             <Badge variant="gold">Essência</Badge>
             <div className="mt-4 space-y-4 text-sm leading-7 text-brand-ivory/70">
               {paragraphs.length ? (
-                paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+                <RichText value={page?.body} />
               ) : (
                 <p>
                   Atendimento imobiliário próximo, análise cuidadosa e comunicação clara para
@@ -87,9 +88,7 @@ export default async function AboutPage() {
             </div>
             <div className="p-6">
               <Badge variant="outline">Perfil</Badge>
-              <p className="mt-4 text-sm leading-7 text-brand-ivory/72">
-                {profile?.content ?? "A apresentação da assessoria passa pela confiança de quem conduz cada etapa do processo, com comunicação clara, elegante e humana."}
-              </p>
+              {profile?.content ? <RichText value={profile.content} className="mt-4" /> : <p className="mt-4 text-sm leading-7 text-brand-ivory/72">A apresentação da assessoria passa pela confiança de quem conduz cada etapa do processo, com comunicação clara, elegante e humana.</p>}
             </div>
           </Card>
         </div>

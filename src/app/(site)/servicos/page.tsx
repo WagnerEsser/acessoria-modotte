@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { RichText } from "@/components/shared/rich-text";
 import {
   getPublicPageBySlug,
   getPublicSiteSettings,
@@ -70,9 +71,7 @@ export default async function ServicesPage() {
           <Card className="p-6">
             <Badge variant="gold">Descrição</Badge>
             <div className="mt-4 space-y-4 text-sm leading-7 text-brand-ivory/70">
-              {paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+              <RichText value={page?.body} />
             </div>
           </Card>
         ) : null}

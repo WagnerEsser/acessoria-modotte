@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { RichText } from "@/components/shared/rich-text";
 import { formatDateBRL } from "@/lib/formatters";
 import { getPublicBlogPostBySlug, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
@@ -118,7 +119,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <BookText className="size-5 text-brand-gold" />
             <div className="space-y-3 text-sm leading-7 text-brand-ivory/72">
               {paragraphs.length ? (
-                paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+                <RichText value={post.body} />
               ) : post.summary.length ? (
                 post.summary.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
               ) : (

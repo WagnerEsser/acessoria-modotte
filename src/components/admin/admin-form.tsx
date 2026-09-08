@@ -11,10 +11,20 @@ type AdminFormProps = {
   children: ReactNode;
   className?: string;
   id?: string;
+  onError?: () => void;
   onSuccess?: () => void;
+  refreshOnSuccess?: boolean;
 };
 
-export function AdminForm({ action, children, className, id, onSuccess }: AdminFormProps) {
+export function AdminForm({
+  action,
+  children,
+  className,
+  id,
+  onError,
+  onSuccess,
+  refreshOnSuccess = true,
+}: AdminFormProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [pending, setPending] = useState(false);
@@ -89,6 +99,7 @@ export function AdminForm({ action, children, className, id, onSuccess }: AdminF
       if (!response.ok || payload?.status === "error") {
         setFieldErrors(payload?.fieldErrors ?? {});
         showToast("error", payload?.message ?? "Não foi possível concluir a operação.");
+        onError?.();
         setPending(false);
         return;
       }
@@ -99,11 +110,12 @@ export function AdminForm({ action, children, className, id, onSuccess }: AdminF
 
       if (payload?.redirect) {
         router.replace(payload.redirect);
-      } else {
+      } else if (refreshOnSuccess) {
         router.refresh();
       }
     } catch {
       showToast("error", "Não foi possível concluir a operação. Revise os campos e tente novamente.");
+      onError?.();
       setPending(false);
     }
   }

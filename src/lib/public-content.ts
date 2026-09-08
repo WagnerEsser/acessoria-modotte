@@ -7,6 +7,7 @@ import {
   normalizePhoneDigits,
 } from "@/lib/contact";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { richTextToPlainText } from "@/lib/rich-text";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -350,7 +351,7 @@ function formatArea(value: number | string | null | undefined) {
 }
 
 function splitParagraphs(value: string | null | undefined): string[] {
-  const text = normalizeText(value);
+  const text = normalizeText(richTextToPlainText(value));
 
   if (!text) {
     return [];
@@ -363,7 +364,7 @@ function splitParagraphs(value: string | null | undefined): string[] {
 }
 
 function estimateReadingTime(value: string | null | undefined) {
-  const text = normalizeText(value);
+  const text = normalizeText(richTextToPlainText(value));
 
   if (!text) {
     return "1 min";

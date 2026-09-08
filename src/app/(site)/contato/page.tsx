@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { RichText } from "@/components/shared/rich-text";
 import { TurnstileWidget } from "@/components/security/turnstile-widget";
 import { AdminForm } from "@/components/admin/admin-form";
 import {
@@ -95,9 +96,7 @@ export default async function ContactPage() {
                   Conteúdo da página
                 </p>
                 <div className="space-y-3 text-sm leading-7 text-brand-ivory/72">
-                  {pageParagraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
+                  <RichText value={page?.body} />
                 </div>
               </div>
             ) : null}

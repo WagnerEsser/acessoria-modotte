@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth";
 import { readFormBoolean, readFormValue, sanitizeInternalRedirect } from "@/lib/form-utils";
 import { isCurrentSuperAdmin } from "@/lib/admin-authorization";
+import { sanitizeRichText } from "@/lib/rich-text";
 
 const EDITABLE_PAGE_DEFAULTS = {
   sobre: {
@@ -74,6 +75,12 @@ function toNullableText(value: string) {
   const trimmed = value.trim();
 
   return trimmed ? trimmed : null;
+}
+
+function toNullableRichText(value: string) {
+  const sanitized = sanitizeRichText(value);
+
+  return sanitized || null;
 }
 
 function parseBlockPayload(formData: FormData) {
@@ -140,6 +147,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   }
 
   const formData = await request.formData();
+  const action = readFormValue(formData, "action");
   const redirectTo = sanitizeInternalRedirect(
     readFormValue(formData, "redirect_to"),
     "/admin/conteudos"
@@ -157,6 +165,44 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return applyNoStoreHeaders(response);
   }
 
+  if (action === "publish") {
+    const isPublished = readFormBoolean(formData, "is_published");
+    const { data: updatedPage, error: publishError } = await supabase
+      .from("pages")
+      .update({ is_published: isPublished })
+      .eq("slug", slug)
+      .select("id")
+      .maybeSingle();
+
+    if (publishError || !updatedPage) {
+      return applyNoStoreHeaders(
+        NextResponse.json(
+          { status: "error", message: "Não foi possível atualizar a publicação da página." },
+          { status: 500 },
+        ),
+      );
+    }
+
+    if (slug === "blog" || slug === "areas") {
+      await supabase
+        .from("site_settings")
+        .update({
+          ...(slug === "blog" ? { show_blog_navigation: isPublished } : {}),
+          ...(slug === "areas" ? { show_areas_navigation: isPublished } : {}),
+        })
+        .eq("singleton_key", "main");
+    }
+
+    for (const path of ["/", "/sobre", "/servicos", "/quero-vender", "/contato", "/imoveis", "/blog", "/areas", "/sitemap.xml"]) revalidatePath(path);
+
+    return applyNoStoreHeaders(
+      NextResponse.json({
+        status: "success",
+        message: isPublished ? "Página publicada com sucesso." : "Página retirada da publicação.",
+      }),
+    );
+  }
+
   const existingPageResult = await supabase
     .from("pages")
     .select("id, page_type, hero_image_url, is_published, seo_title, seo_description, og_image_url, sort_order")
@@ -166,7 +212,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const defaults = EDITABLE_PAGE_DEFAULTS[slug];
   const title = readFormValue(formData, "title") || defaults.title;
   const subtitle = toNullableText(readFormValue(formData, "subtitle"));
-  const body = toNullableText(readFormValue(formData, "body"));
+  const body = toNullableRichText(readFormValue(formData, "body"));
   const pageType =
     readFormValue(formData, "page_type") || existingPage?.page_type || defaults.pageType;
   const seoTitle = toNullableText(readFormValue(formData, "seo_title")) ?? existingPage?.seo_title ?? null;
@@ -224,7 +270,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
   const blocks = blocksResult.data;
   const profileTitle = toNullableText(readFormValue(formData, "profile_title"))?.slice(0, 160) ?? null;
-  const profileDescription = toNullableText(readFormValue(formData, "profile_description"))?.slice(0, 5000) ?? null;
+  const profileDescription = toNullableRichText(readFormValue(formData, "profile_description"))?.slice(0, 5000) ?? null;
   const submittedBlocks = slug === "sobre"
     ? [{ block_key: "about-profile", title: profileTitle, content: profileDescription, sort_order: 0, is_active: Boolean(profileTitle || profileDescription) }, ...blocks.map((block, index) => ({ ...block, sort_order: index + 1 }))]
     : blocks;
