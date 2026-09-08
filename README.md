@@ -34,6 +34,14 @@ SUPABASE_ANON_KEY=
 SITE_URL=http://localhost:3000
 ```
 
+Para criar ou atualizar automaticamente o usuário principal do painel administrativo local, configure também:
+
+```env
+ADMIN_SUPERADMIN_EMAIL=
+ADMIN_SUPERADMIN_PASSWORD=
+ADMIN_SUPERADMIN_FULL_NAME=
+```
+
 As chaves secretas devem ficar somente no `.env` local ou no painel do provedor de deploy. Não versionar senhas, service keys ou tokens.
 
 4. Inicie o servidor de desenvolvimento:
@@ -54,8 +62,9 @@ Para facilitar a execução do projeto, use:
 
 ```powershell
 make frontend      # sobe somente o frontend
-make backend       # sobe somente o backend local com Supabase
+make backend       # sobe o backend local e garante o superadmin do .env
 make up            # instala dependências, sobe backend e frontend
+make ensure-superadmin  # reaplica o bootstrap do superadmin local
 make stop-backend  # para o backend local
 ```
 
@@ -74,6 +83,35 @@ Para parar:
 ```
 
 As migrações ficam em `supabase/migrations/` e os seeds em `supabase/seeds/`.
+
+No Docker Desktop, o grupo do Compose aparece como `luanamodotte-supabase`.
+
+## Superadmin Local
+
+O painel administrativo do site usa Supabase Auth. Para ter um usuário principal pronto ao subir o ambiente local, defina no `.env`:
+
+```env
+ADMIN_SUPERADMIN_EMAIL=seu-email-local
+ADMIN_SUPERADMIN_PASSWORD=sua-senha-local
+ADMIN_SUPERADMIN_FULL_NAME=Seu Nome
+```
+
+A senha precisa ter entre 14 e 128 caracteres, com maiúscula, minúscula, número e um destes símbolos: `!@%&*_-`.
+
+Ao executar `make backend` ou `make up`, o projeto:
+
+1. sobe o Supabase local;
+2. aplica a migração local que habilita o papel `superadmin`;
+3. cria ou atualiza o usuário no Supabase Auth;
+4. marca o perfil correspondente em `public.users` como `superadmin` e ativo.
+
+Para reaplicar esse processo sem reiniciar o backend:
+
+```powershell
+make ensure-superadmin
+```
+
+Depois acesse `http://localhost:3000/admin/login` com o e-mail e a senha definidos no `.env`.
 
 ## Acessar Banco Pelo DBeaver
 
