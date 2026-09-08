@@ -20,7 +20,7 @@ export function SectionHeading({
   as: Heading = "h2",
 }: SectionHeadingProps) {
   return (
-    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
+    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between", className)}>
       <div className="max-w-3xl">
         {eyebrow ? (
           <p className="mb-3 text-xs uppercase tracking-[0.32em] text-brand-beige/60">

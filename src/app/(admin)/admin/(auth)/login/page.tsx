@@ -7,7 +7,8 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
-import { getLoginErrorMessage, sanitizeAdminRedirect } from "@/lib/auth";
+import { AdminForm } from "@/components/admin/admin-form";
+import { sanitizeAdminRedirect } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { buildMetadata } from "@/lib/seo";
 
@@ -36,9 +37,6 @@ export default async function AdminLoginPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const errorMessage = getLoginErrorMessage(
-    getFirstValue(resolvedSearchParams.error),
-  );
   const redirectTo = sanitizeAdminRedirect(
     getFirstValue(resolvedSearchParams.redirectTo),
   );
@@ -71,9 +69,8 @@ export default async function AdminLoginPage({
           administrativo da assessoria.
         </p>
 
-        <form
+        <AdminForm
           action="/api/auth/sign-in"
-          method="post"
           className="mt-6 space-y-4"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
@@ -99,17 +96,6 @@ export default async function AdminLoginPage({
             />
           </label>
 
-          <div
-            className={
-              errorMessage
-                ? "rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-100"
-                : "rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 px-4 py-3 text-sm leading-6 text-brand-ivory/72"
-            }
-          >
-            {errorMessage ??
-              "Acesso protegido. Apenas usuários autorizados podem entrar."}
-          </div>
-
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-brand-ivory/56">
               {brand.name} - {brand.subtitle}
@@ -123,7 +109,7 @@ export default async function AdminLoginPage({
               <ArrowRight className="size-4" />
             </SubmitButton>
           </div>
-        </form>
+        </AdminForm>
       </Card>
     </div>
   );

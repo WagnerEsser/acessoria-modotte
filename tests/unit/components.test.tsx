@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { AdminShell } from "@/components/layout/admin-shell";
+import { UserActiveToggle } from "@/components/admin/user-active-toggle";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 
@@ -37,5 +38,17 @@ describe("components", () => {
 
     expect(screen.getByText("Maria Gestora")).toBeInTheDocument();
     expect(screen.getByText("maria@example.com")).toBeInTheDocument();
+  });
+
+  it("renders the active user toggle inside its own client boundary", () => {
+    render(
+      createElement(UserActiveToggle, {
+        action: "/api/admin/users/user-1",
+        isActive: true,
+      }),
+    );
+
+    expect(screen.getByRole("checkbox")).toBeChecked();
+    expect(screen.getByText("Ativo")).toBeInTheDocument();
   });
 });
