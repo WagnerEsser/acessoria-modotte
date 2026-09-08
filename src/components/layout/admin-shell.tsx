@@ -69,7 +69,7 @@ export function AdminShell({ children, currentUser }: AdminShellProps) {
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="hidden flex-wrap items-center gap-3 lg:flex">
               <Link
                 href="/"
                 target="_blank"
