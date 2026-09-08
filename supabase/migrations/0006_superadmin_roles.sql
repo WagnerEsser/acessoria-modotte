@@ -3,12 +3,6 @@ alter table public.users drop constraint if exists users_role_check;
 alter table public.users
   add constraint users_role_check check (role in ('superadmin', 'admin', 'editor'));
 
--- The Luana owner account is the only account promoted automatically.
-update public.users
-set role = 'superadmin', updated_at = now()
-where lower(coalesce(email, '')) = 'admin@email.com'
-   or lower(trim(full_name)) = 'luana modotte';
-
 create or replace function public.current_user_is_admin()
 returns boolean
 language sql
@@ -41,6 +35,8 @@ $$;
 
 revoke all on function public.current_user_is_admin() from public, anon, authenticated;
 revoke all on function public.current_user_is_superadmin() from public, anon, authenticated;
+grant execute on function public.current_user_is_admin() to authenticated;
+grant execute on function public.current_user_is_superadmin() to authenticated;
 
 alter policy "Site settings admin manage" on public.site_settings
   using (public.current_user_is_superadmin())
