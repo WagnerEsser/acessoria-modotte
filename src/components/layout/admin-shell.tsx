@@ -26,6 +26,12 @@ const iconMap = {
   users: Users,
 } as const;
 
+const roleLabelByRole = {
+  admin: "Administrador",
+  editor: "Editor",
+  superadmin: "Superadmin",
+} as const;
+
 type AdminShellProps = {
   children: ReactNode;
   currentUser: AdminIdentity;
@@ -36,6 +42,10 @@ export function AdminShell({ children, currentUser }: AdminShellProps) {
     currentUser.role === "superadmin" ||
     !["/admin/conteudos", "/admin/usuarios"].includes(item.href),
   );
+  const roleLabel = currentUser.role
+    ? roleLabelByRole[currentUser.role]
+    : "Papel não informado";
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] text-brand-ivory">
       <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
@@ -76,16 +86,19 @@ export function AdminShell({ children, currentUser }: AdminShellProps) {
               </h1>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 px-3 py-2">
+              <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 px-4 py-2 sm:min-w-[22rem]">
                 <span className="grid size-9 shrink-0 place-items-center rounded-full border border-brand-gold/20 bg-brand-gold/12 text-brand-gold">
                   <UserRound className="size-4" aria-hidden="true" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block max-w-52 truncate text-sm font-medium text-brand-ivory">
+                  <span className="block max-w-[16rem] truncate text-base font-medium text-brand-ivory">
                     {currentUser.name}
                   </span>
-                  <span className="block max-w-52 truncate text-xs text-brand-ivory/58">
+                  <span className="block max-w-[16rem] truncate text-sm text-brand-ivory/58">
                     {currentUser.email}
+                  </span>
+                  <span className="mt-1 block w-fit rounded-full border border-brand-gold/20 bg-brand-gold/10 px-2 py-0.5 text-[0.68rem] font-semibold uppercase leading-none tracking-[0.18em] text-brand-gold">
+                    {roleLabel}
                   </span>
                 </span>
               </div>

@@ -41,6 +41,7 @@ describe("admin shell layout", () => {
       identity: {
         name: "Maria Gestora",
         email: "maria@example.com",
+        role: "superadmin",
       },
     });
 
@@ -50,6 +51,7 @@ describe("admin shell layout", () => {
 
     expect(markup).toContain("Maria Gestora");
     expect(markup).toContain("maria@example.com");
+    expect(markup).toContain("Superadmin");
     expect(markup).not.toContain("auth-user-id");
     expect(layoutMocks.redirect).not.toHaveBeenCalled();
   });

@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { getLoginErrorMessage, sanitizeAdminRedirect } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { buildMetadata } from "@/lib/seo";
@@ -19,7 +20,9 @@ export const metadata = buildMetadata({
 
 export const dynamic = "force-dynamic";
 
-function getFirstValue(value: string | string[] | undefined): string | undefined {
+function getFirstValue(
+  value: string | string[] | undefined,
+): string | undefined {
   if (Array.isArray(value)) {
     return value[0];
   }
@@ -33,13 +36,20 @@ export default async function AdminLoginPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const errorMessage = getLoginErrorMessage(getFirstValue(resolvedSearchParams.error));
-  const redirectTo = sanitizeAdminRedirect(getFirstValue(resolvedSearchParams.redirectTo));
+  const errorMessage = getLoginErrorMessage(
+    getFirstValue(resolvedSearchParams.error),
+  );
+  const redirectTo = sanitizeAdminRedirect(
+    getFirstValue(resolvedSearchParams.redirectTo),
+  );
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(203,178,140,0.12),_transparent_32%),linear-gradient(180deg,_#07111d_0%,_#0b1b2c_100%)] px-4 py-10 text-brand-ivory">
       <div className="mx-auto mb-6 flex w-full max-w-lg justify-start">
-        <Link href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        <Link
+          href="/"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Voltar ao site
         </Link>
       </div>
@@ -61,7 +71,11 @@ export default async function AdminLoginPage({
           administrativo da assessoria.
         </p>
 
-        <form action="/api/auth/sign-in" method="post" className="mt-6 space-y-4">
+        <form
+          action="/api/auth/sign-in"
+          method="post"
+          className="mt-6 space-y-4"
+        >
           <input type="hidden" name="redirectTo" value={redirectTo} />
 
           <label className="block space-y-2">
@@ -77,11 +91,10 @@ export default async function AdminLoginPage({
 
           <label className="block space-y-2">
             <span className="text-sm text-brand-ivory/78">Senha</span>
-            <Input
+            <PasswordInput
               autoComplete="current-password"
               name="password"
               placeholder="senha"
-              type="password"
               required
             />
           </label>
@@ -93,7 +106,8 @@ export default async function AdminLoginPage({
                 : "rounded-2xl border border-brand-beige/12 bg-brand-ivory/5 px-4 py-3 text-sm leading-6 text-brand-ivory/72"
             }
           >
-            {errorMessage ?? "Acesso protegido. Apenas usuários autorizados podem entrar."}
+            {errorMessage ??
+              "Acesso protegido. Apenas usuários autorizados podem entrar."}
           </div>
 
           <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
