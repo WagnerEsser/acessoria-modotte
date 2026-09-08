@@ -96,6 +96,7 @@ export function CreateUserModal({ action }: CreateUserModalProps) {
                   minLength={14}
                   maxLength={128}
                   autoComplete="new-password"
+                  toggleClassName="text-brand-ivory/65 hover:bg-brand-ivory/8 hover:text-brand-ivory"
                   required
                 />
                 <span className="block text-xs leading-5 text-brand-beige/58">

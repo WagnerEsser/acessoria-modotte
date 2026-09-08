@@ -70,6 +70,7 @@ export function UserListItem({
               minLength={14}
               maxLength={128}
               autoComplete="new-password"
+              toggleClassName="text-brand-ivory/65 hover:bg-brand-ivory/8 hover:text-brand-ivory"
             />
           </label>
           <div className="flex shrink-0 items-center gap-2">

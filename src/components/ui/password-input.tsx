@@ -8,8 +8,11 @@ import { Input } from "@/components/ui/input";
 
 export function PasswordInput({
   className,
+  toggleClassName,
   ...props
-}: InputHTMLAttributes<HTMLInputElement>) {
+}: InputHTMLAttributes<HTMLInputElement> & {
+  toggleClassName?: string;
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const Icon = isVisible ? EyeOff : Eye;
 
@@ -24,7 +27,10 @@ export function PasswordInput({
         type="button"
         aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
         aria-pressed={isVisible}
-        className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-brand-navy/65 transition hover:bg-brand-navy/8 hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
+        className={cn(
+          "absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-brand-navy/65 transition hover:bg-brand-navy/8 hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70",
+          toggleClassName,
+        )}
         onClick={() => setIsVisible((current) => !current)}
       >
         <Icon className="size-4" aria-hidden="true" />
