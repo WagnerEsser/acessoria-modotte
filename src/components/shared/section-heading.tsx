@@ -7,6 +7,7 @@ type SectionHeadingProps = {
   title: string;
   description?: string;
   action?: ReactNode;
+  actionPosition?: "start" | "end";
   className?: string;
   as?: "h1" | "h2";
 };
@@ -16,12 +17,20 @@ export function SectionHeading({
   title,
   description,
   action,
+  actionPosition = "end",
   className,
   as: Heading = "h2",
 }: SectionHeadingProps) {
   return (
-    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between", className)}>
-      <div className="max-w-3xl">
+    <div
+      className={cn(
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+        actionPosition === "start" && "sm:items-start sm:justify-start sm:gap-8",
+        className,
+      )}
+    >
+      {action && actionPosition === "start" ? <div className="order-2 sm:order-1 sm:pt-12">{action}</div> : null}
+      <div className={cn("max-w-3xl", actionPosition === "start" && "order-1 sm:order-2")}>
         {eyebrow ? (
           <p className="mb-3 text-xs uppercase tracking-[0.32em] text-brand-beige/60">
             {eyebrow}
@@ -36,7 +45,7 @@ export function SectionHeading({
           </p>
         ) : null}
       </div>
-      {action ? <div>{action}</div> : null}
+      {action && actionPosition === "end" ? <div>{action}</div> : null}
     </div>
   );
 }

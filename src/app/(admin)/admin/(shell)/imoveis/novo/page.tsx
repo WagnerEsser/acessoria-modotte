@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -16,24 +16,22 @@ export const metadata = buildMetadata({
 export default function NewPropertyPage() {
   return (
     <div className="space-y-8">
-      <SectionHeading
-        eyebrow="Cadastro"
-        title="Criar novo imóvel"
-        description="Este formulário grava o imóvel no Supabase e pode ser publicado ou salvo como rascunho."
-        action={
-          <Link href="/admin/imoveis" className={buttonVariants({ variant: "outline" })}>
-            Voltar
-            <ArrowRight className="size-4" />
-          </Link>
-        }
-      />
+      <div className="space-y-4">
+        <Link href="/admin/imoveis" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          <ArrowLeft className="size-4" />
+          Voltar
+        </Link>
+        <SectionHeading
+          eyebrow="Cadastro"
+          title="Criar novo imóvel"
+          description="Preencha as informações do imóvel e escolha se deseja publicá-lo agora ou deixá-lo salvo para revisar depois."
+        />
+      </div>
 
       <PropertyForm
         action="/api/admin/properties"
         redirectTo="/admin/imoveis"
         submitLabel="Salvar imóvel"
-        title="Dados do imóvel"
-        description="Preencha os campos essenciais primeiro. Imagens, galeria e complementos podem entrar depois."
         values={{
           transactionType: "sale",
         }}

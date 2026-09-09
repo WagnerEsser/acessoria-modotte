@@ -59,6 +59,14 @@ type PropertyImageRow = {
   height: number | null;
 };
 
+type PropertyVideoRow = {
+  url: string;
+  file_name: string | null;
+  mime_type: string;
+  size_bytes: number;
+  sort_order: number;
+};
+
 type PropertyFeatureRow = {
   label: string;
   value: string | null;
@@ -86,6 +94,7 @@ type PropertyRow = {
   price_on_request: boolean;
   description: string | null;
   address: string | null;
+  show_full_address: boolean;
   city: string | null;
   state: string | null;
   zip_code: string | null;
@@ -108,6 +117,7 @@ type PropertyRow = {
   updated_at: string;
   neighborhood: PropertyNeighborhoodRow | PropertyNeighborhoodRow[] | null;
   property_images: PropertyImageRow[] | null;
+  property_videos: PropertyVideoRow[] | null;
   property_features: PropertyFeatureRow[] | null;
 };
 
@@ -168,6 +178,14 @@ export type PublicPropertyImage = {
   height: number | null;
 };
 
+export type PublicPropertyVideo = {
+  url: string;
+  fileName: string | null;
+  mimeType: string;
+  sizeBytes: number;
+  sortOrder: number;
+};
+
 export type PublicPropertyFeature = {
   label: string;
   value: string | null;
@@ -201,6 +219,7 @@ export type PublicPropertyCard = {
   seoTitle: string | null;
   seoDescription: string | null;
   updatedAt: string;
+  showFullAddress?: boolean;
 };
 
 export type PublicPropertyDetail = PublicPropertyCard & {
@@ -224,6 +243,7 @@ export type PublicPropertyDetail = PublicPropertyCard & {
   neighborhoodCity: string | null;
   neighborhoodState: string | null;
   images: PublicPropertyImage[];
+  videos: PublicPropertyVideo[];
   features: PublicPropertyFeature[];
 };
 
@@ -390,6 +410,16 @@ function mapPropertyImage(row: PropertyImageRow): PublicPropertyImage {
   };
 }
 
+function mapPropertyVideo(row: PropertyVideoRow): PublicPropertyVideo {
+  return {
+    url: row.url,
+    fileName: normalizeText(row.file_name),
+    mimeType: row.mime_type,
+    sizeBytes: row.size_bytes,
+    sortOrder: row.sort_order,
+  };
+}
+
 function mapPropertyFeature(row: PropertyFeatureRow): PublicPropertyFeature {
   return {
     label: row.label,
@@ -422,7 +452,7 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     title: row.title,
     type: row.property_type,
     transactionType: row.transaction_type,
-    location: normalizeText(neighborhood?.name) ?? normalizeText(row.address),
+    location: normalizeText(neighborhood?.name),
     city: normalizeText(row.city) ?? normalizeText(neighborhood?.city),
     neighborhoodSlug: normalizeText(neighborhood?.slug),
     status: row.status,
@@ -448,6 +478,7 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     seoTitle: normalizeText(row.seo_title),
     seoDescription: normalizeText(row.seo_description),
     updatedAt: row.updated_at,
+    showFullAddress: row.show_full_address,
   };
 
   return card;
@@ -475,6 +506,9 @@ function mapPropertyDetail(row: PropertyRow): PublicPropertyDetail {
     .sort((left, right) => {
       return left.sortOrder - right.sortOrder;
     });
+  const videos = toArrayValue(row.property_videos)
+    .map(mapPropertyVideo)
+    .sort((left, right) => left.sortOrder - right.sortOrder);
   const baseCard = mapPropertyCard(row);
   const latitudeValue =
     row.latitude === null || row.latitude === undefined || row.latitude === ""
@@ -490,7 +524,7 @@ function mapPropertyDetail(row: PropertyRow): PublicPropertyDetail {
   return {
     ...baseCard,
     description: normalizeText(row.description),
-    address: normalizeText(row.address),
+    address: row.show_full_address ? normalizeText(row.address) : null,
     state: normalizeText(row.state),
     zipCode: normalizeText(row.zip_code),
     latitude: Number.isNaN(latitudeValue ?? NaN) ? null : latitudeValue,
@@ -511,6 +545,7 @@ function mapPropertyDetail(row: PropertyRow): PublicPropertyDetail {
     neighborhoodCity: normalizeText(neighborhood?.city),
     neighborhoodState: normalizeText(neighborhood?.state),
     images,
+    videos,
     features,
   };
 }
@@ -623,9 +658,10 @@ export async function getPublicProperties() {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, city, state, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, city, state, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
     )
     .eq("is_published", true)
+    .neq("status", "hidden")
     .order("featured", { ascending: false })
     .order("sort_order", { ascending: true })
     .order("updated_at", { ascending: false });
@@ -646,10 +682,11 @@ export async function getPublicPropertyBySlug(slug: string) {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, contact_phone, contact_whatsapp, seo_title, seo_description, published_at, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, contact_phone, contact_whatsapp, seo_title, seo_description, published_at, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_videos(url, file_name, mime_type, size_bytes, sort_order), property_features(label, value, sort_order)",
     )
     .eq("slug", slug)
     .eq("is_published", true)
+    .neq("status", "hidden")
     .maybeSingle();
 
   return data ? mapPropertyDetail(data as PropertyRow) : null;

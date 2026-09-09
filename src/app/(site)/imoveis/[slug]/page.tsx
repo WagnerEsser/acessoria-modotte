@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Bath, BedDouble, CarFront, MapPin, MessageCircle, Square } from "lucide-react";
+import { ArrowRight, Bath, BedDouble, CalendarDays, CarFront, MapPin, MessageCircle, Receipt, Sofa, Square } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { PublicPageLink } from "@/components/shared/public-page-link";
+import { PropertyMap } from "@/components/site/property-map";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppHref } from "@/lib/contact";
 import { buildMetadata } from "@/lib/seo";
 import {
@@ -89,6 +90,12 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
   const locationLabel = buildLocationLabel(property);
   const paragraphs = splitParagraphs(property.description);
   const contactHref = getPropertyContactHref(property, siteSettings.whatsappNumber);
+  const mapQuery = property.showFullAddress
+    ? [property.address, property.neighborhoodName, property.city, property.state].filter(Boolean).join(", ")
+    : [property.neighborhoodName, property.city, property.state].filter(Boolean).join(", ");
+  const displayLocation = property.showFullAddress && property.address
+    ? [property.address, property.city, property.state].filter(Boolean).join(" - ")
+    : [property.neighborhoodName, property.city, property.state].filter(Boolean).join(" - ");
   const openInNewTab = contactHref.startsWith("http");
   const statItems = [
     {
@@ -114,6 +121,30 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       label: "Vagas",
       value: property.garages && property.garages > 0 ? `${property.garages}` : null,
       icon: CarFront,
+    },
+    {
+      key: "condominium",
+      label: "Condomínio",
+      value: property.condominiumFee,
+      icon: Receipt,
+    },
+    {
+      key: "iptu",
+      label: "IPTU",
+      value: property.iptuValue,
+      icon: Receipt,
+    },
+    {
+      key: "built-year",
+      label: "Construção",
+      value: property.builtYear ? `${property.builtYear}` : null,
+      icon: CalendarDays,
+    },
+    {
+      key: "furnished",
+      label: "Mobiliado",
+      value: property.furnished ? "Sim" : null,
+      icon: Sofa,
     },
   ].filter((item) => Boolean(item.value));
 
@@ -240,6 +271,16 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
               </div>
             </Card>
 
+            {displayLocation ? (
+              <Card className="space-y-3 p-5">
+                <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Localização informada</p>
+                <p className="flex items-start gap-2 text-sm leading-6 text-brand-ivory/72">
+                  <MapPin className="mt-1 size-4 shrink-0 text-brand-gold" />
+                  {displayLocation}
+                </p>
+              </Card>
+            ) : null}
+
             <Card className="space-y-4 p-5">
               <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
                 Contato rápido
@@ -332,6 +373,34 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
             </div>
           </Card>
         ) : null}
+
+        {property.videos.length ? (
+          <Card className="p-6">
+            <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
+              Visita em vídeo
+            </p>
+            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              {property.videos.map((video) => (
+                <div
+                  key={video.url}
+                  className="overflow-hidden rounded-3xl border border-brand-beige/12 bg-brand-ink"
+                >
+                  <video
+                    controls
+                    preload="metadata"
+                    className="aspect-video w-full"
+                    aria-label={video.fileName ?? `Vídeo de ${property.title}`}
+                  >
+                    <source src={video.url} type={video.mimeType} />
+                    Seu navegador não consegue reproduzir este vídeo.
+                  </video>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
+
+        <PropertyMap query={mapQuery} />
       </div>
     </div>
   );

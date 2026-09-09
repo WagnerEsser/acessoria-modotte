@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { PropertyForm } from "@/components/admin/property-form";
+import type { ManagedPropertyImage } from "@/components/admin/property-image-manager";
+import type { ManagedPropertyVideo } from "@/components/admin/property-video-manager";
 import { buttonVariants } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { formatBrazilianPhoneDisplayNumber } from "@/lib/contact";
@@ -20,10 +22,12 @@ type PropertyRecord = {
   title: string;
   slug: string;
   transaction_type: string;
+  status: string;
   property_type: string;
   city: string | null;
   state: string | null;
   address: string | null;
+  show_full_address: boolean;
   zip_code: string | null;
   price: number | string | null;
   price_on_request: boolean;
@@ -32,6 +36,12 @@ type PropertyRecord = {
   garages: number | null;
   area_total: number | string | null;
   area_useful: number | string | null;
+  condominium_fee: number | string | null;
+  iptu_value: number | string | null;
+  built_year: number | null;
+  furnished: boolean;
+  latitude: number | string | null;
+  longitude: number | string | null;
   contact_phone: string | null;
   contact_whatsapp: string | null;
   featured: boolean;
@@ -40,6 +50,9 @@ type PropertyRecord = {
   seo_description: string | null;
   description: string | null;
   neighborhood: { name: string | null } | { name: string | null }[] | null;
+  property_images: Array<{ id: string; url: string; alt_text: string | null; is_cover: boolean }> | null;
+  property_videos: Array<{ id: string; url: string; storage_path: string; file_name: string | null; mime_type: string; size_bytes: number; sort_order: number }> | null;
+  property_features: Array<{ label: string; value: string | null; sort_order: number }> | null;
 };
 
 export const metadata = buildMetadata({
@@ -55,7 +68,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, title, slug, transaction_type, property_type, city, state, address, zip_code, price, price_on_request, bedrooms, bathrooms, garages, area_total, area_useful, contact_phone, contact_whatsapp, featured, is_published, seo_title, seo_description, description, neighborhood:neighborhoods(name)"
+      "id, title, slug, transaction_type, property_type, status, city, state, address, show_full_address, zip_code, price, price_on_request, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, latitude, longitude, contact_phone, contact_whatsapp, featured, is_published, seo_title, seo_description, description, neighborhood:neighborhoods(name), property_images(id, url, alt_text, is_cover), property_videos(id, url, storage_path, file_name, mime_type, size_bytes, sort_order), property_features(label, value, sort_order)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -88,17 +101,17 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
         action={`/api/admin/properties/${property.id}`}
         redirectTo="/admin/imoveis"
         submitLabel="Salvar alterações"
-        title="Dados do imóvel"
-        description="Atualize o cadastro quando houver novas informações, valores ou status de publicação."
         values={{
           title: property.title,
           slug: property.slug,
           transactionType: property.transaction_type,
+          commercialStatus: property.status === "reserved" || property.status === "sold" || property.status === "hidden" ? property.status : "published",
           propertyType: property.property_type,
           city: property.city ?? "",
           state: property.state ?? "",
           neighborhoodName: neighborhood || undefined,
           address: property.address ?? "",
+          showFullAddress: property.show_full_address,
           zipCode: property.zip_code ?? "",
           price: property.price === null || property.price === undefined ? "" : String(property.price),
           priceOnRequest: property.price_on_request,
@@ -113,6 +126,18 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
             property.area_useful === null || property.area_useful === undefined
               ? ""
               : String(property.area_useful),
+          condominiumFee:
+            property.condominium_fee === null || property.condominium_fee === undefined
+              ? ""
+              : String(property.condominium_fee),
+          iptuValue:
+            property.iptu_value === null || property.iptu_value === undefined
+              ? ""
+              : String(property.iptu_value),
+          builtYear: property.built_year ? String(property.built_year) : "",
+          furnished: property.furnished,
+          latitude: property.latitude === null || property.latitude === undefined ? "" : String(property.latitude),
+          longitude: property.longitude === null || property.longitude === undefined ? "" : String(property.longitude),
           contactPhone: property.contact_phone ? formatBrazilianPhoneDisplayNumber(property.contact_phone) : "",
           contactWhatsapp: property.contact_whatsapp
             ? formatBrazilianPhoneDisplayNumber(property.contact_whatsapp)
@@ -122,7 +147,25 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
           seoTitle: property.seo_title ?? "",
           seoDescription: property.seo_description ?? "",
           description: property.description ?? "",
+          features: (property.property_features ?? [])
+            .sort((left, right) => left.sort_order - right.sort_order)
+            .map((feature) => feature.value ? `${feature.label}: ${feature.value}` : feature.label)
+            .join("\n"),
         }}
+        images={(property.property_images ?? []).map((image) => ({
+          id: image.id,
+          url: image.url,
+          altText: image.alt_text,
+          isCover: image.is_cover,
+        })) as ManagedPropertyImage[]}
+        videos={(property.property_videos ?? []).map((video) => ({
+          id: video.id,
+          url: video.url,
+          fileName: video.file_name,
+          mimeType: video.mime_type,
+          sizeBytes: video.size_bytes,
+          sortOrder: video.sort_order,
+        })) as ManagedPropertyVideo[]}
       />
     </div>
   );

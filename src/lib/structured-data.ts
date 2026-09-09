@@ -99,7 +99,7 @@ export function buildPropertyStructuredData(property: PublicPropertyDetail) {
   const locality = property.neighborhoodCity ?? property.city;
   const region = property.neighborhoodState ?? property.state;
   const address =
-    property.address || locality || region
+    (property.showFullAddress ? property.address : null) || locality || region
       ? {
           "@type": "PostalAddress",
           ...(property.address ? { streetAddress: property.address } : {}),
@@ -140,7 +140,7 @@ export function buildPropertyStructuredData(property: PublicPropertyDetail) {
         ? { image: [absoluteUrl(property.coverImageUrl)] }
         : {}),
     ...(address ? { address } : {}),
-    ...(property.latitude !== null && property.longitude !== null
+    ...(property.showFullAddress && property.latitude !== null && property.longitude !== null
       ? {
           geo: {
             "@type": "GeoCoordinates",

@@ -84,14 +84,7 @@ export function AdminForm({
         }
       });
 
-      const formData = new FormData(form);
-      const body = new URLSearchParams();
-
-      for (const [key, value] of formData.entries()) {
-        if (typeof value === "string") {
-          body.append(key, value);
-        }
-      }
+      const body = new FormData(form);
 
       const response = await fetch(action, {
         method: "POST",

@@ -95,6 +95,7 @@ create table if not exists public.properties (
   price_on_request boolean not null default false,
   description text,
   address text,
+  show_full_address boolean not null default false,
   neighborhood_id uuid references public.neighborhoods(id) on delete set null,
   city text,
   state text,
@@ -129,6 +130,19 @@ create table if not exists public.property_images (
   is_cover boolean not null default false,
   width integer,
   height integer,
+  created_at timestamptz not null default now(),
+  unique (property_id, sort_order)
+);
+
+create table if not exists public.property_videos (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references public.properties(id) on delete cascade,
+  storage_path text not null unique,
+  url text not null,
+  file_name text,
+  mime_type text not null,
+  size_bytes bigint not null check (size_bytes > 0),
+  sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   unique (property_id, sort_order)
 );
@@ -220,6 +234,7 @@ create index if not exists idx_neighborhoods_is_published_sort_order on public.n
 create index if not exists idx_properties_is_published_featured on public.properties (is_published, featured, sort_order);
 create index if not exists idx_properties_neighborhood_id on public.properties (neighborhood_id);
 create index if not exists idx_property_images_property_id_sort_order on public.property_images (property_id, sort_order);
+create index if not exists idx_property_videos_property_id_sort_order on public.property_videos (property_id, sort_order);
 create index if not exists idx_property_features_property_id_sort_order on public.property_features (property_id, sort_order);
 create index if not exists idx_leads_status_created_at on public.leads (status, created_at desc);
 create index if not exists idx_leads_assigned_to on public.leads (assigned_to);
@@ -322,6 +337,7 @@ alter table public.page_blocks enable row level security;
 alter table public.neighborhoods enable row level security;
 alter table public.properties enable row level security;
 alter table public.property_images enable row level security;
+alter table public.property_videos enable row level security;
 alter table public.property_features enable row level security;
 alter table public.leads enable row level security;
 alter table public.lead_notes enable row level security;
@@ -394,6 +410,23 @@ create policy "Property images public read" on public.property_images
   );
 
 create policy "Property images admin manage" on public.property_images
+  for all
+  using (public.current_user_is_admin())
+  with check (public.current_user_is_admin());
+
+create policy "Property videos public read" on public.property_videos
+  for select
+  using (
+    exists (
+      select 1
+      from public.properties p
+      where p.id = property_id
+        and p.is_published = true
+        and p.status <> 'hidden'
+    )
+  );
+
+create policy "Property videos admin manage" on public.property_videos
   for all
   using (public.current_user_is_admin())
   with check (public.current_user_is_admin());
@@ -849,6 +882,8 @@ alter policy "Properties admin manage" on public.properties
   to authenticated;
 alter policy "Property images admin manage" on public.property_images
   to authenticated;
+alter policy "Property videos admin manage" on public.property_videos
+  to authenticated;
 alter policy "Property features admin manage" on public.property_features
   to authenticated;
 alter policy "Leads admin manage" on public.leads
@@ -871,8 +906,9 @@ grant select on table
   public.neighborhoods,
   public.properties,
   public.property_images,
+  public.property_videos,
   public.property_features,
-  public.testimonials,
+  public.testimonials
 to anon;
 
 grant select on table
@@ -882,6 +918,7 @@ grant select on table
   public.neighborhoods,
   public.properties,
   public.property_images,
+  public.property_videos,
   public.property_features,
   public.leads,
   public.lead_notes,
@@ -897,6 +934,7 @@ grant insert, update on table
   public.neighborhoods,
   public.properties,
   public.property_images,
+  public.property_videos,
   public.property_features,
   public.testimonials
 to authenticated;
@@ -907,6 +945,7 @@ grant delete on table
   public.neighborhoods,
   public.properties,
   public.property_images,
+  public.property_videos,
   public.property_features,
   public.testimonials
 to authenticated;
@@ -940,6 +979,7 @@ alter default privileges for role postgres in schema public
   revoke all on tables from anon, authenticated, service_role;
 alter default privileges for role postgres in schema public
   revoke execute on functions from public, anon, authenticated, service_role;
+
 -- Consolidated from 0005_navigation_visibility_settings.sql during the initial schema bootstrap.
 alter table public.site_settings
   add column if not exists show_areas_navigation boolean not null default false;

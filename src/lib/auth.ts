@@ -9,6 +9,8 @@ import { getSecurityHeaders } from "../../security-headers.mjs";
 export const ADMIN_LOGIN_PATH = "/admin/login";
 export const ADMIN_DEFAULT_PATH = "/admin/dashboard";
 export const ADMIN_FORM_MAX_BYTES = 256 * 1024;
+// Supports the maximum media selection: 20 images (5 MB) plus 3 videos (50 MB), with form overhead.
+export const ADMIN_MULTIPART_MAX_BYTES = 256 * 1024 * 1024;
 
 const sensitiveResponseHeaders = [
   ...getSecurityHeaders(process.env.NODE_ENV === "production").map(
@@ -144,15 +146,18 @@ export function getAdminFormRequestRejection(
   }
 
   const contentType = request.headers.get("content-type")?.trim().toLowerCase() ?? "";
-  const isSupportedForm = contentType.startsWith(
-    "application/x-www-form-urlencoded"
-  );
+  const isSupportedForm =
+    contentType.startsWith("application/x-www-form-urlencoded") ||
+    contentType.startsWith("multipart/form-data");
 
   if (!isSupportedForm) {
     return { error: "unsupported_media_type", status: 415 };
   }
 
   const contentLength = request.headers.get("content-length")?.trim();
+  const maxBytes = contentType.startsWith("multipart/form-data")
+    ? ADMIN_MULTIPART_MAX_BYTES
+    : ADMIN_FORM_MAX_BYTES;
 
   if (contentLength) {
     const parsedLength = Number(contentLength);
@@ -160,7 +165,7 @@ export function getAdminFormRequestRejection(
     if (
       !/^\d+$/.test(contentLength) ||
       !Number.isSafeInteger(parsedLength) ||
-      parsedLength > ADMIN_FORM_MAX_BYTES
+      parsedLength > maxBytes
     ) {
       return { error: "payload_too_large", status: 413 };
     }
