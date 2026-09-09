@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 
 $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $supabaseDir = Join-Path $projectRoot "supabase\docker"
@@ -36,14 +37,14 @@ try {
   $schemaReady = docker compose --project-name "$composeProjectName" --env-file "$rootEnvFile" exec -T db psql -U supabase_admin -d postgres -tAc "select to_regclass('public.properties') is not null;"
 
   if ($schemaReady.Trim() -ne "t") {
-    Get-Content -Raw -LiteralPath $initialMigration |
+    Get-Content -Raw -Encoding utf8 -LiteralPath $initialMigration |
       docker compose --project-name "$composeProjectName" --env-file "$rootEnvFile" exec -T db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres
 
     if ($LASTEXITCODE -ne 0) {
       throw "Failed to apply the consolidated initial migration."
     }
 
-    Get-Content -Raw -LiteralPath $initialSeed |
+    Get-Content -Raw -Encoding utf8 -LiteralPath $initialSeed |
       docker compose --project-name "$composeProjectName" --env-file "$rootEnvFile" exec -T db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres
 
     if ($LASTEXITCODE -ne 0) {

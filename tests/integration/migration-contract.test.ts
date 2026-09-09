@@ -141,6 +141,8 @@ describe("migration and seed contract", () => {
     expect(compose).not.toContain("../seeds/");
     expect(startScript).toContain("supabase\\migrations\\0001_initial.sql");
     expect(startScript).toContain("supabase\\seeds\\0001_initial_seed.sql");
+    expect(startScript).toContain("Get-Content -Raw -Encoding utf8");
+    expect(startScript).toContain("$OutputEncoding = [System.Text.UTF8Encoding]::new($false)");
     expect(startScript).not.toContain("0002_");
     expect(startScript).not.toContain("0003_");
     expect(startScript).not.toContain("0004_");
