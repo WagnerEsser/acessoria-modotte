@@ -42,7 +42,6 @@ describe("public content helpers", () => {
       impactPhrase: "Descrição institucional curta.",
       defaultSeoTitle: "Luana Modotte | Assessoria Imobiliária",
       defaultSeoDescription: "Descrição padrão.",
-      showBlogNavigation: false,
       showAreasNavigation: false,
     } satisfies PublicSiteSettings;
 
@@ -79,7 +78,6 @@ describe("public content helpers", () => {
       impactPhrase: "Descrição institucional curta.",
       defaultSeoTitle: "Luana Modotte | Assessoria Imobiliária",
       defaultSeoDescription: "Descrição padrão.",
-      showBlogNavigation: false,
       showAreasNavigation: false,
     } satisfies PublicSiteSettings;
 
@@ -107,7 +105,6 @@ describe("public content helpers", () => {
     expect(settings.impactPhrase).toBe(brand.slogan);
     expect(settings.defaultSeoDescription).toBe(brand.slogan);
     expect(settings.whatsappNumber).toBeNull();
-    expect(settings.showBlogNavigation).toBe(false);
     expect(settings.showAreasNavigation).toBe(false);
   });
 });

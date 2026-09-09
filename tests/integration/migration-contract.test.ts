@@ -95,18 +95,18 @@ describe("migration and seed contract", () => {
     );
   });
 
-  it("adds navigation visibility settings with disabled defaults", () => {
+  it("adds areas navigation visibility with a disabled default", () => {
     const sql = readFileSync(
       path.resolve("supabase/migrations/0001_initial.sql"),
       "utf8",
     );
 
     expect(sql).toContain(
-      "show_blog_navigation boolean not null default false",
-    );
-    expect(sql).toContain(
       "show_areas_navigation boolean not null default false",
     );
+    expect(sql).not.toContain("show_blog_navigation");
+    expect(sql).not.toContain("blog_posts");
+    expect(sql).not.toContain("blog_categories");
   });
 
   it("ships editorial seed data for the first boot", () => {

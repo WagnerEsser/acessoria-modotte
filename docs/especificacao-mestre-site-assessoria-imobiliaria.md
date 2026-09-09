@@ -301,7 +301,6 @@ O admin deve permitir:
 | PUB-06 | Quero vender | Captacao de leads de proprietarios | pages, leads |
 | PUB-07 | Avaliacao | Solicitar avaliacao de imovel | pages, leads |
 | PUB-08 | Areas atendidas | SEO local e contexto regional | neighborhoods, pages |
-| PUB-09 | Blog | Conteudo e autoridade | blog_posts |
 | PUB-10 | Contato | Canais diretos de contato | settings, leads |
 | ADM-01 | Login | Entrada segura no painel | auth |
 | ADM-02 | Dashboard | Visao geral operacional | analytics, leads, properties |

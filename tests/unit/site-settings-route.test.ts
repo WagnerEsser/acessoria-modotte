@@ -114,17 +114,16 @@ describe("site settings navigation visibility", () => {
     expect(settingsMocks.upsert).not.toHaveBeenCalled();
   });
 
-  it("persists enabled links independently and revalidates the public layout", async () => {
+  it("persists enabled areas navigation and revalidates the public layout", async () => {
     const response = await POST(
       createRequest({
-        show_blog_navigation: "on",
+        show_areas_navigation: "on",
       }),
     );
 
     expect(settingsMocks.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        show_blog_navigation: true,
-        show_areas_navigation: false,
+        show_areas_navigation: true,
       }),
       { onConflict: "singleton_key" },
     );
@@ -133,12 +132,11 @@ describe("site settings navigation visibility", () => {
     expect(response.headers.get("location")).toContain("status=updated");
   });
 
-  it("persists both links as disabled when checkboxes are absent", async () => {
+  it("persists areas navigation as disabled when the checkbox is absent", async () => {
     await POST(createRequest({}));
 
     expect(settingsMocks.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        show_blog_navigation: false,
         show_areas_navigation: false,
       }),
       { onConflict: "singleton_key" },
@@ -151,7 +149,7 @@ describe("site settings navigation visibility", () => {
       error: { message: "database unavailable" },
     });
 
-    const response = await POST(createRequest({ show_blog_navigation: "on" }));
+    const response = await POST(createRequest({ show_areas_navigation: "on" }));
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toContain("error=save_failed");
@@ -164,7 +162,7 @@ describe("site settings navigation visibility", () => {
       error: { message: "database unavailable" },
     });
 
-    const response = await POST(createRequest({ show_blog_navigation: "on" }));
+    const response = await POST(createRequest({ show_areas_navigation: "on" }));
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toContain("error=save_failed");

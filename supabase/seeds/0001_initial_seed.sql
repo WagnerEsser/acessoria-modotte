@@ -94,6 +94,51 @@ set
   seo_description = excluded.seo_description,
   sort_order = excluded.sort_order;
 
+insert into public.pages (
+  slug,
+  title,
+  subtitle,
+  body,
+  page_type,
+  is_published,
+  seo_title,
+  seo_description,
+  sort_order
+)
+values
+  (
+    'imoveis',
+    'Imóveis',
+    'Encontre oportunidades com informações claras e atendimento próximo.',
+    'Explore os imóveis publicados pela assessoria e encontre uma oportunidade alinhada ao seu momento.',
+    'landing',
+    true,
+    'Imóveis | Luana Modotte Assessoria Imobiliária',
+    'Encontre imóveis para comprar ou alugar com a assessoria.',
+    50
+  ),
+  (
+    'areas',
+    'Áreas atendidas',
+    'Conheça as regiões atendidas pela assessoria.',
+    'Encontre imóveis e informações organizadas por cidade e região.',
+    'landing',
+    true,
+    'Áreas atendidas | Luana Modotte Assessoria Imobiliária',
+    'Conheça as cidades e regiões atendidas pela assessoria.',
+    70
+  )
+on conflict (slug) do update
+set
+  title = excluded.title,
+  subtitle = excluded.subtitle,
+  body = excluded.body,
+  page_type = excluded.page_type,
+  is_published = excluded.is_published,
+  seo_title = excluded.seo_title,
+  seo_description = excluded.seo_description,
+  sort_order = excluded.sort_order;
+
 with seeded_page as (
   insert into public.pages (
     slug,

@@ -59,7 +59,6 @@ Campos principais:
 - `state`
 - `social_links`
 - `opening_hours`
-- `show_blog_navigation`
 - `show_areas_navigation`
 - `default_seo_title`
 - `default_seo_description`
@@ -231,37 +230,6 @@ Campos principais:
 - `is_published`
 - `sort_order`
 
-### `blog_categories`
-
-Categorias de blog.
-
-Campos principais:
-
-- `id`
-- `slug`
-- `name`
-- `is_published`
-
-### `blog_posts`
-
-Conteudo editorial e SEO.
-
-Campos principais:
-
-- `id`
-- `slug`
-- `title`
-- `excerpt`
-- `content`
-- `category_id`
-- `cover_image_url`
-- `is_published`
-- `seo_title`
-- `seo_description`
-- `published_at`
-- `created_at`
-- `updated_at`
-
 ### `users`
 
 Perfil interno vinculado ao login do provedor.
@@ -300,7 +268,6 @@ Campos principais:
 - `lead_notes.lead_id -> leads.id`
 - `lead_notes.author_id -> users.id`
 - `page_blocks.page_id -> pages.id`
-- `blog_posts.category_id -> blog_categories.id`
 - `audit_logs.actor_user_id -> users.id`
 
 ## Indices e Constraints
@@ -308,7 +275,6 @@ Campos principais:
 - `pages.slug` unico.
 - `properties.slug` unico.
 - `neighborhoods.slug` unico.
-- `blog_posts.slug` unico.
 - `property_images(property_id, sort_order)`.
 - `property_features(property_id, sort_order)`.
 - `leads(status, created_at)`.
@@ -368,8 +334,6 @@ As rotas publicas devem viver sob um grupo de site e usar dados do banco com ren
 | `/quero-vender`   | Captacao de proprietarios | `pages`, `leads`                                             | conversao de venda              |
 | `/avaliacao`      | Avaliacao de imovel       | `pages`, `leads`                                             | lead qualificado                |
 | `/areas/[slug]`   | SEO local                 | `neighborhoods`, `pages`                                     | pagina por bairro/regiao        |
-| `/blog`           | Listagem editorial        | `blog_posts`                                                 | opcional no MVP                 |
-| `/blog/[slug]`    | Post editorial            | `blog_posts`                                                 | opcional no MVP                 |
 | `/contato`        | Contato direto            | `site_settings`, `leads`                                     | telefone, whatsapp e formulario |
 
 ## Rotas Administrativas
@@ -391,7 +355,7 @@ As rotas administrativas devem ficar em grupo separado e exigir autenticacao.
 | `/admin/conteudos`           | Paginas e blocos      | sim  | `pages`, `page_blocks`                               |
 | `/admin/leads`               | Gerenciar leads       | sim  | `leads`, `lead_notes`                                |
 | `/admin/usuarios`            | Usuarios e papeis     | sim  | `users`                                              |
-| `/admin/seo`                 | Metadados e indexacao | sim  | `pages`, `properties`, `blog_posts`                  |
+| `/admin/seo`                 | Metadados e indexacao | sim  | `pages`, `properties`                                 |
 
 ## Endpoints e Server Actions
 
@@ -431,7 +395,6 @@ As rotas administrativas devem ficar em grupo separado e exigir autenticacao.
 - Alterou pagina institucional: revalidar rota correspondente.
 - Alterou `site_settings`: revalidar home, contato e rodape.
 - Alterou imagem principal: revalidar rota do imovel e listagens relacionadas.
-- Alterou blog: revalidar listagem e post individual.
 
 ## Seeds Minimos
 

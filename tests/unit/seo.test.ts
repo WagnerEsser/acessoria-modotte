@@ -80,7 +80,7 @@ describe("SEO metadata", () => {
     const metadata = buildMetadata({
       title: "Guia de compra",
       description: "Como comprar um imóvel com segurança.",
-      path: "/blog/guia-de-compra",
+      path: "/conteudo/guia-de-compra",
       image: "https://cdn.example.com/guia.jpg",
       imageAlt: "Sala de estar iluminada",
       type: "article",

@@ -153,7 +153,7 @@ create table if not exists public.leads (
   property_id uuid references public.properties(id) on delete set null,
   page_slug text,
   message text,
-  status text not null default 'new' check (status in ('new', 'qualified', 'in_progress', 'won', 'lost')),
+  status text not null default 'new' check (status in ('new', 'read', 'qualified', 'in_progress', 'won', 'lost')),
   notes text,
   assigned_to uuid,
   created_at timestamptz not null default now(),
@@ -175,35 +175,6 @@ create table if not exists public.testimonials (
   content text not null,
   rating smallint not null default 5 check (rating between 1 and 5),
   is_published boolean not null default false,
-  sort_order integer not null default 0,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.blog_categories (
-  id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
-  name text not null,
-  description text,
-  is_published boolean not null default false,
-  sort_order integer not null default 0,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.blog_posts (
-  id uuid primary key default gen_random_uuid(),
-  category_id uuid references public.blog_categories(id) on delete set null,
-  slug text not null unique,
-  title text not null,
-  excerpt text,
-  body text,
-  cover_image_url text,
-  is_published boolean not null default false,
-  seo_title text,
-  seo_description text,
-  og_image_url text,
-  published_at timestamptz,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -252,8 +223,6 @@ create index if not exists idx_property_images_property_id_sort_order on public.
 create index if not exists idx_property_features_property_id_sort_order on public.property_features (property_id, sort_order);
 create index if not exists idx_leads_status_created_at on public.leads (status, created_at desc);
 create index if not exists idx_leads_assigned_to on public.leads (assigned_to);
-create index if not exists idx_blog_posts_is_published_published_at on public.blog_posts (is_published, published_at desc);
-create index if not exists idx_blog_categories_is_published_sort_order on public.blog_categories (is_published, sort_order);
 create index if not exists idx_testimonials_is_published_sort_order on public.testimonials (is_published, sort_order);
 create index if not exists idx_users_auth_user_id on public.users (auth_user_id);
 
@@ -357,8 +326,6 @@ alter table public.property_features enable row level security;
 alter table public.leads enable row level security;
 alter table public.lead_notes enable row level security;
 alter table public.testimonials enable row level security;
-alter table public.blog_categories enable row level security;
-alter table public.blog_posts enable row level security;
 alter table public.users enable row level security;
 alter table public.audit_logs enable row level security;
 
@@ -466,24 +433,6 @@ create policy "Testimonials admin manage" on public.testimonials
   using (public.current_user_is_admin())
   with check (public.current_user_is_admin());
 
-create policy "Blog categories public read" on public.blog_categories
-  for select
-  using (is_published = true);
-
-create policy "Blog categories admin manage" on public.blog_categories
-  for all
-  using (public.current_user_is_admin())
-  with check (public.current_user_is_admin());
-
-create policy "Blog posts public read" on public.blog_posts
-  for select
-  using (is_published = true);
-
-create policy "Blog posts admin manage" on public.blog_posts
-  for all
-  using (public.current_user_is_admin())
-  with check (public.current_user_is_admin());
-
 create policy "Users self read or admin" on public.users
   for select
   using (auth.uid() = auth_user_id or public.current_user_is_admin());
@@ -523,14 +472,6 @@ for each row execute function public.set_updated_at();
 
 create trigger set_updated_at_testimonials
 before update on public.testimonials
-for each row execute function public.set_updated_at();
-
-create trigger set_updated_at_blog_categories
-before update on public.blog_categories
-for each row execute function public.set_updated_at();
-
-create trigger set_updated_at_blog_posts
-before update on public.blog_posts
 for each row execute function public.set_updated_at();
 
 create trigger set_updated_at_users
@@ -895,10 +836,6 @@ alter policy "Property features public read" on public.property_features
   to anon, authenticated;
 alter policy "Testimonials public read" on public.testimonials
   to anon, authenticated;
-alter policy "Blog categories public read" on public.blog_categories
-  to anon, authenticated;
-alter policy "Blog posts public read" on public.blog_posts
-  to anon, authenticated;
 
 alter policy "Site settings admin manage" on public.site_settings
   to authenticated;
@@ -920,10 +857,6 @@ alter policy "Lead notes admin manage" on public.lead_notes
   to authenticated;
 alter policy "Testimonials admin manage" on public.testimonials
   to authenticated;
-alter policy "Blog categories admin manage" on public.blog_categories
-  to authenticated;
-alter policy "Blog posts admin manage" on public.blog_posts
-  to authenticated;
 alter policy "Users self read or admin" on public.users
   to authenticated;
 alter policy "Users admin manage" on public.users
@@ -940,8 +873,6 @@ grant select on table
   public.property_images,
   public.property_features,
   public.testimonials,
-  public.blog_categories,
-  public.blog_posts
 to anon;
 
 grant select on table
@@ -955,8 +886,6 @@ grant select on table
   public.leads,
   public.lead_notes,
   public.testimonials,
-  public.blog_categories,
-  public.blog_posts,
   public.users,
   public.audit_logs
 to authenticated;
@@ -969,9 +898,7 @@ grant insert, update on table
   public.properties,
   public.property_images,
   public.property_features,
-  public.testimonials,
-  public.blog_categories,
-  public.blog_posts
+  public.testimonials
 to authenticated;
 
 grant delete on table
@@ -981,12 +908,11 @@ grant delete on table
   public.properties,
   public.property_images,
   public.property_features,
-  public.testimonials,
-  public.blog_categories,
-  public.blog_posts
+  public.testimonials
 to authenticated;
 
-grant update on table public.leads, public.users to authenticated;
+grant update, delete on table public.leads to authenticated;
+grant update on table public.users to authenticated;
 grant insert, update, delete on table public.lead_notes to authenticated;
 
 grant insert on table public.leads to service_role;
@@ -1016,11 +942,7 @@ alter default privileges for role postgres in schema public
   revoke execute on functions from public, anon, authenticated, service_role;
 -- Consolidated from 0005_navigation_visibility_settings.sql during the initial schema bootstrap.
 alter table public.site_settings
-  add column if not exists show_blog_navigation boolean not null default false,
   add column if not exists show_areas_navigation boolean not null default false;
-
-comment on column public.site_settings.show_blog_navigation is
-  'Controls whether the Blog link appears in public navigation.';
 
 comment on column public.site_settings.show_areas_navigation is
   'Controls whether the Areas link appears in public navigation.';
