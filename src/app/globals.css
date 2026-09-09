@@ -47,6 +47,32 @@
     letter-spacing: -0.01em;
   }
 
+  .select-scrollbar {
+    scrollbar-color: rgba(203, 178, 140, 0.58) transparent;
+    scrollbar-width: thin;
+  }
+
+  .select-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .select-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .select-scrollbar::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: rgba(203, 178, 140, 0.58);
+    background-clip: padding-box;
+  }
+
+  .select-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(203, 178, 140, 0.88);
+    background-clip: padding-box;
+  }
+
   .rich-text {
     @apply text-sm leading-7 text-brand-ivory/72;
   }

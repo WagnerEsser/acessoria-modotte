@@ -265,7 +265,7 @@ export function Select({
           menuClassName
         )}
       >
-        <div className="max-h-72 overflow-auto p-2">
+        <div className="select-scrollbar max-h-72 overflow-auto p-2">
           {options.map((option, index) => {
             const isSelected = option.value === selectedValue;
             const isActive = index === activeIndex;
