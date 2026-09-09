@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,10 @@ function instagramValue(value: string | undefined) { return value?.match(/instag
 function pageBlocks(all: PageBlockRecord[], page?: PageRecord | null) { return page ? all.filter((b) => b.page_id === page.id).sort((a, z) => a.sort_order - z.sort_order) : []; }
 function editableBlocks(blocks: PageBlockRecord[], predicate?: (block: PageBlockRecord) => boolean): EditableBlock[] { return blocks.filter((b) => predicate ? predicate(b) : true).map((b) => ({ blockKey: b.block_key, title: b.title ?? "", content: b.content ?? "" })); }
 
+function ContentField({ label, children }: { label: string; children: ReactNode }) {
+  return <label className="block space-y-2"><span className="ml-1 block text-[13px] text-brand-ivory/78">{label}</span>{children}</label>;
+}
+
 const pageDefinitions = [
   { slug: "quero-vender", label: "Quero vender", type: "landing", fallback: "Quero vender seu imóvel" },
   { slug: "contato", label: "Contato", type: "landing", fallback: "Fale com a assessoria" },
@@ -46,13 +51,13 @@ function PageEditor({ page, definition, sellCardText }: { page: PageRecord | nul
       </div>
       <AdminForm id={`form-${definition.slug}`} action={`/api/admin/pages/${definition.slug}`} className="space-y-5">
         <input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value={definition.type} />
-        <div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={page?.title ?? definition.fallback} placeholder="Título" required /><Input name="subtitle" defaultValue={page?.subtitle ?? ""} placeholder="Subtítulo" /></div>
+        <div className="grid gap-4 md:grid-cols-2"><ContentField label="Título"><Input name="title" defaultValue={page?.title ?? definition.fallback} placeholder="Título da página" required /></ContentField><ContentField label="Subtítulo"><Input name="subtitle" defaultValue={page?.subtitle ?? ""} placeholder="Resumo exibido abaixo do título" /></ContentField></div>
         {!(["imoveis", "areas"] as const).includes(definition.slug as "imoveis" | "areas") ? (
-          <RichTextEditor name="body" value={page?.body ?? ""} placeholder="Texto principal da página" />
+          <RichTextEditor name="body" label="Texto principal" value={page?.body ?? ""} placeholder="Escreva o conteúdo principal da página" />
         ) : null}
         {definition.slug === "quero-vender" ? (
           <label className="block space-y-2">
-            <span className="text-sm text-brand-ivory/78">Texto do card de atendimento</span>
+            <span className="ml-1 block text-[13px] text-brand-ivory/78">Texto do card de atendimento</span>
             <textarea
               name="sell_card_text"
               rows={4}
@@ -104,13 +109,13 @@ export default async function AdminContentPage() {
     </Card>
 
     <Card id="conteudos-sobre" className="scroll-mt-6 space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /sobre</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Sobre</h2></div><PublishPageSwitch action="/api/admin/pages/sobre" checked={about?.is_published ?? true} /></div>
-      <AdminForm id="form-sobre" action="/api/admin/pages/sobre" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="institutional" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={about?.title ?? "Sobre a assessoria"} placeholder="Título" required /><Input name="subtitle" defaultValue={about?.subtitle ?? ""} placeholder="Subtítulo" /></div><RichTextEditor name="body" value={about?.body ?? ""} placeholder="Texto principal" />
-        <div className="rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"><p className="mb-3 uppercase tracking-[0.28em] text-xs text-brand-beige/55">Perfil da Luana</p><input type="hidden" name="profile_key" value="about-profile" /><Input name="profile_title" defaultValue={profile?.title ?? "Atendimento próximo, leitura técnica e condução direta."} placeholder="Título do perfil" /><RichTextEditor className="mt-4" name="profile_description" value={profile?.content ?? ""} placeholder="Descrição do perfil" /></div>
+      <AdminForm id="form-sobre" action="/api/admin/pages/sobre" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="institutional" /><div className="grid gap-4 md:grid-cols-2"><ContentField label="Título"><Input name="title" defaultValue={about?.title ?? "Sobre a assessoria"} placeholder="Título da página" required /></ContentField><ContentField label="Subtítulo"><Input name="subtitle" defaultValue={about?.subtitle ?? ""} placeholder="Resumo exibido abaixo do título" /></ContentField></div><RichTextEditor name="body" label="Texto principal" value={about?.body ?? ""} placeholder="Escreva o conteúdo principal da página" />
+        <div className="rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"><p className="mb-3 uppercase tracking-[0.28em] text-xs text-brand-beige/55">Perfil da Luana</p><input type="hidden" name="profile_key" value="about-profile" /><ContentField label="Título do perfil"><Input name="profile_title" defaultValue={profile?.title ?? "Atendimento próximo, leitura técnica e condução direta."} placeholder="Título exibido no perfil" /></ContentField><RichTextEditor className="mt-4" name="profile_description" label="Descrição do perfil" value={profile?.content ?? ""} placeholder="Escreva uma descrição do perfil" /></div>
         <div><p className="mb-3 text-xs uppercase tracking-[0.28em] text-brand-beige/55">Direção</p><PageBlocksEditor initialBlocks={directions} label="Direção" addLabel="Adicionar direção" emptyLabel="Nenhum texto de direção será exibido no site." /></div><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Sobre</SubmitButton></AdminForm>
     </Card>
 
     <Card id="conteudos-servicos" className="scroll-mt-6 space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /servicos</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Serviços</h2></div><PublishPageSwitch action="/api/admin/pages/servicos" checked={services?.is_published ?? true} /></div>
-      <AdminForm id="form-servicos" action="/api/admin/pages/servicos" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="services" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={services?.title ?? "Serviços essenciais"} placeholder="Título" required /><Input name="subtitle" defaultValue={services?.subtitle ?? ""} placeholder="Subtítulo" /></div><RichTextEditor name="body" value={services?.body ?? ""} placeholder="Texto principal" /><PageBlocksEditor initialBlocks={serviceBlocks} label="Serviço" addLabel="Adicionar serviço" emptyLabel="Nenhum serviço será exibido no site." /><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Serviços</SubmitButton></AdminForm>
+      <AdminForm id="form-servicos" action="/api/admin/pages/servicos" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="services" /><div className="grid gap-4 md:grid-cols-2"><ContentField label="Título"><Input name="title" defaultValue={services?.title ?? "Serviços essenciais"} placeholder="Título da página" required /></ContentField><ContentField label="Subtítulo"><Input name="subtitle" defaultValue={services?.subtitle ?? ""} placeholder="Resumo exibido abaixo do título" /></ContentField></div><RichTextEditor name="body" label="Texto principal" value={services?.body ?? ""} placeholder="Escreva o conteúdo principal da página" /><PageBlocksEditor initialBlocks={serviceBlocks} label="Serviço" addLabel="Adicionar serviço" emptyLabel="Nenhum serviço será exibido no site." /><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Serviços</SubmitButton></AdminForm>
     </Card>
 
     {pageDefinitions.map((definition) => <PageEditor key={definition.slug} definition={definition} page={pages.find((p) => p.slug === definition.slug) ?? null} sellCardText={definition.slug === "quero-vender" ? sellCardText : undefined} />)}

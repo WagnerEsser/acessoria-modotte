@@ -25,6 +25,7 @@ export type SelectProps = {
   required?: boolean;
   className?: string;
   menuClassName?: string;
+  labelClassName?: string;
 };
 
 function isPrintableKey(key: string) {
@@ -43,6 +44,7 @@ export function Select({
   required = false,
   className,
   menuClassName,
+  labelClassName,
 }: SelectProps) {
   const labelId = useId();
   const valueId = useId();
@@ -207,8 +209,8 @@ export function Select({
   }
 
   return (
-    <div ref={rootRef} className={cn("relative w-full space-y-2", className)} onBlurCapture={handleBlurCapture}>
-      <span id={labelId} className="text-xs uppercase tracking-[0.24em] text-brand-beige/55">
+    <div ref={rootRef} className={cn("relative w-full", className)} onBlurCapture={handleBlurCapture}>
+      <span id={labelId} className={cn("ml-1 block text-xs uppercase tracking-[0.24em] text-brand-beige/55", labelClassName)}>
         {label}
       </span>
 
@@ -230,7 +232,7 @@ export function Select({
         onClick={() => (open ? closeMenu() : openMenu())}
         onKeyDown={handleButtonKeyDown}
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-4 rounded-2xl border border-brand-beige/18 bg-[linear-gradient(180deg,rgba(19,37,59,0.72),rgba(11,27,44,0.94))] px-4 text-left text-sm text-brand-ivory shadow-sm outline-none transition duration-200 hover:border-brand-gold/35 hover:bg-brand-navy/70 focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:cursor-not-allowed disabled:opacity-50",
+          "mt-2 flex h-11 w-full items-center justify-between gap-4 rounded-2xl border border-brand-beige/18 bg-[linear-gradient(180deg,rgba(19,37,59,0.72),rgba(11,27,44,0.94))] px-4 text-left text-sm text-brand-ivory shadow-sm outline-none transition duration-200 hover:border-brand-gold/35 hover:bg-brand-navy/70 focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:cursor-not-allowed disabled:opacity-50",
           open && "border-brand-gold/45 bg-brand-navy/78 shadow-[0_18px_50px_-20px_rgba(203,178,140,0.28)]"
         )}
       >
@@ -246,7 +248,7 @@ export function Select({
       </button>
 
       {!selectedOption ? (
-        <p id={helperTextId} className="text-xs leading-5 text-brand-ivory/50">
+        <p id={helperTextId} className="mt-2 text-xs leading-5 text-brand-ivory/50">
           {placeholder}
         </p>
       ) : null}

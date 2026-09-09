@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import {
   Bold,
   Eraser,
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 type RichTextEditorProps = {
   name: string;
   value: string;
+  label?: ReactNode;
   onChange?: (value: string) => void;
   placeholder?: string;
   className?: string;
@@ -71,7 +72,7 @@ function executeCommand(command: (typeof toolbar)[number]["command"]) {
   }
 }
 
-export function RichTextEditor({ name, value, onChange, placeholder, className }: RichTextEditorProps) {
+export function RichTextEditor({ name, value, label, onChange, placeholder, className }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const hiddenInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,8 +94,10 @@ export function RichTextEditor({ name, value, onChange, placeholder, className }
   }
 
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-brand-beige/18 bg-brand-navy/55 shadow-sm", className)}>
-      <div className="flex flex-wrap gap-1 border-b border-brand-beige/12 bg-brand-ivory/4 p-2" role="toolbar" aria-label="Formatação do texto">
+    <div className={cn("space-y-2", className)}>
+      {label ? <span className="ml-1 block text-[13px] text-brand-ivory/78">{label}</span> : null}
+      <div className="overflow-hidden rounded-2xl border border-brand-beige/18 bg-brand-navy/55 shadow-sm">
+        <div className="flex flex-wrap gap-1 border-b border-brand-beige/12 bg-brand-ivory/4 p-2" role="toolbar" aria-label="Formatação do texto">
         {toolbar.map((item) => {
           const Icon = "icon" in item ? item.icon : null;
           const text = "text" in item ? item.text : null;
@@ -119,19 +122,20 @@ export function RichTextEditor({ name, value, onChange, placeholder, className }
             </button>
           );
         })}
+        </div>
+        <input ref={hiddenInputRef} type="hidden" name={name} defaultValue={value} />
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          role="textbox"
+          aria-multiline="true"
+          data-rich-text-name={name}
+          data-placeholder={placeholder}
+          className="rich-text min-h-40 w-full px-4 py-3 outline-none empty:before:pointer-events-none empty:before:text-brand-ivory/42 empty:before:content-[attr(data-placeholder)]"
+          onInput={handleInput}
+        />
       </div>
-      <input ref={hiddenInputRef} type="hidden" name={name} defaultValue={value} />
-      <div
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        role="textbox"
-        aria-multiline="true"
-        data-rich-text-name={name}
-        data-placeholder={placeholder}
-        className="rich-text min-h-40 w-full px-4 py-3 outline-none empty:before:pointer-events-none empty:before:text-brand-ivory/42 empty:before:content-[attr(data-placeholder)]"
-        onInput={handleInput}
-      />
     </div>
   );
 }

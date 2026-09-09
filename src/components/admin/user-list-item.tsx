@@ -55,15 +55,15 @@ export function UserListItem({
         >
           <input type="hidden" name="action" value="update" />
           <label className="min-w-0 flex-1 space-y-2">
-            <span className="text-xs text-brand-ivory/60">Nome completo</span>
+            <span className="ml-1 block text-xs text-brand-ivory/60">Nome completo</span>
             <Input name="full_name" defaultValue={name} required />
           </label>
           <label className="min-w-0 flex-1 space-y-2">
-            <span className="text-xs text-brand-ivory/60">E-mail</span>
+            <span className="ml-1 block text-xs text-brand-ivory/60">E-mail</span>
             <Input name="email" type="email" defaultValue={email ?? ""} required />
           </label>
           <label className="min-w-0 flex-1 space-y-2">
-            <span className="text-xs text-brand-ivory/60">Nova senha</span>
+            <span className="ml-1 block text-xs text-brand-ivory/60">Nova senha</span>
             <PasswordInput
               name="password"
               placeholder="Opcional"

@@ -68,8 +68,8 @@ export function CreateUserModal({ action }: CreateUserModalProps) {
               className="mt-6 grid gap-5 md:grid-cols-2"
               onSuccess={() => setOpen(false)}
             >
-              <label className="space-y-2">
-                <span className="text-sm text-brand-ivory/78">Nome completo</span>
+              <label className="block space-y-2">
+                <span className="ml-1 block text-[13px] text-brand-ivory/78">Nome completo</span>
                 <Input
                   name="full_name"
                   type="text"
@@ -79,8 +79,8 @@ export function CreateUserModal({ action }: CreateUserModalProps) {
                   required
                 />
               </label>
-              <label className="space-y-2">
-                <span className="text-sm text-brand-ivory/78">E-mail de acesso</span>
+              <label className="block space-y-2">
+                <span className="ml-1 block text-[13px] text-brand-ivory/78">E-mail de acesso</span>
                 <Input
                   name="email"
                   type="email"
@@ -89,8 +89,8 @@ export function CreateUserModal({ action }: CreateUserModalProps) {
                   required
                 />
               </label>
-              <label className="space-y-2 md:col-span-2">
-                <span className="text-sm text-brand-ivory/78">Senha inicial</span>
+              <label className="block space-y-2 md:col-span-2">
+                <span className="ml-1 block text-[13px] text-brand-ivory/78">Senha inicial</span>
                 <PasswordInput
                   name="password"
                   minLength={14}

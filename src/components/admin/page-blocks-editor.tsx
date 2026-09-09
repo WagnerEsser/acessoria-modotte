@@ -86,19 +86,25 @@ export function PageBlocksEditor({
               </Button>
             </div>
             <input type="hidden" name={`block_${index + 1}_key`} value={block.blockKey} />
-            <Input
-              name={`block_${index + 1}_title`}
-              value={block.title}
-              onChange={(event) => updateBlock(index, "title", event.target.value)}
-              placeholder={`Título de ${label.toLowerCase()}`}
-            />
-            <Textarea
-              name={`block_${index + 1}_content`}
-              value={block.content}
-              onChange={(event) => updateBlock(index, "content", event.target.value)}
-              rows={4}
-              placeholder={contentLabel}
-            />
+            <label className="block space-y-2">
+              <span className="ml-1 block text-[13px] text-brand-ivory/78">Título</span>
+              <Input
+                name={`block_${index + 1}_title`}
+                value={block.title}
+                onChange={(event) => updateBlock(index, "title", event.target.value)}
+                placeholder={`Título de ${label.toLowerCase()}`}
+              />
+            </label>
+            <label className="block space-y-2">
+              <span className="ml-1 block text-[13px] text-brand-ivory/78">{contentLabel}</span>
+              <Textarea
+                name={`block_${index + 1}_content`}
+                value={block.content}
+                onChange={(event) => updateBlock(index, "content", event.target.value)}
+                rows={4}
+                placeholder={`Escreva a ${contentLabel.toLowerCase()}`}
+              />
+            </label>
           </div>
         ))}
         </div>

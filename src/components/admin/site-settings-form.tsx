@@ -59,8 +59,8 @@ export function SiteSettingsForm({
     <AdminForm action={action} className="space-y-5">
       <input type="hidden" name="redirect_to" value="/admin/conteudos" />
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-2">
-          <span className="text-sm text-brand-ivory/78">WhatsApp</span>
+        <label className="block space-y-2">
+          <span className="ml-1 block text-[13px] text-brand-ivory/78">WhatsApp</span>
           <Input
             name="whatsapp_number"
             type="tel"
@@ -74,8 +74,8 @@ export function SiteSettingsForm({
             title="Informe um WhatsApp com DDD, no formato (11) 99999-9999."
           />
         </label>
-        <label className="space-y-2">
-          <span className="text-sm text-brand-ivory/78">Telefone</span>
+        <label className="block space-y-2">
+          <span className="ml-1 block text-[13px] text-brand-ivory/78">Telefone</span>
           <Input
             name="primary_phone"
             type="tel"
@@ -89,8 +89,8 @@ export function SiteSettingsForm({
             title="Informe um telefone com DDD, no formato (11) 3333-4444."
           />
         </label>
-        <label className="space-y-2">
-          <span className="text-sm text-brand-ivory/78">E-mail</span>
+        <label className="block space-y-2">
+          <span className="ml-1 block text-[13px] text-brand-ivory/78">E-mail</span>
           <Input
             name="email"
             type="email"
@@ -102,8 +102,8 @@ export function SiteSettingsForm({
             title="Informe um e-mail válido."
           />
         </label>
-        <label className="space-y-2">
-          <span className="text-sm text-brand-ivory/78">Instagram</span>
+        <label className="block space-y-2">
+          <span className="ml-1 block text-[13px] text-brand-ivory/78">Instagram</span>
           <Input
             name="instagram"
             placeholder="@usuario"
@@ -113,7 +113,7 @@ export function SiteSettingsForm({
         </label>
       </div>
       <label className="block space-y-2">
-        <span className="text-sm text-brand-ivory/78">Frase institucional</span>
+        <span className="ml-1 block text-[13px] text-brand-ivory/78">Frase institucional</span>
         <textarea
           name="impact_phrase"
           rows={3}

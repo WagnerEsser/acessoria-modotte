@@ -179,7 +179,7 @@ export default async function HomePage() {
             </Card>
 
             <div className="space-y-5">
-              <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight text-brand-ivory sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight text-brand-ivory sm:text-5xl lg:text-5xl">
                 {heroTitle}
               </h1>
               <p className="max-w-2xl whitespace-pre-line text-base leading-7 text-brand-ivory/72 sm:text-lg">

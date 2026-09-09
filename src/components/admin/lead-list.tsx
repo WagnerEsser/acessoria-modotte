@@ -232,7 +232,7 @@ export function LeadList({ initialLeads }: { initialLeads: AdminLead[] }) {
                 </div>
 
                 <div className="w-full space-y-2 md:w-56">
-                  <label htmlFor={`status-${lead.id}`} className="text-xs uppercase tracking-[0.2em] text-brand-beige/55">
+                  <label htmlFor={`status-${lead.id}`} className="ml-1 block text-xs uppercase tracking-[0.2em] text-brand-beige/55">
                     Atualizar status
                   </label>
                   <select

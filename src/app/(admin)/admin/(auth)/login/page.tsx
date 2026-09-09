@@ -76,7 +76,7 @@ export default async function AdminLoginPage({
           <input type="hidden" name="redirectTo" value={redirectTo} />
 
           <label className="block space-y-2">
-            <span className="text-sm text-brand-ivory/78">E-mail</span>
+            <span className="ml-1 block text-[13px] text-brand-ivory/78">E-mail</span>
             <Input
               autoComplete="email"
               name="email"
@@ -87,7 +87,7 @@ export default async function AdminLoginPage({
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm text-brand-ivory/78">Senha</span>
+            <span className="ml-1 block text-[13px] text-brand-ivory/78">Senha</span>
             <PasswordInput
               autoComplete="current-password"
               name="password"
