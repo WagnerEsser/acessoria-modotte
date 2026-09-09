@@ -28,8 +28,31 @@ const leadSubmissionSchema = z
     website: optionalText(200),
     turnstileToken: optionalText(2048),
   })
-  .refine((value) => Boolean(value.email || value.phone), {
-    message: "email_or_phone_required",
+  .superRefine((value, context) => {
+    if (!value.email && !value.phone) {
+      context.addIssue({
+        code: "custom",
+        path: ["email"],
+        message: "email_or_phone_required",
+      });
+    }
+
+    if (value.pageSlug === "contato") {
+      if (!value.email) {
+        context.addIssue({ code: "custom", path: ["email"], message: "required" });
+      }
+      if (!value.phone) {
+        context.addIssue({ code: "custom", path: ["phone"], message: "required" });
+      }
+      if (!value.interestType) {
+        context.addIssue({ code: "custom", path: ["interestType"], message: "required" });
+      }
+      if (!value.message) {
+        context.addIssue({ code: "custom", path: ["message"], message: "required" });
+      } else if (value.message.length < 10) {
+        context.addIssue({ code: "custom", path: ["message"], message: "min_length" });
+      }
+    }
   });
 
 export type LeadSubmission = z.infer<typeof leadSubmissionSchema>;

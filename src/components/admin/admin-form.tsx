@@ -12,7 +12,7 @@ type AdminFormProps = {
   className?: string;
   id?: string;
   onError?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (form: HTMLFormElement) => void;
   refreshOnSuccess?: boolean;
 };
 
@@ -72,7 +72,19 @@ export function AdminForm({
     setFieldErrors({});
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const form = event.currentTarget;
+
+      // Read rich text directly from the editor so the submitted value cannot lag behind the visible content.
+      form.querySelectorAll<HTMLElement>("[data-rich-text-name]").forEach((editor) => {
+        const name = editor.dataset.richTextName;
+        const field = name ? Array.from(form.elements).find((element) => element.getAttribute("name") === name) : null;
+
+        if (field instanceof HTMLInputElement) {
+          field.value = editor.innerHTML;
+        }
+      });
+
+      const formData = new FormData(form);
       const body = new URLSearchParams();
 
       for (const [key, value] of formData.entries()) {
@@ -105,7 +117,7 @@ export function AdminForm({
       }
 
       showToast("success", payload?.message ?? "Alterações salvas com sucesso.");
-      onSuccess?.();
+      onSuccess?.(form);
       setPending(false);
 
       if (payload?.redirect) {

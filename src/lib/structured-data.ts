@@ -1,5 +1,4 @@
 import type {
-  PublicBlogPost,
   PublicPropertyDetail,
   PublicSiteSettings,
 } from "@/lib/public-content";
@@ -13,7 +12,6 @@ type BreadcrumbItem = {
 function absoluteUrl(path: string) {
   return new URL(path, siteUrl).toString();
 }
-
 function getPropertySchemaType(propertyType: string) {
   const normalized = propertyType.toLocaleLowerCase("pt-BR");
 
@@ -68,7 +66,6 @@ export function buildOrganizationStructuredData(settings: PublicSiteSettings) {
     ...(sameAs.length ? { sameAs } : {}),
   };
 }
-
 export function buildWebsiteStructuredData(settings: PublicSiteSettings) {
   return {
     "@context": "https://schema.org",
@@ -169,25 +166,3 @@ export function buildPropertyStructuredData(property: PublicPropertyDetail) {
   };
 }
 
-export function buildArticleStructuredData(post: PublicBlogPost) {
-  const image = post.ogImageUrl ?? post.coverImageUrl;
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "@id": absoluteUrl(`/blog/${post.slug}#article`),
-    url: absoluteUrl(`/blog/${post.slug}`),
-    headline: post.title,
-    description: post.seoDescription ?? post.excerpt,
-    inLanguage: "pt-BR",
-    ...(image ? { image: [absoluteUrl(image)] } : {}),
-    ...(post.publishedAt ? { datePublished: post.publishedAt } : {}),
-    dateModified: post.updatedAt,
-    author: {
-      "@id": absoluteUrl("/#organization"),
-    },
-    publisher: {
-      "@id": absoluteUrl("/#organization"),
-    },
-  };
-}

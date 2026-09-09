@@ -37,7 +37,6 @@ type SiteSettingsRecord = {
   impact_phrase: string | null;
   default_seo_title: string | null;
   default_seo_description: string | null;
-  show_blog_navigation: boolean;
   show_areas_navigation: boolean;
 };
 
@@ -57,7 +56,6 @@ const siteSettingsInputSchema = z.object({
     .refine((value) => !value || z.string().email().safeParse(value).success),
   impactPhrase: z.string().trim().min(2).max(500),
   instagram: z.string().trim().max(200),
-  showBlogNavigation: z.boolean(),
   showAreasNavigation: z.boolean(),
 });
 
@@ -159,7 +157,6 @@ export async function POST(request: NextRequest) {
     email: readFormValue(formData, "email"),
     impactPhrase: readFormValue(formData, "impact_phrase") || brand.slogan,
     instagram: readFormValue(formData, "instagram"),
-    showBlogNavigation: readFormBoolean(formData, "show_blog_navigation"),
     showAreasNavigation: readFormBoolean(formData, "show_areas_navigation"),
   });
 
@@ -207,7 +204,7 @@ export async function POST(request: NextRequest) {
     await supabase
       .from("site_settings")
       .select(
-        "company_name, brand_name, legal_name, logo_url, primary_color, secondary_color, accent_color, primary_phone, whatsapp_number, email, address, city, state, social_links, opening_hours, impact_phrase, default_seo_title, default_seo_description, show_blog_navigation, show_areas_navigation",
+        "company_name, brand_name, legal_name, logo_url, primary_color, secondary_color, accent_color, primary_phone, whatsapp_number, email, address, city, state, social_links, opening_hours, impact_phrase, default_seo_title, default_seo_description, show_areas_navigation",
       )
       .eq("singleton_key", "main")
       .maybeSingle();
@@ -249,7 +246,6 @@ export async function POST(request: NextRequest) {
         settings?.default_seo_title ?? `${brand.name} | ${brand.subtitle}`,
       default_seo_description:
         settings?.default_seo_description ?? impactPhrase,
-      show_blog_navigation: parsed.data.showBlogNavigation,
       show_areas_navigation: parsed.data.showAreasNavigation,
     },
     { onConflict: "singleton_key" },

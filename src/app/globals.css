@@ -17,6 +17,11 @@
     @apply border-brand-beige/15;
   }
 
+  button:not(:disabled),
+  a[href] {
+    cursor: pointer;
+  }
+
   html {
     scroll-behavior: smooth;
   }

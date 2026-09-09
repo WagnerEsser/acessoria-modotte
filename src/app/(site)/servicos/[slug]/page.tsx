@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -82,10 +82,10 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             "Atendimento próximo para organizar informações, reduzir riscos e conduzir a negociação com clareza."
           }
           action={
-            <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ variant: "gold" })}>
               Solicitar atendimento
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 

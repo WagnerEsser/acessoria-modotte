@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { RichText } from "@/components/shared/rich-text";
 import { TurnstileWidget } from "@/components/security/turnstile-widget";
 import { AdminForm } from "@/components/admin/admin-form";
@@ -42,6 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function EvaluationPage() {
   const page = await getPublicPageBySlug("avaliacao");
+  if (!page) notFound();
   const paragraphs = splitParagraphs(page?.body);
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -52,10 +54,10 @@ export default async function EvaluationPage() {
           title={page?.title ?? "Solicite uma leitura comercial do seu imóvel"}
           description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo de avaliação ainda não cadastrado."}
           action={
-            <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ variant: "gold" })}>
               Falar com a assessoria
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 
@@ -87,7 +89,7 @@ export default async function EvaluationPage() {
                       {block.title ?? "Bloco"}
                     </h2>
                     {block.content ? (
-                      <p className="mt-2 text-sm leading-6 text-brand-ivory/68">{block.content}</p>
+                      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-brand-ivory/68">{block.content}</p>
                     ) : null}
                   </div>
                 ))
@@ -144,9 +146,9 @@ export default async function EvaluationPage() {
                   Enviar pedido
                   <ArrowRight className="size-4" />
                 </SubmitButton>
-                <Link href="/contato" className={buttonVariants({ variant: "outline" })}>
+                <PublicPageLink href="/contato" className={buttonVariants({ variant: "outline" })}>
                   Falar com a assessoria
-                </Link>
+                </PublicPageLink>
               </div>
             </AdminForm>
           </Card>

@@ -11,6 +11,7 @@ import { AdminForm } from "@/components/admin/admin-form";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppDisplayNumber } from "@/lib/contact";
 import { formatDateTimeBRL } from "@/lib/formatters";
 import { getPublicSiteSettings } from "@/lib/public-content";
+import { SELL_CARD_FALLBACK_TEXT } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 import { getVerifiedAdminIdentity } from "@/lib/admin-identity";
@@ -29,13 +30,16 @@ const pageDefinitions = [
   { slug: "quero-vender", label: "Quero vender", type: "landing", fallback: "Quero vender seu imóvel" },
   { slug: "contato", label: "Contato", type: "landing", fallback: "Fale com a assessoria" },
   { slug: "imoveis", label: "Imóveis", type: "landing", fallback: "Imóveis" },
-  { slug: "blog", label: "Blog", type: "landing", fallback: "Blog" },
   { slug: "areas", label: "Áreas atendidas", type: "landing", fallback: "Áreas atendidas" },
 ] as const;
 
-function PageEditor({ page, definition }: { page: PageRecord | null; definition: { slug: string; label: string; type: string; fallback: string } }) {
+function PageEditor({ page, definition, sellCardText }: { page: PageRecord | null; definition: { slug: string; label: string; type: string; fallback: string }; sellCardText?: string | null }) {
+  const sectionId = definition.slug === "contato"
+    ? "conteudos-contato-pagina"
+    : `conteudos-${definition.slug}`;
+
   return (
-    <Card className="space-y-5 p-6">
+    <Card id={sectionId} className="scroll-mt-6 space-y-5 p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /{definition.slug}</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">{definition.label}</h2></div>
         <PublishPageSwitch action={`/api/admin/pages/${definition.slug}`} checked={page?.is_published ?? true} />
@@ -43,7 +47,22 @@ function PageEditor({ page, definition }: { page: PageRecord | null; definition:
       <AdminForm id={`form-${definition.slug}`} action={`/api/admin/pages/${definition.slug}`} className="space-y-5">
         <input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value={definition.type} />
         <div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={page?.title ?? definition.fallback} placeholder="Título" required /><Input name="subtitle" defaultValue={page?.subtitle ?? ""} placeholder="Subtítulo" /></div>
-        <RichTextEditor name="body" value={page?.body ?? ""} placeholder="Texto principal da página" />
+        {!(["imoveis", "areas"] as const).includes(definition.slug as "imoveis" | "areas") ? (
+          <RichTextEditor name="body" value={page?.body ?? ""} placeholder="Texto principal da página" />
+        ) : null}
+        {definition.slug === "quero-vender" ? (
+          <label className="block space-y-2">
+            <span className="text-sm text-brand-ivory/78">Texto do card de atendimento</span>
+            <textarea
+              name="sell_card_text"
+              rows={4}
+              defaultValue={sellCardText ?? SELL_CARD_FALLBACK_TEXT}
+              placeholder="Texto exibido no card de atendimento"
+              maxLength={5000}
+              className="min-h-[160px] w-full rounded-2xl border border-brand-beige/18 bg-brand-navy/55 px-4 py-3 text-sm leading-7 text-brand-ivory placeholder:text-brand-ivory/42 shadow-sm outline-none transition focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20"
+            />
+          </label>
+        ) : null}
         {definition.slug === "sobre" ? null : null}
         <SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página</SubmitButton>
       </AdminForm>
@@ -68,10 +87,12 @@ export default async function AdminContentPage() {
   const profile = aboutPageBlocks.find((b) => b.block_key === "about-profile");
   const directions = editableBlocks(aboutPageBlocks, (b) => b.block_key !== "about-profile");
   const serviceBlocks = editableBlocks(pageBlocks(blocks, services));
+  const sellPage = pages.find((p) => p.slug === "quero-vender") ?? null;
+  const sellCardText = pageBlocks(blocks, sellPage).find((block) => block.block_key === "sell-card-text")?.content;
   return <div className="space-y-8">
     <SectionHeading eyebrow="Conteúdos" title="Conteúdos públicos em edição centralizada" description="Edite os textos exibidos no site e escolha quais páginas aparecem na navegação." />
 
-    <Card className="space-y-5 p-6"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Contato e marca</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Dados principais da assessoria</h2></div>
+    <Card id="conteudos-contato" className="scroll-mt-6 space-y-5 p-6"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Contato e marca</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Dados principais da assessoria</h2></div>
       <SiteSettingsForm
         action="/api/admin/site-settings"
         email={settings.email ?? ""}
@@ -82,16 +103,16 @@ export default async function AdminContentPage() {
       />
     </Card>
 
-    <Card className="space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /sobre</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Sobre</h2></div><PublishPageSwitch action="/api/admin/pages/sobre" checked={about?.is_published ?? true} /></div>
+    <Card id="conteudos-sobre" className="scroll-mt-6 space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /sobre</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Sobre</h2></div><PublishPageSwitch action="/api/admin/pages/sobre" checked={about?.is_published ?? true} /></div>
       <AdminForm id="form-sobre" action="/api/admin/pages/sobre" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="institutional" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={about?.title ?? "Sobre a assessoria"} placeholder="Título" required /><Input name="subtitle" defaultValue={about?.subtitle ?? ""} placeholder="Subtítulo" /></div><RichTextEditor name="body" value={about?.body ?? ""} placeholder="Texto principal" />
         <div className="rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4"><p className="mb-3 uppercase tracking-[0.28em] text-xs text-brand-beige/55">Perfil da Luana</p><input type="hidden" name="profile_key" value="about-profile" /><Input name="profile_title" defaultValue={profile?.title ?? "Atendimento próximo, leitura técnica e condução direta."} placeholder="Título do perfil" /><RichTextEditor className="mt-4" name="profile_description" value={profile?.content ?? ""} placeholder="Descrição do perfil" /></div>
         <div><p className="mb-3 text-xs uppercase tracking-[0.28em] text-brand-beige/55">Direção</p><PageBlocksEditor initialBlocks={directions} label="Direção" addLabel="Adicionar direção" emptyLabel="Nenhum texto de direção será exibido no site." /></div><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Sobre</SubmitButton></AdminForm>
     </Card>
 
-    <Card className="space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /servicos</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Serviços</h2></div><PublishPageSwitch action="/api/admin/pages/servicos" checked={services?.is_published ?? true} /></div>
+    <Card id="conteudos-servicos" className="scroll-mt-6 space-y-5 p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Página /servicos</p><h2 className="mt-2 font-display text-3xl text-brand-ivory">Serviços</h2></div><PublishPageSwitch action="/api/admin/pages/servicos" checked={services?.is_published ?? true} /></div>
       <AdminForm id="form-servicos" action="/api/admin/pages/servicos" className="space-y-5"><input type="hidden" name="redirect_to" value="/admin/conteudos" /><input type="hidden" name="page_type" value="services" /><div className="grid gap-4 md:grid-cols-2"><Input name="title" defaultValue={services?.title ?? "Serviços essenciais"} placeholder="Título" required /><Input name="subtitle" defaultValue={services?.subtitle ?? ""} placeholder="Subtítulo" /></div><RichTextEditor name="body" value={services?.body ?? ""} placeholder="Texto principal" /><PageBlocksEditor initialBlocks={serviceBlocks} label="Serviço" addLabel="Adicionar serviço" emptyLabel="Nenhum serviço será exibido no site." /><SubmitButton size="lg" pendingLabel="Salvando página...">Salvar página Serviços</SubmitButton></AdminForm>
     </Card>
 
-    {pageDefinitions.map((definition) => <PageEditor key={definition.slug} definition={definition} page={pages.find((p) => p.slug === definition.slug) ?? null} />)}
+    {pageDefinitions.map((definition) => <PageEditor key={definition.slug} definition={definition} page={pages.find((p) => p.slug === definition.slug) ?? null} sellCardText={definition.slug === "quero-vender" ? sellCardText : undefined} />)}
   </div>;
 }

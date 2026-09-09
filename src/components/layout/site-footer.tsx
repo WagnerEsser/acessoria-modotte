@@ -8,9 +8,10 @@ import {
   type PublicSiteSettings,
 } from "@/lib/public-content";
 import { brand } from "@/lib/brand";
-import { getVisiblePublicNavigation } from "@/lib/navigation";
+import { getVisiblePublicNavigation, type PublicNavigationVisibility } from "@/lib/navigation";
 
 type SiteFooterProps = {
+  navigationVisibility: PublicNavigationVisibility;
   siteSettings: PublicSiteSettings;
 };
 
@@ -58,10 +59,10 @@ function renderContactIcon(label: string) {
   return <Phone className="size-4" aria-hidden="true" />;
 }
 
-export function SiteFooter({ siteSettings }: SiteFooterProps) {
+export function SiteFooter({ navigationVisibility, siteSettings }: SiteFooterProps) {
   const contactChannels = getPublicContactChannels(siteSettings).slice(0, 4);
   const impactPhraseParts = siteSettings.impactPhrase.split(/\.\s+/, 2);
-  const footerNavigation = getVisiblePublicNavigation(siteSettings);
+  const footerNavigation = getVisiblePublicNavigation(navigationVisibility);
 
   return (
     <footer className="border-t border-brand-beige/10 bg-brand-ink/96">
@@ -71,7 +72,7 @@ export function SiteFooter({ siteSettings }: SiteFooterProps) {
           <div className="relative max-w-md overflow-hidden rounded-[2rem] border border-brand-beige/14 bg-[linear-gradient(135deg,rgba(203,178,140,0.16),rgba(11,27,44,0.94))] p-5 shadow-[0_20px_60px_-34px_rgba(0,0,0,0.72)]">
             <div className="absolute -right-8 -top-8 size-24 rounded-full bg-brand-gold/12 blur-3xl" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.10),transparent_55%)]" />
-            <p className="relative text-base font-medium leading-7 text-brand-ivory/92 sm:text-lg">
+            <p className="relative whitespace-pre-line text-base font-medium leading-7 text-brand-ivory/92 sm:text-lg">
               {impactPhraseParts.length === 2 ? (
                 <>
                   {impactPhraseParts[0]}.

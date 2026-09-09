@@ -27,8 +27,7 @@ const EDITABLE_PAGE_DEFAULTS = {
   "quero-vender": { title: "Quero vender seu imóvel", pageType: "landing", sortOrder: 30 },
   contato: { title: "Fale com a assessoria", pageType: "landing", sortOrder: 40 },
   imoveis: { title: "Imóveis", pageType: "landing", sortOrder: 50 },
-  blog: { title: "Blog", pageType: "landing", sortOrder: 60 },
-  areas: { title: "Áreas atendidas", pageType: "landing", sortOrder: 70 },
+  areas: { title: "Áreas atendidas", pageType: "landing", sortOrder: 60 },
 } as const;
 
 const pageInputSchema = z.object({
@@ -169,8 +168,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const isPublished = readFormBoolean(formData, "is_published");
     const { data: updatedPage, error: publishError } = await supabase
       .from("pages")
-      .update({ is_published: isPublished })
-      .eq("slug", slug)
+      .upsert(
+        {
+          slug,
+          title: EDITABLE_PAGE_DEFAULTS[slug].title,
+          page_type: EDITABLE_PAGE_DEFAULTS[slug].pageType,
+          is_published: isPublished,
+          sort_order: EDITABLE_PAGE_DEFAULTS[slug].sortOrder,
+        },
+        { onConflict: "slug" },
+      )
       .select("id")
       .maybeSingle();
 
@@ -183,17 +190,14 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       );
     }
 
-    if (slug === "blog" || slug === "areas") {
+    if (slug === "areas") {
       await supabase
         .from("site_settings")
-        .update({
-          ...(slug === "blog" ? { show_blog_navigation: isPublished } : {}),
-          ...(slug === "areas" ? { show_areas_navigation: isPublished } : {}),
-        })
+        .update({ show_areas_navigation: isPublished })
         .eq("singleton_key", "main");
     }
 
-    for (const path of ["/", "/sobre", "/servicos", "/quero-vender", "/contato", "/imoveis", "/blog", "/areas", "/sitemap.xml"]) revalidatePath(path);
+    for (const path of ["/", "/sobre", "/servicos", "/quero-vender", "/contato", "/imoveis", "/areas", "/sitemap.xml"]) revalidatePath(path);
 
     return applyNoStoreHeaders(
       NextResponse.json({
@@ -212,13 +216,17 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const defaults = EDITABLE_PAGE_DEFAULTS[slug];
   const title = readFormValue(formData, "title") || defaults.title;
   const subtitle = toNullableText(readFormValue(formData, "subtitle"));
-  const body = toNullableRichText(readFormValue(formData, "body"));
+  const body = ["imoveis", "areas"].includes(slug)
+    ? null
+    : toNullableRichText(readFormValue(formData, "body"));
   const pageType =
     readFormValue(formData, "page_type") || existingPage?.page_type || defaults.pageType;
   const seoTitle = toNullableText(readFormValue(formData, "seo_title")) ?? existingPage?.seo_title ?? null;
   const seoDescription =
     toNullableText(readFormValue(formData, "seo_description")) ?? existingPage?.seo_description ?? null;
-  const isPublished = readFormBoolean(formData, "is_published");
+  const isPublished = formData.has("is_published")
+    ? readFormBoolean(formData, "is_published")
+    : existingPage?.is_published ?? true;
   const pageInput = pageInputSchema.safeParse({
     title,
     subtitle,
@@ -271,9 +279,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const blocks = blocksResult.data;
   const profileTitle = toNullableText(readFormValue(formData, "profile_title"))?.slice(0, 160) ?? null;
   const profileDescription = toNullableRichText(readFormValue(formData, "profile_description"))?.slice(0, 5000) ?? null;
+  const sellCardText = slug === "quero-vender"
+    ? toNullableText(readFormValue(formData, "sell_card_text"))?.slice(0, 5000) ?? null
+    : null;
   const submittedBlocks = slug === "sobre"
     ? [{ block_key: "about-profile", title: profileTitle, content: profileDescription, sort_order: 0, is_active: Boolean(profileTitle || profileDescription) }, ...blocks.map((block, index) => ({ ...block, sort_order: index + 1 }))]
-    : blocks;
+    : slug === "quero-vender"
+      ? sellCardText
+        ? [{ block_key: "sell-card-text", title: null, content: sellCardText, sort_order: 0, is_active: true }]
+        : []
+      : blocks;
 
   const { data: savedPage, error: pageError } = await supabase
     .from("pages")
@@ -343,13 +358,12 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     }
   }
 
-  if (slug === "blog" || slug === "areas") {
+  if (slug === "areas") {
     await supabase.from("site_settings").update({
-      ...(slug === "blog" ? { show_blog_navigation: pageInput.data.isPublished } : {}),
-      ...(slug === "areas" ? { show_areas_navigation: pageInput.data.isPublished } : {}),
+      show_areas_navigation: pageInput.data.isPublished,
     }).eq("singleton_key", "main");
   }
-  for (const path of ["/", "/sobre", "/servicos", "/quero-vender", "/contato", "/imoveis", "/blog", "/areas", "/sitemap.xml"]) revalidatePath(path);
+  for (const path of ["/", "/sobre", "/servicos", "/quero-vender", "/contato", "/imoveis", "/areas", "/sitemap.xml"]) revalidatePath(path);
 
   const response = NextResponse.redirect(
     new URL(`${redirectTo}?status=updated`, requestOrigin),

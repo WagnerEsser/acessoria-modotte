@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppHref } from "@/lib/contact";
 import { buildMetadata } from "@/lib/seo";
 import {
@@ -135,10 +136,10 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           title={property.title}
           description={property.summary ?? undefined}
           action={
-            <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ variant: "gold" })}>
               Falar com a assessoria
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 

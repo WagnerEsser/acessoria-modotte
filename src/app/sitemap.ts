@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 
 import {
-  getPublicBlogPosts,
   getPublicNeighborhoods,
   getPublicPageBySlug,
   getPublicPages,
@@ -73,10 +72,9 @@ function propertyFacetRoutes(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [properties, neighborhoods, blogPosts, pages, servicesPage] = await Promise.all([
+  const [properties, neighborhoods, pages, servicesPage] = await Promise.all([
     getPublicProperties(),
     getPublicNeighborhoods(),
-    getPublicBlogPosts(),
     getPublicPages(),
     getPublicPageBySlug("servicos"),
   ]);
@@ -100,12 +98,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: latestDate(neighborhoods.map((neighborhood) => neighborhood.updatedAt)),
       changeFrequency: "weekly",
       priority: 0.8,
-    },
-    {
-      url: absoluteSiteUrl("/blog"),
-      lastModified: latestDate(blogPosts.map((post) => post.updatedAt)),
-      changeFrequency: "weekly",
-      priority: 0.7,
     },
     ...pages
       .filter((page) => publicPagePaths[page.slug])
@@ -133,12 +125,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const blogRoutes = blogPosts.map((post) => ({
-    url: absoluteSiteUrl(`/blog/${post.slug}`),
-    lastModified: validDate(post.updatedAt ?? post.publishedAt),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
   const serviceRoutes: MetadataRoute.Sitemap = Array.from(
     new Set(
       (servicesPage?.blocks ?? [])
@@ -160,6 +146,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...propertyCityRoutes,
     ...propertyRoutes,
     ...neighborhoodRoutes,
-    ...blogRoutes,
   ];
 }

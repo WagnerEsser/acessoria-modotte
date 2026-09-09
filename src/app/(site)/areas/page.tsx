@@ -1,12 +1,14 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight, MapPinHouse } from "lucide-react";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getPublicNeighborhoods, getPublicPageBySlug, splitParagraphs } from "@/lib/public-content";
+import { getPublicNeighborhoods, getPublicPageBySlug } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 import { buildBreadcrumbStructuredData } from "@/lib/structured-data";
 
@@ -19,7 +21,7 @@ export async function generateMetadata() {
 
 export default async function AreasPage() {
   const [neighborhoods, page] = await Promise.all([getPublicNeighborhoods(), getPublicPageBySlug("areas")]);
-  const paragraphs = splitParagraphs(page?.body);
+  if (!page) notFound();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -35,12 +37,12 @@ export default async function AreasPage() {
           as="h1"
           eyebrow="Atuação local"
           title={page?.title ?? "Cidades e bairros atendidos pela assessoria"}
-          description={page?.subtitle ?? paragraphs[0] ?? "Explore as regiões com imóveis publicados e encontre informações organizadas para sua busca."}
+          description={page?.subtitle ?? "Explore as regiões com imóveis publicados e encontre informações organizadas para sua busca."}
           action={
-            <Link href="/imoveis" className={buttonVariants({ variant: "gold" })}>
+            <PublicPageLink href="/imoveis" className={buttonVariants({ variant: "gold" })}>
               Ver todos os imóveis
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 

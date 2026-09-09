@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { WhatsAppBubble } from "@/components/layout/whatsapp-bubble";
 import { JsonLd } from "@/components/seo/json-ld";
-import { getPublicPageBySlug, getPublicSiteSettings } from "@/lib/public-content";
+import { getPublicPages, getPublicSiteSettings } from "@/lib/public-content";
 import {
   buildOrganizationStructuredData,
   buildWebsiteStructuredData,
@@ -15,11 +15,19 @@ export default async function SiteLayout({
 }: {
   children: ReactNode;
 }) {
-  const [siteSettings, servicesPage, sellPage] = await Promise.all([
+  const [siteSettings, publicPages] = await Promise.all([
     getPublicSiteSettings(),
-    getPublicPageBySlug("servicos"),
-    getPublicPageBySlug("quero-vender"),
+    getPublicPages(),
   ]);
+  const publishedSlugs = new Set(publicPages.map((page) => page.slug));
+  const navigationVisibility = {
+    showAreasNavigation: publishedSlugs.has("areas"),
+    showServicesNavigation: publishedSlugs.has("servicos"),
+    showSellNavigation: publishedSlugs.has("quero-vender"),
+    showAboutNavigation: publishedSlugs.has("sobre"),
+    showPropertiesNavigation: publishedSlugs.has("imoveis"),
+    showContactNavigation: publishedSlugs.has("contato"),
+  };
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -30,13 +38,10 @@ export default async function SiteLayout({
         ]}
       />
       <SiteHeader
-        showBlogNavigation={siteSettings.showBlogNavigation}
-        showAreasNavigation={siteSettings.showAreasNavigation}
-        showServicesNavigation={servicesPage !== null}
-        showSellNavigation={sellPage !== null}
+        {...navigationVisibility}
       />
       <main className="flex-1">{children}</main>
-      <SiteFooter siteSettings={siteSettings} />
+      <SiteFooter siteSettings={siteSettings} navigationVisibility={navigationVisibility} />
       <WhatsAppBubble whatsappNumber={siteSettings.whatsappNumber} />
     </div>
   );

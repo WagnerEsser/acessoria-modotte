@@ -9,6 +9,9 @@ import {
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { richTextToPlainText } from "@/lib/rich-text";
 
+export const SELL_CARD_FALLBACK_TEXT =
+  "Conte sua necessidade para a assessoria preparar uma estratégia de venda adequada ao imóvel e ao seu momento.";
+
 type JsonRecord = Record<string, unknown>;
 
 type SiteSettingsRow = {
@@ -30,7 +33,6 @@ type SiteSettingsRow = {
   impact_phrase: string | null;
   default_seo_title: string | null;
   default_seo_description: string | null;
-  show_blog_navigation: boolean;
   show_areas_navigation: boolean;
 };
 
@@ -109,29 +111,6 @@ type PropertyRow = {
   property_features: PropertyFeatureRow[] | null;
 };
 
-type BlogCategoryRow = {
-  slug: string;
-  name: string;
-};
-
-type BlogPostRow = {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string | null;
-  body: string | null;
-  cover_image_url: string | null;
-  is_published: boolean;
-  seo_title: string | null;
-  seo_description: string | null;
-  og_image_url: string | null;
-  published_at: string | null;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-  category: BlogCategoryRow | BlogCategoryRow[] | null;
-};
-
 type PageBlockRow = {
   id: string;
   block_key: string;
@@ -177,7 +156,6 @@ export type PublicSiteSettings = {
   impactPhrase: string;
   defaultSeoTitle: string;
   defaultSeoDescription: string;
-  showBlogNavigation: boolean;
   showAreasNavigation: boolean;
 };
 
@@ -249,25 +227,6 @@ export type PublicPropertyDetail = PublicPropertyCard & {
   features: PublicPropertyFeature[];
 };
 
-export type PublicBlogCard = {
-  slug: string;
-  title: string;
-  excerpt: string | null;
-  category: string | null;
-  readingTime: string;
-  publishedAt: string | null;
-  summary: string[];
-  coverImageUrl: string | null;
-  seoTitle: string | null;
-  seoDescription: string | null;
-  ogImageUrl: string | null;
-  updatedAt: string;
-};
-
-export type PublicBlogPost = PublicBlogCard & {
-  body: string | null;
-};
-
 export type PublicNeighborhood = {
   slug: string;
   name: string;
@@ -301,6 +260,7 @@ export type PublicPageContent = {
   ogImageUrl: string | null;
   isPublished: boolean;
   updatedAt: string;
+  sellCardText: string | null;
   blocks: PublicPageBlock[];
 };
 
@@ -361,18 +321,6 @@ function splitParagraphs(value: string | null | undefined): string[] {
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
-}
-
-function estimateReadingTime(value: string | null | undefined) {
-  const text = normalizeText(richTextToPlainText(value));
-
-  if (!text) {
-    return "1 min";
-  }
-
-  const words = text.split(/\s+/).filter(Boolean).length;
-
-  return `${Math.max(1, Math.ceil(words / 180))} min`;
 }
 
 function hashText(value: string) {
@@ -567,47 +515,6 @@ function mapPropertyDetail(row: PropertyRow): PublicPropertyDetail {
   };
 }
 
-function mapBlogSummary(
-  value: string | null | undefined,
-  excerpt: string | null | undefined,
-) {
-  const paragraphs = splitParagraphs(value);
-
-  if (paragraphs.length) {
-    return paragraphs.slice(0, 3);
-  }
-
-  const normalizedExcerpt = normalizeText(excerpt);
-
-  return normalizedExcerpt ? [normalizedExcerpt] : [];
-}
-
-function mapBlogPost(row: BlogPostRow): PublicBlogPost {
-  const category = Array.isArray(row.category)
-    ? (row.category[0] ?? null)
-    : row.category;
-  const excerpt =
-    normalizeText(row.excerpt) ??
-    normalizeText(row.body)?.slice(0, 180) ??
-    null;
-
-  return {
-    slug: row.slug,
-    title: row.title,
-    excerpt,
-    category: normalizeText(category?.name) ?? null,
-    readingTime: estimateReadingTime(row.body ?? row.excerpt),
-    publishedAt: row.published_at ?? row.created_at,
-    summary: mapBlogSummary(row.body, row.excerpt),
-    coverImageUrl: normalizeText(row.cover_image_url),
-    seoTitle: normalizeText(row.seo_title),
-    seoDescription: normalizeText(row.seo_description),
-    ogImageUrl: normalizeText(row.og_image_url),
-    updatedAt: row.updated_at,
-    body: normalizeText(row.body),
-  };
-}
-
 function mapNeighborhoodRecord(
   row: NeighborhoodRow,
   propertyCount: number,
@@ -640,6 +547,8 @@ function mapPageRecord(
   row: PageRow,
   blocks: PageBlockRow[] = [],
 ): PublicPageContent {
+  const sellCardBlock = blocks.find((block) => block.block_key === "sell-card-text");
+
   return {
     slug: row.slug,
     title: row.title,
@@ -652,8 +561,10 @@ function mapPageRecord(
     ogImageUrl: normalizeText(row.og_image_url),
     isPublished: row.is_published,
     updatedAt: row.updated_at,
+    sellCardText: normalizeText(sellCardBlock?.content),
     blocks: blocks
       .filter((block) => block.is_active)
+      .filter((block) => block.block_key !== "sell-card-text")
       .sort((left, right) => left.sort_order - right.sort_order)
       .map(mapPageBlock),
   };
@@ -690,7 +601,6 @@ function mapSiteSettings(row: SiteSettingsRow | null): PublicSiteSettings {
       `${brand.name} | ${brand.subtitle}`,
     defaultSeoDescription:
       normalizeText(row?.default_seo_description) ?? brand.slogan,
-    showBlogNavigation: row?.show_blog_navigation === true,
     showAreasNavigation: row?.show_areas_navigation === true,
   };
 }
@@ -700,7 +610,7 @@ export async function getPublicSiteSettings() {
   const { data } = await supabase
     .from("site_settings")
     .select(
-      "company_name, brand_name, legal_name, logo_url, primary_color, secondary_color, accent_color, primary_phone, whatsapp_number, email, address, city, state, social_links, opening_hours, impact_phrase, default_seo_title, default_seo_description, show_blog_navigation, show_areas_navigation",
+      "company_name, brand_name, legal_name, logo_url, primary_color, secondary_color, accent_color, primary_phone, whatsapp_number, email, address, city, state, social_links, opening_hours, impact_phrase, default_seo_title, default_seo_description, show_areas_navigation",
     )
     .eq("singleton_key", "main")
     .maybeSingle();
@@ -743,34 +653,6 @@ export async function getPublicPropertyBySlug(slug: string) {
     .maybeSingle();
 
   return data ? mapPropertyDetail(data as PropertyRow) : null;
-}
-
-export async function getPublicBlogPosts() {
-  const supabase = createSupabasePublicClient();
-  const { data } = await supabase
-    .from("blog_posts")
-    .select(
-      "id, slug, title, excerpt, body, cover_image_url, is_published, seo_title, seo_description, og_image_url, published_at, sort_order, created_at, updated_at, category:blog_categories(slug, name)",
-    )
-    .eq("is_published", true)
-    .order("published_at", { ascending: false, nullsFirst: false })
-    .order("sort_order", { ascending: true });
-
-  return ((data ?? []) as BlogPostRow[]).map((row) => mapBlogPost(row));
-}
-
-export async function getPublicBlogPostBySlug(slug: string) {
-  const supabase = createSupabasePublicClient();
-  const { data } = await supabase
-    .from("blog_posts")
-    .select(
-      "id, slug, title, excerpt, body, cover_image_url, is_published, seo_title, seo_description, og_image_url, published_at, sort_order, created_at, updated_at, category:blog_categories(slug, name)",
-    )
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .maybeSingle();
-
-  return data ? mapBlogPost(data as BlogPostRow) : null;
 }
 
 export async function getPublicNeighborhoods() {
@@ -986,4 +868,4 @@ export function getPublicContactChannels(settings: PublicSiteSettings) {
   return channels;
 }
 
-export { splitParagraphs, estimateReadingTime };
+export { splitParagraphs };

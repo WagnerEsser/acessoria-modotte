@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { slugify } from "@/lib/form-utils";
@@ -77,10 +77,10 @@ export default async function PropertyTypePage({ params }: PropertyTypePageProps
           title={`${propertyType}: imóveis disponíveis`}
           description={`Compare as opções de ${propertyType} e conte com acompanhamento próximo durante toda a negociação.`}
           action={
-            <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ variant: "gold" })}>
               Solicitar atendimento
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 

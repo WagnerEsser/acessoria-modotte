@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { StatCard } from "@/components/shared/stat-card";
 import { formatCurrencyBRL, formatDateTimeBRL } from "@/lib/formatters";
+import { getLeadStatusLabel } from "@/lib/lead-status";
 import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
@@ -131,25 +132,26 @@ export default async function DashboardPage() {
           <div className="mt-5 space-y-4">
             {leads.length ? (
               leads.slice(0, 4).map((lead) => (
-                <div
+                <Link
                   key={lead.id}
-                  className="rounded-2xl border border-brand-beige/12 bg-brand-ivory/4 p-4"
+                  href={`/admin/leads#lead-${lead.id}`}
+                  className="group block w-full rounded-2xl border border-brand-beige/12 bg-brand-ivory/4 p-4 transition hover:border-brand-gold/35 hover:bg-brand-ivory/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium text-brand-ivory">{lead.name}</p>
                       <p className="text-sm text-brand-ivory/64">
-                        {lead.source ?? "Site"} - {lead.interest_type ?? lead.property?.[0]?.title ?? "Contato geral"}
+                        {lead.interest_type ?? lead.property?.[0]?.title ?? "Contato geral"}
                       </p>
                     </div>
                     <Badge variant="outline" className="normal-case tracking-normal">
-                      {lead.status}
+                      {getLeadStatusLabel(lead.status)}
                     </Badge>
                   </div>
                   <p className="mt-3 text-xs uppercase tracking-[0.28em] text-brand-beige/55">
                     {formatDateTimeBRL(lead.created_at)}
                   </p>
-                </div>
+                </Link>
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-brand-beige/18 bg-brand-ivory/4 p-6 text-sm text-brand-ivory/68">

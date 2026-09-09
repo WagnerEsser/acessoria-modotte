@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { RichText } from "@/components/shared/rich-text";
 import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
@@ -35,8 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function AboutPage() {
+export default async function Page() {
   const page = await getPublicPageBySlug("sobre");
+  if (!page) notFound();
   const paragraphs = splitParagraphs(page?.body);
   const profile = page?.blocks.find((block) => block.blockKey === "about-profile");
   const directionBlocks = page?.blocks.filter((block) => block.blockKey !== "about-profile") ?? [];
@@ -99,19 +101,19 @@ export default async function AboutPage() {
             {directionBlocks.map((block) => (
                 <li key={block.id} className="flex gap-2 rounded-2xl border border-brand-beige/10 bg-brand-ivory/4 p-4">
                   <span className="mt-2 size-1.5 rounded-full bg-brand-gold" />
-                  <span><strong className="font-medium text-brand-ivory">{block.title ?? block.content ?? block.blockKey}</strong>{block.title && block.content ? <span className="mt-1 block text-brand-ivory/65">{block.content}</span> : null}</span>
+              <span><strong className="font-medium text-brand-ivory">{block.title ?? block.content ?? block.blockKey}</strong>{block.title && block.content ? <span className="mt-1 block whitespace-pre-line text-brand-ivory/65">{block.content}</span> : null}</span>
                 </li>
               ))}
           </ul>
         </Card> : null}
 
         <div className="flex flex-wrap gap-3">
-          <Link href="/contato" className={buttonVariants({ size: "lg" })}>
+          <PublicPageLink href="/contato" className={buttonVariants({ size: "lg" })}>
             Falar com a assessoria
-          </Link>
-          <Link href="/imoveis" className={buttonVariants({ variant: "outline", size: "lg" })}>
+          </PublicPageLink>
+          <PublicPageLink href="/imoveis" className={buttonVariants({ variant: "outline", size: "lg" })}>
             Ver imóveis
-          </Link>
+          </PublicPageLink>
         </div>
       </div>
     </div>

@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import {
   Bold,
   Eraser,
-  Heading2,
   Italic,
   Link,
   List,
@@ -34,11 +33,11 @@ const toolbar = [
   { label: "Sublinhado", icon: Underline, command: "underline" },
   { label: "Tachado", icon: Strikethrough, command: "strikeThrough" },
   { label: "Parágrafo", icon: Pilcrow, command: "formatParagraph" },
-  { label: "Título 2", icon: Heading2, command: "formatH2" },
-  { label: "Título 3", icon: Heading2, command: "formatH3" },
-  { label: "Título 4", icon: Heading2, command: "formatH4" },
-  { label: "Título 5", icon: Heading2, command: "formatH5" },
-  { label: "Título 6", icon: Heading2, command: "formatH6" },
+  { label: "Título H2", text: "H2", command: "formatH2" },
+  { label: "Título H3", text: "H3", command: "formatH3" },
+  { label: "Título H4", text: "H4", command: "formatH4" },
+  { label: "Título H5", text: "H5", command: "formatH5" },
+  { label: "Título H6", text: "H6", command: "formatH6" },
   { label: "Lista", icon: List, command: "insertUnorderedList" },
   { label: "Lista numerada", icon: ListOrdered, command: "insertOrderedList" },
   { label: "Citação", icon: Quote, command: "formatBlockquote" },
@@ -74,47 +73,63 @@ function executeCommand(command: (typeof toolbar)[number]["command"]) {
 
 export function RichTextEditor({ name, value, onChange, placeholder, className }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const valueRef = useRef(value);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== valueRef.current) {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
       editorRef.current.innerHTML = value;
     }
-    valueRef.current = value;
+    if (hiddenInputRef.current) {
+      hiddenInputRef.current.value = value;
+    }
   }, [value]);
 
   function handleInput() {
     const nextValue = editorRef.current?.innerHTML ?? "";
-    valueRef.current = nextValue;
+    if (hiddenInputRef.current) {
+      hiddenInputRef.current.value = nextValue;
+    }
     onChange?.(nextValue);
   }
 
   return (
     <div className={cn("overflow-hidden rounded-2xl border border-brand-beige/18 bg-brand-navy/55 shadow-sm", className)}>
       <div className="flex flex-wrap gap-1 border-b border-brand-beige/12 bg-brand-ivory/4 p-2" role="toolbar" aria-label="Formatação do texto">
-        {toolbar.map(({ label, icon: Icon, command }) => (
-          <button
-            key={command}
-            type="button"
-            className="grid size-8 place-items-center rounded-lg text-brand-ivory/70 transition hover:bg-brand-ivory/10 hover:text-brand-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
-            aria-label={label}
-            title={label}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => executeCommand(command)}
-          >
-            <Icon className="size-4" aria-hidden="true" />
-          </button>
-        ))}
+        {toolbar.map((item) => {
+          const Icon = "icon" in item ? item.icon : null;
+          const text = "text" in item ? item.text : null;
+
+          return (
+            <button
+              key={item.command}
+              type="button"
+              className="grid size-8 place-items-center rounded-lg text-brand-ivory/70 transition hover:bg-brand-ivory/10 hover:text-brand-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70"
+              aria-label={item.label}
+              title={item.label}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => executeCommand(item.command)}
+            >
+              {text ? (
+                <span className="text-[10px] font-semibold leading-none" aria-hidden="true">
+                  {text}
+                </span>
+              ) : Icon ? (
+                <Icon className="size-4" aria-hidden="true" />
+              ) : null}
+            </button>
+          );
+        })}
       </div>
-      <input type="hidden" name={name} value={value} />
+      <input ref={hiddenInputRef} type="hidden" name={name} defaultValue={value} />
       <div
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
+        data-rich-text-name={name}
         data-placeholder={placeholder}
-        className="min-h-40 w-full px-4 py-3 text-sm leading-7 text-brand-ivory outline-none empty:before:pointer-events-none empty:before:text-brand-ivory/42 empty:before:content-[attr(data-placeholder)]"
+        className="rich-text min-h-40 w-full px-4 py-3 outline-none empty:before:pointer-events-none empty:before:text-brand-ivory/42 empty:before:content-[attr(data-placeholder)]"
         onInput={handleInput}
       />
     </div>

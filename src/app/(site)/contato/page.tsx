@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { SubmitButton } from "@/components/ui/submit-button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { RichText } from "@/components/shared/rich-text";
-import { TurnstileWidget } from "@/components/security/turnstile-widget";
-import { AdminForm } from "@/components/admin/admin-form";
+import { ContactLeadForm } from "@/components/site/contact-lead-form";
 import {
   getPublicContactChannels,
   getPublicPageBySlug,
@@ -27,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     getPublicSiteSettings(),
     getPublicPageBySlug("contato"),
   ]);
+  if (!page) notFound();
 
   if (!page) {
     return buildMetadata({
@@ -101,52 +96,7 @@ export default async function ContactPage() {
               </div>
             ) : null}
 
-            <AdminForm action="/api/leads" className="mt-6 space-y-5">
-              <input type="hidden" name="redirect_to" value="/contato" />
-              <input type="hidden" name="source" value="contato" />
-              <input type="hidden" name="page_slug" value="contato" />
-              <input type="hidden" name="website" value="" />
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input name="name" placeholder="Nome" autoComplete="name" required />
-                <Input
-                  name="email"
-                  placeholder="E-mail"
-                  type="email"
-                  autoComplete="email"
-                  required
-                />
-                <Input
-                  name="phone"
-                  placeholder="Telefone"
-                  autoComplete="tel"
-                  required
-                />
-                <Input
-                  name="interest_type"
-                  placeholder="Interesse principal"
-                  defaultValue="Contato geral"
-                  required
-                />
-                <Textarea
-                  name="message"
-                  className="sm:col-span-2"
-                  placeholder="Conte sua necessidade"
-                />
-              </div>
-
-              <TurnstileWidget />
-
-              <div className="flex flex-wrap items-center gap-3">
-                <SubmitButton size="lg" pendingLabel="Enviando mensagem...">
-                  Enviar mensagem
-                  <ArrowRight className="size-4" />
-                </SubmitButton>
-                <Link href="/quero-vender" className={buttonVariants({ variant: "outline" })}>
-                  Quero vender
-                </Link>
-              </div>
-            </AdminForm>
+            <ContactLeadForm />
           </Card>
         </div>
       </div>

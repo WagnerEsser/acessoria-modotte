@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { PropertyCard } from "@/components/shared/property-card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { slugify } from "@/lib/form-utils";
@@ -80,10 +80,10 @@ export default async function CityPage({ params }: CityPageProps) {
           title={`Imóveis em ${city}`}
           description={`Conheça as oportunidades publicadas em ${city} e receba apoio para comparar localização, características e condições da negociação.`}
           action={
-            <Link href="/contato" className={buttonVariants({ variant: "gold" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ variant: "gold" })}>
               Falar com a assessoria
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 

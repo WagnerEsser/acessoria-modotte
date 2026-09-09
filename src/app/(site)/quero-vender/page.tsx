@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { RichText } from "@/components/shared/rich-text";
-import { getPublicPageBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
+import {
+  getPublicPageBySlug,
+  getPublicSiteSettings,
+  SELL_CARD_FALLBACK_TEXT,
+  splitParagraphs,
+} from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 300;
@@ -37,6 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function SellPage() {
   const page = await getPublicPageBySlug("quero-vender");
+  if (!page) notFound();
   const paragraphs = splitParagraphs(page?.body);
 
   return (
@@ -48,10 +55,10 @@ export default async function SellPage() {
           title={page?.title ?? "Se você quer vender, comece pelo essencial"}
           description={page?.subtitle ?? paragraphs[0] ?? "Conteúdo para vendedores ainda não cadastrado."}
           action={
-            <Link href="/contato" className={buttonVariants({ size: "lg" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ size: "lg" })}>
               Pedir análise
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 
@@ -81,14 +88,15 @@ export default async function SellPage() {
                     {block.title ?? "Bloco"}
                   </h3>
                   {block.content ? (
-                    <p className="mt-3 text-sm leading-6 text-brand-ivory/70">{block.content}</p>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-6 text-brand-ivory/70">{block.content}</p>
                   ) : null}
                 </Card>
               ))
             ) : (
               <Card className="p-5 text-sm leading-6 text-brand-ivory/68">
-                Conte sua necessidade para a assessoria preparar uma estratégia de venda adequada ao
-                imóvel e ao seu momento.
+                <span className="whitespace-pre-line">
+                  {page?.sellCardText ?? SELL_CARD_FALLBACK_TEXT}
+                </span>
               </Card>
             )}
           </div>

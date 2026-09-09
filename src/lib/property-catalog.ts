@@ -1,6 +1,7 @@
 import type { PublicPropertyCard } from "@/lib/public-content";
 
 export const PROPERTY_PAGE_SIZE = 10;
+export const PROPERTY_PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
 
 export type PropertyCatalogFilters = {
   type?: string;
@@ -81,4 +82,12 @@ export function parsePositiveInteger(value: string | string[] | undefined, fallb
   const parsed = Number.parseInt(raw, 10);
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export function parsePropertyPageSize(value: string | string[] | undefined) {
+  const parsed = parsePositiveInteger(value, PROPERTY_PAGE_SIZE);
+
+  return PROPERTY_PAGE_SIZE_OPTIONS.includes(parsed as (typeof PROPERTY_PAGE_SIZE_OPTIONS)[number])
+    ? parsed
+    : PROPERTY_PAGE_SIZE;
 }

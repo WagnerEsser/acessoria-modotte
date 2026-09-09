@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { ArrowRight, Bath, BedDouble, CarFront, Square } from "lucide-react";
 
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -57,28 +57,28 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className={cn("absolute inset-0 bg-gradient-to-br", property.accent)} />
         <div className="relative p-5">
           <div className="flex items-start justify-between gap-3">
-            <Link href={`/imoveis/tipo/${slugify(property.type)}`}>
+            <PublicPageLink href={`/imoveis/tipo/${slugify(property.type)}`}>
               <Badge variant="soft">{property.type}</Badge>
-            </Link>
+            </PublicPageLink>
             {property.featured ? <Badge variant="gold">Destaque</Badge> : null}
           </div>
 
           <div className="mt-16 space-y-2">
             {locationLabel ? (
               property.neighborhoodSlug ? (
-                <Link
+                <PublicPageLink
                   href={`/areas/${property.neighborhoodSlug}`}
                   className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68 transition hover:text-brand-gold"
                 >
                   {locationLabel}
-                </Link>
+                </PublicPageLink>
               ) : property.city ? (
-                <Link
+                <PublicPageLink
                   href={`/imoveis/cidade/${slugify(property.city)}`}
                   className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68 transition hover:text-brand-gold"
                 >
                   {locationLabel}
-                </Link>
+                </PublicPageLink>
               ) : (
                 <div className="text-xs uppercase tracking-[0.3em] text-brand-ivory/68">
                   {locationLabel}
@@ -136,13 +136,13 @@ export function PropertyCard({ property }: PropertyCardProps) {
             </div>
           </div>
 
-          <Link
+          <PublicPageLink
             href={`/imoveis/${property.slug}`}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             Ver detalhes
             <ArrowRight className="size-4" />
-          </Link>
+          </PublicPageLink>
         </div>
       </div>
     </Card>

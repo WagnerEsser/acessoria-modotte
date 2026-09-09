@@ -1,16 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Filter, Star } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowRight, Filter, Star } from "lucide-react";
 
+import { PropertyPagination } from "@/components/site/property-pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PropertyCard } from "@/components/shared/property-card";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { getPublicPageBySlug, getPublicProperties, splitParagraphs } from "@/lib/public-content";
+import { getPublicPageBySlug, getPublicProperties } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/seo";
 import {
   filterProperties,
   getPropertyTypes,
   paginateProperties,
+  parsePropertyPageSize,
   parsePositiveInteger,
   PROPERTY_PAGE_SIZE,
 } from "@/lib/property-catalog";
@@ -55,6 +59,7 @@ function buildPropertiesHref(options: {
   neighborhoodSlug?: string;
   featuredOnly?: boolean;
   page?: number;
+  pageSize?: number;
 }) {
   const params = new URLSearchParams();
 
@@ -78,6 +83,10 @@ function buildPropertiesHref(options: {
     params.set("pagina", String(options.page));
   }
 
+  if (options.pageSize && options.pageSize !== PROPERTY_PAGE_SIZE) {
+    params.set("porPagina", String(options.pageSize));
+  }
+
   const query = params.toString();
 
   return query ? `/imoveis?${query}` : "/imoveis";
@@ -85,13 +94,14 @@ function buildPropertiesHref(options: {
 
 export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
   const [properties, page] = await Promise.all([getPublicProperties(), getPublicPageBySlug("imoveis")]);
-  const paragraphs = splitParagraphs(page?.body);
+  if (!page) notFound();
   const resolvedSearchParams = await searchParams;
   const activeType = getFirstValue(resolvedSearchParams.tipo);
   const activeCity = getFirstValue(resolvedSearchParams.cidade);
   const activeNeighborhoodSlug = getFirstValue(resolvedSearchParams.bairro);
   const featuredOnly = getFirstValue(resolvedSearchParams.destaque) === "1";
   const currentPage = parsePositiveInteger(resolvedSearchParams.pagina, 1);
+  const pageSize = parsePropertyPageSize(resolvedSearchParams.porPagina);
 
   const filteredProperties = filterProperties(properties, {
     type: activeType,
@@ -99,31 +109,9 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     neighborhoodSlug: activeNeighborhoodSlug,
     featuredOnly,
   });
-  const pagination = paginateProperties(filteredProperties, currentPage, PROPERTY_PAGE_SIZE);
+  const pagination = paginateProperties(filteredProperties, currentPage, pageSize);
   const propertyTypes = getPropertyTypes(properties);
   const hasActiveFilter = Boolean(activeType || activeCity || activeNeighborhoodSlug || featuredOnly);
-
-  const prevHref =
-    pagination.currentPage > 1
-      ? buildPropertiesHref({
-          type: activeType,
-          city: activeCity,
-          neighborhoodSlug: activeNeighborhoodSlug,
-          featuredOnly,
-          page: pagination.currentPage - 1,
-        })
-      : null;
-
-  const nextHref =
-    pagination.currentPage < pagination.totalPages
-      ? buildPropertiesHref({
-          type: activeType,
-          city: activeCity,
-          neighborhoodSlug: activeNeighborhoodSlug,
-          featuredOnly,
-          page: pagination.currentPage + 1,
-        })
-      : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -132,12 +120,12 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           as="h1"
           eyebrow="Catálogo"
           title={page?.title ?? "Imóveis selecionados para a assessoria apresentar com clareza"}
-          description={page?.subtitle ?? paragraphs[0] ?? "Use os filtros para encontrar oportunidades alinhadas à região e ao tipo de imóvel que você procura."}
+          description={page?.subtitle ?? "Use os filtros para encontrar oportunidades alinhadas à região e ao tipo de imóvel que você procura."}
           action={
-            <Link href="/contato" className={buttonVariants({ variant: "outline" })}>
+            <PublicPageLink href="/contato" className={buttonVariants({ variant: "outline" })}>
               Solicitar atendimento
               <ArrowRight className="size-4" />
-            </Link>
+            </PublicPageLink>
           }
         />
 
@@ -151,6 +139,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
             <Link
               href={buildPropertiesHref({
                 page: 1,
+                pageSize,
               })}
               className={buttonVariants({
                 variant: hasActiveFilter ? "outline" : "gold",
@@ -166,6 +155,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 neighborhoodSlug: activeNeighborhoodSlug,
                 featuredOnly: true,
                 page: 1,
+                pageSize,
               })}
               className={buttonVariants({
                 variant: featuredOnly ? "gold" : "outline",
@@ -184,6 +174,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                   city: activeCity,
                   neighborhoodSlug: activeNeighborhoodSlug,
                   page: 1,
+                  pageSize,
                 })}
                 className={buttonVariants({
                   variant: activeType === type ? "gold" : "outline",
@@ -221,37 +212,15 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           </Card>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-brand-beige/10 pt-4">
-          <div className="text-sm text-brand-ivory/68">
-            Mostrando até {PROPERTY_PAGE_SIZE} itens por página.
-          </div>
-
-          <div className="flex items-center gap-3">
-            {prevHref ? (
-              <Link href={prevHref} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                <ChevronLeft className="size-4" />
-                Anterior
-              </Link>
-            ) : (
-              <span className={buttonVariants({ variant: "outline", size: "sm" }) + " pointer-events-none opacity-40"}>
-                <ChevronLeft className="size-4" />
-                Anterior
-              </span>
-            )}
-
-            {nextHref ? (
-              <Link href={nextHref} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                Próxima
-                <ChevronRight className="size-4" />
-              </Link>
-            ) : (
-              <span className={buttonVariants({ variant: "outline", size: "sm" }) + " pointer-events-none opacity-40"}>
-                Próxima
-                <ChevronRight className="size-4" />
-              </span>
-            )}
-          </div>
-        </div>
+        <PropertyPagination
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalItems}
+          pageSize={pageSize}
+          type={activeType}
+          city={activeCity}
+          neighborhoodSlug={activeNeighborhoodSlug}
+          featuredOnly={featuredOnly}
+        />
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { RichText } from "@/components/shared/rich-text";
 import {
   getPublicPageBySlug,
@@ -43,6 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ServicesPage() {
   const page = await getPublicPageBySlug("servicos");
+  if (!page) notFound();
   const paragraphs = splitParagraphs(page?.body);
 
   return (
@@ -58,12 +60,12 @@ export default async function ServicesPage() {
             "Conteúdo de serviços ainda não cadastrado."
           }
           action={
-            <Link
+            <PublicPageLink
               href="/contato"
               className={buttonVariants({ variant: "gold" })}
             >
               Pedir atendimento
-            </Link>
+            </PublicPageLink>
           }
         />
 
@@ -84,7 +86,7 @@ export default async function ServicesPage() {
                   {block.title ?? "Bloco"}
                 </h3>
                 {block.content ? (
-                  <p className="mt-3 text-sm leading-7 text-brand-ivory/70">
+                  <p className="mt-3 whitespace-pre-line text-sm leading-7 text-brand-ivory/70">
                     {block.content}
                   </p>
                 ) : null}

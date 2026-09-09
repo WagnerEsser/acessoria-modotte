@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Building2, Store } from "lucide-react";
 
 import { PropertyCard } from "@/components/shared/property-card";
+import { PublicPageLink } from "@/components/shared/public-page-link";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -39,11 +40,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [siteSettings, properties, neighborhoods, homePage] = await Promise.all([
+  const [siteSettings, properties, neighborhoods, homePage, aboutPage] = await Promise.all([
     getPublicSiteSettings(),
     getPublicProperties(),
     getPublicNeighborhoods(),
     getPublicPageBySlug("home"),
+    getPublicPageBySlug("sobre"),
   ]);
 
   const featuredProperties = properties.filter((property) => property.featured).slice(0, 2);
@@ -177,22 +179,22 @@ export default async function HomePage() {
               <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight text-brand-ivory sm:text-5xl lg:text-6xl">
                 {heroTitle}
               </h1>
-              <p className="max-w-2xl text-base leading-7 text-brand-ivory/72 sm:text-lg">
+              <p className="max-w-2xl whitespace-pre-line text-base leading-7 text-brand-ivory/72 sm:text-lg">
                 {heroDescription}
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Link href="/imoveis" className={buttonVariants({ size: "lg" })}>
+              <PublicPageLink href="/imoveis" className={buttonVariants({ size: "lg" })}>
                 Ver imóveis
                 <ArrowRight className="size-4" />
-              </Link>
-              <Link
+              </PublicPageLink>
+              <PublicPageLink
                 href="/contato"
                 className={buttonVariants({ variant: "outline", size: "lg" })}
               >
                 Falar com a assessoria
-              </Link>
+              </PublicPageLink>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -231,44 +233,62 @@ export default async function HomePage() {
               />
             </div>
 
-            <Link
-              href="/sobre"
-              aria-label="Conheça mais sobre Luana Modotte"
-              className="group mt-5 block overflow-hidden rounded-[1.75rem] border border-brand-beige/12 bg-brand-ivory/4 transition hover:-translate-y-0.5 hover:border-brand-gold/30 hover:bg-brand-ivory/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[5/4]">
-                <div className="absolute inset-0">
-                  <Image
-                    src="/images/luana-modotte-portrait-pro.png"
-                    alt="Retrato profissional de Luana Modotte"
-                    fill
-                    sizes="(min-width: 1024px) 36rem, 100vw"
-                    className="object-cover object-[center_32%] transition duration-500 group-hover:scale-[1.03]"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/18 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                  <Badge variant="soft" className="w-fit">
-                    À frente da assessoria
-                  </Badge>
-                  <h2 className="mt-4 font-display text-3xl text-brand-ivory sm:text-4xl">
-                    Luana Modotte
-                  </h2>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-brand-ivory/80 sm:text-base">
-                    Atendimento direto, leitura cuidadosa do perfil do cliente e condução objetiva
-                    em cada etapa.
-                  </p>
-                </div>
-              </div>
+            {(() => {
+              const aboutCardContent = (
+                <>
+                  <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[5/4]">
+                    <div className="absolute inset-0">
+                      <Image
+                        src="/images/luana-modotte-portrait-pro.png"
+                        alt="Retrato profissional de Luana Modotte"
+                        fill
+                        sizes="(min-width: 1024px) 36rem, 100vw"
+                        className="object-cover object-[center_32%] transition duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/18 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                      <Badge variant="soft" className="w-fit">
+                        À frente da assessoria
+                      </Badge>
+                      <h2 className="mt-4 font-display text-3xl text-brand-ivory sm:text-4xl">
+                        Luana Modotte
+                      </h2>
+                      <p className="mt-3 max-w-xl text-sm leading-6 text-brand-ivory/80 sm:text-base">
+                        Atendimento direto, leitura cuidadosa do perfil do cliente e condução objetiva
+                        em cada etapa.
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="flex items-center justify-between border-t border-brand-beige/10 px-4 py-4 text-sm text-brand-ivory/72 sm:px-5">
-                <span>Conheça a trajetória e o posicionamento da assessoria.</span>
-                <span className="inline-flex items-center gap-2 font-medium text-brand-gold">
-                  Ver sobre
-                  <ArrowRight className="size-4" />
-                </span>
-              </div>
-            </Link>
+                  {aboutPage ? (
+                    <div className="flex items-center justify-between border-t border-brand-beige/10 px-4 py-4 text-sm text-brand-ivory/72 sm:px-5">
+                      <span>Conheça a trajetória e o posicionamento da assessoria.</span>
+                      <span className="inline-flex items-center gap-2 font-medium text-brand-gold">
+                        Ver sobre
+                        <ArrowRight className="size-4" />
+                      </span>
+                    </div>
+                  ) : null}
+                </>
+              );
+
+              const cardClassName = "group mt-5 block overflow-hidden rounded-[1.75rem] border border-brand-beige/12 bg-brand-ivory/4 transition";
+
+              return aboutPage ? (
+                <Link
+                  href="/sobre"
+                  aria-label="Conheça mais sobre Luana Modotte"
+                  className={`${cardClassName} hover:-translate-y-0.5 hover:border-brand-gold/30 hover:bg-brand-ivory/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-ink`}
+                >
+                  {aboutCardContent}
+                </Link>
+              ) : (
+                <div className={`${cardClassName} cursor-default`} aria-disabled="true">
+                  {aboutCardContent}
+                </div>
+              );
+            })()}
           </Card>
         </div>
       </section>
@@ -291,7 +311,7 @@ export default async function HomePage() {
                   {block.title ?? "Bloco sem título"}
                 </h3>
                 {block.content ? (
-                  <p className="mt-3 text-sm leading-6 text-brand-ivory/70">{block.content}</p>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-6 text-brand-ivory/70">{block.content}</p>
                 ) : null}
               </Card>
             ))}
