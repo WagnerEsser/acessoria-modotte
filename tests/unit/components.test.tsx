@@ -1,13 +1,36 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { createElement } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const navigationMocks = vi.hoisted(() => ({
+  refresh: vi.fn(),
+  replace: vi.fn(),
+  usePathname: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: navigationMocks.usePathname,
+  useRouter: () => ({
+    refresh: navigationMocks.refresh,
+    replace: navigationMocks.replace,
+  }),
+}));
+
+vi.mock("@/components/ui/toast-provider", () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
+  }),
+}));
 
 import { AdminShell } from "@/components/layout/admin-shell";
 import { UserActiveToggle } from "@/components/admin/user-active-toggle";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 describe("components", () => {
   it("renders the brand mark", () => {
@@ -26,6 +49,8 @@ describe("components", () => {
   });
 
   it("shows the verified user in the administrative shell", () => {
+    navigationMocks.usePathname.mockReturnValue("/admin/dashboard");
+
     render(
       createElement(AdminShell, {
         currentUser: {

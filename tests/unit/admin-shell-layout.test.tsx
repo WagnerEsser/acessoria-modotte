@@ -5,6 +5,9 @@ const layoutMocks = vi.hoisted(() => ({
   createSupabaseRscClient: vi.fn(),
   getVerifiedAdminIdentity: vi.fn(),
   redirect: vi.fn(),
+  refresh: vi.fn(),
+  replace: vi.fn(),
+  usePathname: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/rsc", () => ({
@@ -22,6 +25,17 @@ vi.mock("@/lib/admin-identity", async (importOriginal) => {
 
 vi.mock("next/navigation", () => ({
   redirect: layoutMocks.redirect,
+  usePathname: layoutMocks.usePathname,
+  useRouter: () => ({
+    refresh: layoutMocks.refresh,
+    replace: layoutMocks.replace,
+  }),
+}));
+
+vi.mock("@/components/ui/toast-provider", () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
+  }),
 }));
 
 import AdminShellLayout from "@/app/(admin)/admin/(shell)/layout";
@@ -30,6 +44,7 @@ describe("admin shell layout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     layoutMocks.createSupabaseRscClient.mockResolvedValue({ client: true });
+    layoutMocks.usePathname.mockReturnValue("/admin/dashboard");
     layoutMocks.redirect.mockImplementation(() => {
       throw new Error("NEXT_REDIRECT");
     });

@@ -19,6 +19,7 @@ describe("public lead security", () => {
       phone: "(11) 99999-9999",
       source: "contato",
       page_slug: "contato",
+      interest_type: "comprar",
       message: "Quero comprar um imóvel.",
     });
     const parsed = parseLeadSubmission(params);
@@ -113,6 +114,9 @@ describe("admin input security", () => {
     expect(parsePropertyFormData(formData)).toEqual({
       ok: false,
       error: "invalid_fields",
+      fieldErrors: {
+        bedrooms: "Revise este campo.",
+      },
     });
   });
 });

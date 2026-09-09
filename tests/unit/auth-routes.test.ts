@@ -9,9 +9,26 @@ const authMocks = vi.hoisted(() => ({
   signOut: vi.fn(),
   getUser: vi.fn(),
   rateLimitRpc: vi.fn(),
+  refresh: vi.fn(),
+  replace: vi.fn(),
+  usePathname: vi.fn(),
   applyCookies: vi.fn((response: NextResponse) => {
     response.headers.set("x-auth-cookies-applied", "1");
     return response;
+  }),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: authMocks.usePathname,
+  useRouter: () => ({
+    refresh: authMocks.refresh,
+    replace: authMocks.replace,
+  }),
+}));
+
+vi.mock("@/components/ui/toast-provider", () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
   }),
 }));
 
@@ -86,6 +103,7 @@ describe("Supabase admin auth routes", () => {
     });
     authMocks.canAccessAdmin.mockResolvedValue(true);
     authMocks.rateLimitRpc.mockResolvedValue({ data: true, error: null });
+    authMocks.usePathname.mockReturnValue("/admin/login");
     vi.stubEnv(
       "AUTH_RATE_LIMIT_SECRET",
       "a-secure-auth-test-secret-with-more-than-32-characters"
