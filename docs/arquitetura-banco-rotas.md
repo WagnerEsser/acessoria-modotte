@@ -132,6 +132,7 @@ Campos principais:
 - `price_on_request`
 - `description`
 - `address`
+- `show_full_address`
 - `neighborhood_id`
 - `city`
 - `state`
@@ -154,6 +155,20 @@ Campos principais:
 - `published_at`
 - `created_at`
 - `updated_at`
+
+As imagens são enviadas ao bucket público `property-images` com limite de 5 MB por arquivo,
+formatos JPG, PNG, WebP ou AVIF e políticas que permitem inclusão/alteração somente a
+administradores autenticados. O cadastro permite até 20 imagens por imóvel e uma capa.
+
+Os vídeos seguem o mesmo fluxo autenticado no bucket público `property-videos`, com limite
+de 50 MB por arquivo e formatos MP4, MOV, WebM ou OGG. O cadastro permite até 3 vídeos por
+imóvel. A tabela `property_videos` mantém o caminho no Storage, URL pública, nome original,
+MIME, tamanho e ordem de exibição; a leitura pública depende de o imóvel estar publicado,
+enquanto inclusão, alteração e exclusão exigem administrador ativo.
+
+No painel, a situação comercial usa `published` (disponível), `reserved` (reservado),
+`sold` (vendido) ou `hidden` (oculto). O checkbox de publicação controla se o registro
+fica visível no site; um rascunho sempre permanece com status `draft`.
 
 ### `property_images`
 

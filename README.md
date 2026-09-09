@@ -95,6 +95,11 @@ execute `make up` para recriar o ambiente do zero.
 O schema fica consolidado em `supabase/migrations/0001_initial.sql` e os seeds
 em `supabase/seeds/`.
 
+Imóveis aceitam até 20 imagens de 5 MB e até 3 vídeos de 50 MB por arquivo. As imagens
+ficam no bucket `property-images` e os vídeos no bucket `property-videos`; ambos são
+exibidos publicamente somente quando o imóvel está publicado. O painel valida os arquivos
+antes do envio e somente administradores autenticados podem incluir ou remover mídias.
+
 No Docker Desktop, o grupo do Compose aparece como `luanamodotte-supabase`.
 
 ## Superadmin Local
