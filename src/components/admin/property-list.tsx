@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, MapPin, Pencil } from "lucide-react";
+import { ExternalLink, ImageIcon, MapPin, Pencil } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Pagination } from "@/components/shared/pagination";
@@ -25,6 +25,8 @@ export type AdminProperty = {
   city: string | null;
   state: string | null;
   updated_at: string;
+  cover_image_url: string | null;
+  cover_image_alt: string | null;
 };
 
 function getPropertyPriceLabel(property: AdminProperty): string {
@@ -209,32 +211,52 @@ export function PropertyList({ initialProperties }: { initialProperties: AdminPr
 
       <div className="grid gap-4">
         {properties.length ? properties.map((property) => (
-          <Card key={property.id} className="relative p-5 pb-16">
-            <div className="flex items-start justify-between gap-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
-                {getLabel(property.property_type, propertyTypeLabels)}
-              </p>
-              <div className="flex shrink-0 flex-wrap justify-end gap-2">
-              <Badge variant="outline" className="normal-case tracking-normal">
-                {getLabel(property.transaction_type, transactionTypeLabels)}
-              </Badge>
-              <Badge variant={property.is_published ? "gold" : "outline"} className="normal-case tracking-normal">
-                {property.is_published ? "Publicado" : "Rascunho"}
-              </Badge>
-              <Badge variant={property.featured ? "gold" : "outline"} className="normal-case tracking-normal">
-                {property.featured ? "Destaque" : "Padrão"}
-              </Badge>
+          <Card key={property.id} className="relative overflow-hidden p-4 pb-16 sm:p-5 sm:pb-5">
+            <div className="grid gap-4 sm:grid-cols-[9rem_1fr] lg:grid-cols-[11rem_1fr]">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-brand-beige/12 bg-brand-navy/70">
+                {property.cover_image_url ? (
+                  <img
+                    src={property.cover_image_url}
+                    alt={property.cover_image_alt ?? property.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-brand-beige/50">
+                    <ImageIcon className="size-9" aria-hidden="true" />
+                    <span className="sr-only">Imóvel sem imagem de capa</span>
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="pr-2">
-              <h2 className="mt-2 font-display text-2xl text-brand-ivory">{property.title}</h2>
-              <p className="mt-2 flex items-center gap-1.5 text-sm text-brand-ivory/68">
-                <MapPin className="size-4 shrink-0 text-brand-beige/70" aria-hidden="true" />
-                {property.city ?? "Cidade"} {property.state ? `/${property.state}` : ""}
-              </p>
-              <p className="mt-3 text-sm text-brand-ivory/70">
-                {getPropertyPriceLabel(property)} - atualizado {formatDateTimeBRL(property.updated_at)}
-              </p>
+
+              <div className="min-w-0">
+                <div className="flex items-start justify-between gap-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
+                    {getLabel(property.property_type, propertyTypeLabels)}
+                  </p>
+                  <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                    <Badge variant="outline" className="normal-case tracking-normal">
+                      {getLabel(property.transaction_type, transactionTypeLabels)}
+                    </Badge>
+                    <Badge variant={property.is_published ? "gold" : "outline"} className="normal-case tracking-normal">
+                      {property.is_published ? "Publicado" : "Rascunho"}
+                    </Badge>
+                    <Badge variant={property.featured ? "gold" : "outline"} className="normal-case tracking-normal">
+                      {property.featured ? "Destaque" : "Padrão"}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="pr-2 sm:pr-24">
+                  <h2 className="mt-2 font-display text-2xl text-brand-ivory">{property.title}</h2>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-brand-ivory/68">
+                    <MapPin className="size-4 shrink-0 text-brand-beige/70" aria-hidden="true" />
+                    {property.city ?? "Cidade"} {property.state ? `/${property.state}` : ""}
+                  </p>
+                  <p className="mt-3 text-sm text-brand-ivory/70">
+                    {getPropertyPriceLabel(property)} - atualizado {formatDateTimeBRL(property.updated_at)}
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="absolute bottom-5 right-5 flex items-center gap-2">
               {property.is_published ? (
