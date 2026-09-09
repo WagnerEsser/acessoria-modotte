@@ -1041,3 +1041,74 @@ alter policy "Users self read or admin" on public.users
 alter policy "Users admin manage" on public.users
   using (public.current_user_is_superadmin())
   with check (public.current_user_is_superadmin());
+
+-- Consolidated from the property management and property video migrations.
+-- Storage is configured here so a fresh local or hosted database needs only
+-- this schema file plus the seed file.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'property-images',
+  'property-images',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+)
+on conflict (id) do update
+set public = excluded.public,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'property-videos',
+  'property-videos',
+  true,
+  52428800,
+  array['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg']
+)
+on conflict (id) do update
+set public = excluded.public,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Property image objects public read" on storage.objects;
+create policy "Property image objects public read" on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'property-images');
+
+drop policy if exists "Property image objects admin insert" on storage.objects;
+create policy "Property image objects admin insert" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'property-images' and public.current_user_is_admin());
+
+drop policy if exists "Property image objects admin update" on storage.objects;
+create policy "Property image objects admin update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'property-images' and public.current_user_is_admin())
+  with check (bucket_id = 'property-images' and public.current_user_is_admin());
+
+drop policy if exists "Property image objects admin delete" on storage.objects;
+create policy "Property image objects admin delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'property-images' and public.current_user_is_admin());
+
+drop policy if exists "Property video objects public read" on storage.objects;
+create policy "Property video objects public read" on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'property-videos');
+
+drop policy if exists "Property video objects admin insert" on storage.objects;
+create policy "Property video objects admin insert" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'property-videos' and public.current_user_is_admin());
+
+drop policy if exists "Property video objects admin update" on storage.objects;
+create policy "Property video objects admin update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'property-videos' and public.current_user_is_admin())
+  with check (bucket_id = 'property-videos' and public.current_user_is_admin());
+
+drop policy if exists "Property video objects admin delete" on storage.objects;
+create policy "Property video objects admin delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'property-videos' and public.current_user_is_admin());

@@ -127,27 +127,24 @@ describe("migration and seed contract", () => {
     expect(sql).toContain("'analise-documental'");
   });
 
-  it("mounts the project schema and seed into the self-hosted supabase database", () => {
+  it("applies only the consolidated project schema and seed after storage is ready", () => {
     const compose = readFileSync(
       path.resolve("supabase/docker/docker-compose.yml"),
       "utf8",
     );
+    const startScript = readFileSync(
+      path.resolve("scripts/supabase/start.ps1"),
+      "utf8",
+    );
 
-    expect(compose).toContain("../migrations/0001_initial.sql");
-    expect(compose).not.toContain("../migrations/0002_security_hardening.sql");
-    expect(compose).not.toContain("../migrations/0003_admin_user_management.sql");
-    expect(compose).not.toContain(
-      "../migrations/0004_explicit_data_api_grants.sql",
-    );
-    expect(compose).not.toContain(
-      "../migrations/0005_navigation_visibility_settings.sql",
-    );
-    expect(compose).toContain("../seeds/0001_initial_seed.sql");
-    expect(compose).toContain(
-      "/docker-entrypoint-initdb.d/init-scripts/96-project-schema.sql",
-    );
-    expect(compose).toContain(
-      "/docker-entrypoint-initdb.d/init-scripts/97-project-seed.sql",
-    );
+    expect(compose).not.toContain("../migrations/");
+    expect(compose).not.toContain("../seeds/");
+    expect(startScript).toContain("supabase\\migrations\\0001_initial.sql");
+    expect(startScript).toContain("supabase\\seeds\\0001_initial_seed.sql");
+    expect(startScript).not.toContain("0002_");
+    expect(startScript).not.toContain("0003_");
+    expect(startScript).not.toContain("0004_");
+    expect(startScript).not.toContain("0005_");
+    expect(startScript).not.toContain("0006_");
   });
 });

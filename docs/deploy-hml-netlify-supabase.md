@@ -56,9 +56,7 @@ Crie um projeto gratuito, preferencialmente na regiao mais proxima da cliente.
 No SQL Editor, execute nesta ordem:
 
 1. `supabase/migrations/0001_initial.sql`;
-2. `supabase/migrations/0005_property_management.sql`;
-3. `supabase/migrations/0006_property_videos.sql`;
-4. `supabase/seeds/0001_initial_seed.sql`.
+2. `supabase/seeds/0001_initial_seed.sql`.
 
 As migrations criam os buckets públicos `property-images` e `property-videos`. O segundo
 aceita vídeos MP4, MOV, WebM ou OGG de até 50 MB por arquivo, com no máximo três vídeos
