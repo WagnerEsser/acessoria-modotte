@@ -143,6 +143,7 @@ export default async function HomePage() {
                     placeholder="Todas as cidades"
                     defaultValue=""
                     options={cityOptions}
+                    menuClassName="min-w-[15rem]"
                   />
 
                   <Select
@@ -151,6 +152,7 @@ export default async function HomePage() {
                     placeholder="Todos os bairros"
                     defaultValue=""
                     options={neighborhoodOptions}
+                    menuClassName="min-w-[15rem]"
                   />
 
                   <Select
@@ -159,6 +161,7 @@ export default async function HomePage() {
                     placeholder="Todos os tipos"
                     defaultValue=""
                     options={propertyTypeOptions}
+                    menuClassName="min-w-[15rem]"
                   />
                 </div>
 

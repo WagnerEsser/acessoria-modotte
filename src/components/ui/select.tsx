@@ -230,7 +230,7 @@ export function Select({
         onClick={() => (open ? closeMenu() : openMenu())}
         onKeyDown={handleButtonKeyDown}
         className={cn(
-          "flex h-12 w-full items-center justify-between gap-4 rounded-2xl border border-brand-beige/18 bg-[linear-gradient(180deg,rgba(19,37,59,0.72),rgba(11,27,44,0.94))] px-4 text-left text-sm text-brand-ivory shadow-sm outline-none transition duration-200 hover:border-brand-gold/35 hover:bg-brand-navy/70 focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-11 w-full items-center justify-between gap-4 rounded-2xl border border-brand-beige/18 bg-[linear-gradient(180deg,rgba(19,37,59,0.72),rgba(11,27,44,0.94))] px-4 text-left text-sm text-brand-ivory shadow-sm outline-none transition duration-200 hover:border-brand-gold/35 hover:bg-brand-navy/70 focus:border-brand-gold/50 focus:ring-2 focus:ring-brand-gold/20 disabled:cursor-not-allowed disabled:opacity-50",
           open && "border-brand-gold/45 bg-brand-navy/78 shadow-[0_18px_50px_-20px_rgba(203,178,140,0.28)]"
         )}
       >
