@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { PropertyForm } from "@/components/admin/property-form";
 import type { ManagedPropertyImage } from "@/components/admin/property-image-manager";
@@ -8,6 +8,7 @@ import type { ManagedPropertyVideo } from "@/components/admin/property-video-man
 import { buttonVariants } from "@/components/ui/button";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { formatBrazilianPhoneDisplayNumber } from "@/lib/contact";
+import { getMediaProxyUrl, getSupabaseStoragePath } from "@/lib/env";
 import { buildMetadata } from "@/lib/seo";
 import { createSupabaseRscClient } from "@/lib/supabase/rsc";
 
@@ -83,19 +84,31 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
     ? property.neighborhood[0]?.name ?? ""
     : property.neighborhood?.name ?? "";
 
+  const images = await Promise.all((property.property_images ?? []).map(async (image) => {
+    const storagePath = getSupabaseStoragePath(image.url, "property-images");
+    const browserImageUrl = storagePath ? getMediaProxyUrl("property-images", storagePath) : image.url;
+
+    return {
+      id: image.id,
+      url: browserImageUrl,
+      altText: image.alt_text,
+      isCover: image.is_cover,
+    };
+  }));
+
   return (
     <div className="space-y-8">
-      <SectionHeading
-        eyebrow="Edição"
-        title={`Editar imóvel ${property.title}`}
-        description="O formulário salva diretamente no Supabase e preserva o registro existente."
-        action={
-          <Link href="/admin/imoveis" className={buttonVariants({ variant: "outline" })}>
-            Voltar
-            <ArrowRight className="size-4" />
-          </Link>
-        }
-      />
+      <div className="space-y-4">
+        <Link href="/admin/imoveis" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          <ArrowLeft className="size-4" />
+          Voltar
+        </Link>
+        <SectionHeading
+          eyebrow="Edição"
+          title={`Editar imóvel ${property.title}`}
+          description="Preencha as informações do imóvel e revise os dados antes de salvar as alterações."
+        />
+      </div>
 
       <PropertyForm
         action={`/api/admin/properties/${property.id}`}
@@ -152,12 +165,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
             .map((feature) => feature.value ? `${feature.label}: ${feature.value}` : feature.label)
             .join("\n"),
         }}
-        images={(property.property_images ?? []).map((image) => ({
-          id: image.id,
-          url: image.url,
-          altText: image.alt_text,
-          isCover: image.is_cover,
-        })) as ManagedPropertyImage[]}
+        images={images as ManagedPropertyImage[]}
         videos={(property.property_videos ?? []).map((video) => ({
           id: video.id,
           url: video.url,

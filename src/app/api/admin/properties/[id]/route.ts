@@ -80,6 +80,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
   const imageFiles = getPropertyImageFiles(formData);
   const videoFiles = getPropertyVideoFiles(formData);
+  const newCoverImageIndexValue = readFormValue(formData, "new_cover_image_index");
+  const newCoverImageIndex = newCoverImageIndexValue === "" ? undefined : Number(newCoverImageIndexValue);
   const deleteImageIds = formData
     .getAll("delete_image_ids")
     .filter((value): value is string => typeof value === "string");
@@ -229,7 +231,11 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       );
 
       const coverImageId = readFormValue(formData, "cover_image_id");
-      if (coverImageId) {
+      if (typeof newCoverImageIndex === "number" && Number.isInteger(newCoverImageIndex) && newCoverImageIndex >= 0 && newCoverImageIndex < imageFiles.length) {
+        const newImageSortOrder = Math.max((existingImageCount ?? 0) - deleteImageIds.length, 0) + newCoverImageIndex;
+        await supabase.from("property_images").update({ is_cover: false }).eq("property_id", id);
+        await supabase.from("property_images").update({ is_cover: true }).eq("property_id", id).eq("sort_order", newImageSortOrder);
+      } else if (coverImageId) {
         await supabase.from("property_images").update({ is_cover: false }).eq("property_id", id);
         await supabase.from("property_images").update({ is_cover: true }).eq("property_id", id).eq("id", coverImageId);
       }

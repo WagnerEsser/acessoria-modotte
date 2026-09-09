@@ -158,7 +158,7 @@ Campos principais:
 
 As imagens são enviadas ao bucket público `property-images` com limite de 5 MB por arquivo,
 formatos JPG, PNG, WebP ou AVIF e políticas que permitem inclusão/alteração somente a
-administradores autenticados. O cadastro permite até 20 imagens por imóvel e uma capa.
+administradores autenticados. O cadastro permite até 30 imagens por imóvel e uma capa.
 
 Os vídeos seguem o mesmo fluxo autenticado no bucket público `property-videos`, com limite
 de 50 MB por arquivo e formatos MP4, MOV, WebM ou OGG. O cadastro permite até 3 vídeos por

@@ -53,32 +53,38 @@ export function PropertyVideoManager({ initialVideos = [] }: PropertyVideoManage
       </label>
 
       {selectedFiles.length ? (
-        <p className="text-sm text-brand-ivory/72">
-          {selectedFiles.length} {selectedFiles.length === 1 ? "vídeo selecionado" : "vídeos selecionados"} para enviar.
-        </p>
+        <div className="space-y-2">
+          <p className="text-sm text-brand-ivory/72">
+            {selectedFiles.length} {selectedFiles.length === 1 ? "vídeo selecionado" : "vídeos selecionados"} para enviar.
+          </p>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {selectedFiles.map((file) => (
+              <div key={`${file.name}-${file.lastModified}`} className="flex min-w-0 items-center gap-2 rounded-xl border border-brand-gold/20 bg-brand-navy/45 px-3 py-2 text-xs text-brand-ivory/68">
+                <Film className="size-4 shrink-0 text-brand-gold" />
+                <span className="truncate">{file.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       {visibleVideos.length ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visibleVideos.map((video) => (
-            <div key={video.id} className="overflow-hidden rounded-2xl border border-brand-beige/12 bg-brand-navy/55">
-              <video controls preload="metadata" className="aspect-video w-full bg-black" aria-label={video.fileName ?? "Vídeo do imóvel"}>
-                <source src={video.url} type={video.mimeType} />
-              </video>
-              <div className="flex items-center justify-between gap-3 p-3">
-                <span className="flex min-w-0 items-center gap-2 text-xs text-brand-ivory/68">
-                  <Film className="size-4 shrink-0 text-brand-gold" />
-                  <span className="truncate">{video.fileName ?? "Vídeo do imóvel"}</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setRemovedIds((current) => current.includes(video.id) ? current : [...current, video.id])}
-                  className="inline-flex cursor-pointer items-center text-brand-ivory/58 transition hover:text-red-200"
-                  aria-label={`Remover vídeo ${video.fileName ?? "do imóvel"}`}
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
+            <div key={video.id} className="flex items-center justify-between gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/55 p-3">
+              <span className="flex min-w-0 items-center gap-2 text-xs text-brand-ivory/68">
+                <Film className="size-4 shrink-0 text-brand-gold" />
+                <span className="truncate">{video.fileName ?? "Vídeo do imóvel"}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setRemovedIds((current) => current.includes(video.id) ? current : [...current, video.id])}
+                className="inline-flex shrink-0 cursor-pointer items-center text-brand-ivory/58 transition hover:text-red-200"
+                aria-label={`Remover vídeo ${video.fileName ?? "do imóvel"}`}
+                title="Remover vídeo"
+              >
+                <Trash2 className="size-4" />
+              </button>
             </div>
           ))}
         </div>

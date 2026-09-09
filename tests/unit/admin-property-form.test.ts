@@ -64,6 +64,21 @@ describe("admin property form", () => {
 });
 
 describe("property image validation", () => {
+  it("allows up to 30 images and rejects the 31st", async () => {
+    const files = Array.from({ length: 30 }, (_, index) =>
+      new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0])], `house-${index}.jpg`, { type: "image/jpeg" }),
+    );
+
+    await expect(validatePropertyImageFiles(files)).resolves.toBeNull();
+    await expect(validatePropertyImageFiles([...files, files[0]])).resolves.toContain("no máximo 30 imagens");
+  });
+
+  it("accepts a valid JPEG signature even when the browser MIME is inconsistent", async () => {
+    const validJpeg = new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0])], "house.jpg", { type: "image/pjpeg" });
+
+    await expect(validatePropertyImageFiles([validJpeg])).resolves.toBeNull();
+  });
+
   it("accepts a valid PNG signature and rejects spoofed content", async () => {
     const validPng = new File([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])], "house.png", { type: "image/png" });
     const spoofedPng = new File(["not an image"], "house.png", { type: "image/png" });

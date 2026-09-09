@@ -9,7 +9,7 @@ import { getSecurityHeaders } from "../../security-headers.mjs";
 export const ADMIN_LOGIN_PATH = "/admin/login";
 export const ADMIN_DEFAULT_PATH = "/admin/dashboard";
 export const ADMIN_FORM_MAX_BYTES = 256 * 1024;
-// Supports the maximum media selection: 20 images (5 MB) plus 3 videos (50 MB), with form overhead.
+// Supports the maximum media selection: 30 images (5 MB) plus 3 videos (50 MB), with form overhead.
 export const ADMIN_MULTIPART_MAX_BYTES = 256 * 1024 * 1024;
 
 const sensitiveResponseHeaders = [

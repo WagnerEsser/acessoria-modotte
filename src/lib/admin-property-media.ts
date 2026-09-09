@@ -1,7 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getSupabaseStoragePublicUrl } from "@/lib/env";
+
 export const PROPERTY_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
-export const PROPERTY_IMAGE_MAX_COUNT = 20;
+export const PROPERTY_IMAGE_MAX_COUNT = 30;
 export const PROPERTY_VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 export const PROPERTY_VIDEO_MAX_COUNT = 3;
 
@@ -28,35 +30,37 @@ export function getPropertyVideoFiles(formData: FormData) {
   return formData.getAll("videos").filter((value): value is File => value instanceof File && value.size > 0);
 }
 
-async function hasValidImageSignature(file: File) {
-  const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+async function detectImageType(file: File): Promise<string | null> {
+  const bytes = new Uint8Array(await file.arrayBuffer()).slice(0, 16);
 
-  if (file.type === "image/jpeg") {
-    return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
   }
 
-  if (file.type === "image/png") {
-    return bytes.slice(0, 8).join(",") === "137,80,78,71,13,10,26,10";
+  if (bytes.slice(0, 8).join(",") === "137,80,78,71,13,10,26,10") {
+    return "image/png";
   }
 
-  if (file.type === "image/webp") {
-    return String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
+  if (String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP") {
+    return "image/webp";
   }
 
-  if (file.type === "image/avif") {
-    return String.fromCharCode(...bytes.slice(4, 8)) === "ftyp";
+  if (String.fromCharCode(...bytes.slice(4, 8)) === "ftyp") {
+    return "image/avif";
   }
 
-  return false;
+  return null;
 }
 
 export async function validatePropertyImageFiles(files: File[], existingCount = 0) {
   if (files.length + existingCount > PROPERTY_IMAGE_MAX_COUNT) {
-    return "Você pode manter no máximo 20 imagens por imóvel.";
+    return "Você pode manter no máximo 30 imagens por imóvel.";
   }
 
   for (const file of files) {
-    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    const detectedType = await detectImageType(file);
+
+    if (!ALLOWED_IMAGE_TYPES.has(file.type) && !detectedType) {
       return "Use apenas imagens JPG, PNG, WebP ou AVIF.";
     }
 
@@ -64,7 +68,7 @@ export async function validatePropertyImageFiles(files: File[], existingCount = 
       return "Cada imagem pode ter no máximo 5 MB.";
     }
 
-    if (!(await hasValidImageSignature(file))) {
+    if (!detectedType) {
       return "Uma das imagens não pôde ser validada. Selecione o arquivo novamente.";
     }
   }
@@ -124,30 +128,38 @@ export async function uploadPropertyImages(
   propertyTitle: string,
   files: File[],
   sortOrderStart: number,
+  coverIndex?: number,
 ) {
   const uploadedPaths: string[] = [];
   const rows: Array<Record<string, unknown>> = [];
 
   try {
     for (const [index, file] of files.entries()) {
-      const extension = IMAGE_EXTENSIONS[file.type];
+      const contentType = await detectImageType(file);
+
+      if (!contentType) {
+        throw new Error("invalid_image_signature");
+      }
+
+      const extension = IMAGE_EXTENSIONS[contentType];
       const path = `${propertyId}/${crypto.randomUUID()}.${extension}`;
       const { error: uploadError } = await supabase.storage
         .from("property-images")
-        .upload(path, file, { contentType: file.type, cacheControl: "31536000", upsert: false });
+        .upload(path, file, { contentType, cacheControl: "31536000", upsert: false });
 
       if (uploadError) {
         throw uploadError;
       }
 
       uploadedPaths.push(path);
-      const { data } = supabase.storage.from("property-images").getPublicUrl(path);
       rows.push({
         property_id: propertyId,
-        url: data.publicUrl,
+        url: getSupabaseStoragePublicUrl("property-images", path),
         alt_text: `${propertyTitle} - imagem ${sortOrderStart + index + 1}`,
         sort_order: sortOrderStart + index,
-        is_cover: sortOrderStart === 0 && index === 0,
+        is_cover: typeof coverIndex === "number"
+          ? coverIndex === index
+          : sortOrderStart === 0 && index === 0,
       });
     }
 
@@ -226,11 +238,10 @@ export async function uploadPropertyVideos(
       }
 
       uploadedPaths.push(path);
-      const { data } = supabase.storage.from("property-videos").getPublicUrl(path);
       rows.push({
         property_id: propertyId,
         storage_path: path,
-        url: data.publicUrl,
+        url: getSupabaseStoragePublicUrl("property-videos", path),
         file_name: file.name.slice(0, 255),
         mime_type: file.type,
         size_bytes: file.size,

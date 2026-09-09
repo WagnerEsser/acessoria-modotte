@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
 
   const imageFiles = getPropertyImageFiles(formData);
   const videoFiles = getPropertyVideoFiles(formData);
+  const newCoverImageIndexValue = readFormValue(formData, "new_cover_image_index");
+  const newCoverImageIndex = newCoverImageIndexValue === "" ? undefined : Number(newCoverImageIndexValue);
   const imageError = await validatePropertyImageFiles(imageFiles);
 
   if (imageError) {
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
   if (!saveError && createdProperty) {
     try {
       await syncPropertyFeatures(supabase, createdProperty.id, parsed.data.features);
-      await uploadPropertyImages(supabase, createdProperty.id, parsed.data.title, imageFiles, 0);
+      await uploadPropertyImages(supabase, createdProperty.id, parsed.data.title, imageFiles, 0, newCoverImageIndex);
       await uploadPropertyVideos(supabase, createdProperty.id, videoFiles, 0);
     } catch {
       const { data: imageRows } = await supabase.from("property_images").select("id").eq("property_id", createdProperty.id);

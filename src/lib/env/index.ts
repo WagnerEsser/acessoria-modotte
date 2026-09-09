@@ -47,6 +47,48 @@ export function getSupabaseUrl(): string {
   return value;
 }
 
+export function getSupabasePublicUrl(): string {
+  const value = getFirstConfiguredEnv([
+    "SUPABASE_PUBLIC_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_URL",
+    "SUPABASE_INTERNAL_URL",
+    "API_EXTERNAL_URL",
+  ]);
+
+  if (!value) {
+    throw new Error("Missing required environment variable: SUPABASE_PUBLIC_URL");
+  }
+
+  return value.replace(/\/$/, "");
+}
+
+export function getSupabaseStoragePublicUrl(bucket: string, path: string): string {
+  return `${getSupabasePublicUrl()}/storage/v1/object/public/${bucket}/${path}`;
+}
+
+export function getSupabaseStoragePath(url: string, bucket: string): string | null {
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const markerIndex = url.indexOf(marker);
+
+  return markerIndex === -1 ? null : url.slice(markerIndex + marker.length);
+}
+
+export function getMediaProxyUrl(bucket: string, path: string): string {
+  const encodedPath = path.split("/").map((segment) => encodeURIComponent(segment)).join("/");
+  return `/api/media/${encodeURIComponent(bucket)}/${encodedPath}`;
+}
+
+export function normalizeSupabaseStoragePublicUrl(url: string, bucket: string): string {
+  if (!hasSupabaseEnv()) {
+    return url;
+  }
+
+  const path = getSupabaseStoragePath(url, bucket);
+
+  return path ? getSupabaseStoragePublicUrl(bucket, path) : url;
+}
+
 export function getSupabaseAnonKey(): string {
   const value = getFirstConfiguredEnv([
     "SUPABASE_ANON_KEY",

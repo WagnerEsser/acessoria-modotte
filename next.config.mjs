@@ -9,6 +9,10 @@ const securityHeaders = getSecurityHeaders(isProduction);
 const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  experimental: {
+    // Keep the limit aligned with the maximum property media payload.
+    proxyClientMaxBodySize: "256mb",
+  },
   productionBrowserSourceMaps: false,
   allowedDevOrigins: ["127.0.0.1"],
   images: {
