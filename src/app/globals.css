@@ -73,6 +73,16 @@
     background-clip: padding-box;
   }
 
+  @keyframes gallery-slide-next {
+    from { opacity: 0; transform: translateX(18px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes gallery-slide-previous {
+    from { opacity: 0; transform: translateX(-18px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
   .rich-text {
     @apply text-sm leading-7 text-brand-ivory/72;
   }

@@ -7,6 +7,7 @@ import {
   normalizePhoneDigits,
 } from "@/lib/contact";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { getMediaProxyUrl, getSupabaseStoragePath } from "@/lib/env";
 import { richTextToPlainText } from "@/lib/rich-text";
 
 export const SELL_CARD_FALLBACK_TEXT =
@@ -400,8 +401,10 @@ function mapPropertyHighlights(
 }
 
 function mapPropertyImage(row: PropertyImageRow): PublicPropertyImage {
+  const path = getSupabaseStoragePath(row.url, "property-images");
+
   return {
-    url: row.url,
+    url: path ? getMediaProxyUrl("property-images", path) : row.url,
     altText: normalizeText(row.alt_text),
     sortOrder: row.sort_order,
     isCover: row.is_cover,
@@ -411,8 +414,10 @@ function mapPropertyImage(row: PropertyImageRow): PublicPropertyImage {
 }
 
 function mapPropertyVideo(row: PropertyVideoRow): PublicPropertyVideo {
+  const path = getSupabaseStoragePath(row.url, "property-videos");
+
   return {
-    url: row.url,
+    url: path ? getMediaProxyUrl("property-videos", path) : row.url,
     fileName: normalizeText(row.file_name),
     mimeType: row.mime_type,
     sizeBytes: row.size_bytes,

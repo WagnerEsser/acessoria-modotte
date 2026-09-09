@@ -10,6 +10,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { PublicPageLink } from "@/components/shared/public-page-link";
 import { PropertyMap } from "@/components/site/property-map";
+import { PropertyImageGallery } from "@/components/site/property-image-gallery";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppHref } from "@/lib/contact";
 import { buildMetadata } from "@/lib/seo";
 import {
@@ -175,7 +176,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
         />
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Card className="overflow-hidden p-0">
+          <Card className="self-start overflow-hidden p-0">
             <div className="relative min-h-[24rem] overflow-hidden bg-brand-ink">
               {property.coverImageUrl ? (
                 <img
@@ -184,40 +185,36 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
                   width={property.coverImageWidth ?? 1600}
                   height={property.coverImageHeight ?? 900}
                   loading="eager"
-                  className="absolute inset-0 h-full w-full object-cover opacity-45"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
-              ) : null}
-              <div className={`absolute inset-0 bg-gradient-to-br ${property.accent}`} />
+              ) : (
+                <div className={`absolute inset-0 bg-gradient-to-br ${property.accent}`} />
+              )}
+            </div>
 
-              <div className="relative flex h-full flex-col justify-between gap-6 p-8">
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge variant="soft">{property.type}</Badge>
-                  {property.featured ? <Badge variant="gold">Destaque</Badge> : null}
-                  <Badge variant="gold">{property.price}</Badge>
-                </div>
-
-                <div className="space-y-3">
-                  {locationLabel ? (
-                    property.neighborhoodSlug ? (
-                      <Link
-                        href={`/areas/${property.neighborhoodSlug}`}
-                        className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72 transition hover:text-brand-gold"
-                      >
-                        <MapPin className="size-4" />
-                        {locationLabel}
-                      </Link>
-                    ) : (
-                      <div className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72">
-                        <MapPin className="size-4" />
-                        {locationLabel}
-                      </div>
-                    )
-                  ) : null}
-                  <h2 className="max-w-2xl font-display text-4xl font-semibold leading-tight text-brand-ivory sm:text-5xl">
-                    {property.title}
-                  </h2>
-                </div>
+            <div className="space-y-4 border-t border-brand-beige/10 p-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="soft">{property.type}</Badge>
+                {property.featured ? <Badge variant="gold">Destaque</Badge> : null}
+                <Badge variant="gold">{property.price}</Badge>
               </div>
+
+              {locationLabel ? (
+                property.neighborhoodSlug ? (
+                  <Link
+                    href={`/areas/${property.neighborhoodSlug}`}
+                    className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72 transition hover:text-brand-gold"
+                  >
+                    <MapPin className="size-4" />
+                    {locationLabel}
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-brand-ivory/72">
+                    <MapPin className="size-4" />
+                    {locationLabel}
+                  </div>
+                )
+              ) : null}
             </div>
           </Card>
 
@@ -354,22 +351,8 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
             <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
               Galeria
             </p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {property.images.map((image) => (
-                <div
-                  key={image.url}
-                  className="overflow-hidden rounded-3xl border border-brand-beige/12 bg-brand-ivory/4"
-                >
-                  <img
-                    src={image.url}
-                    alt={image.altText ?? property.title}
-                    width={image.width ?? 1600}
-                    height={image.height ?? 900}
-                    loading="lazy"
-                    className="h-64 w-full object-cover"
-                  />
-                </div>
-              ))}
+            <div className="mt-4">
+              <PropertyImageGallery images={property.images} title={property.title} />
             </div>
           </Card>
         ) : null}
