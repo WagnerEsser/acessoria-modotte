@@ -209,6 +209,59 @@ describe("components", () => {
     expect(screen.getByPlaceholderText("(11) 99999-9999")).toHaveValue("(47) 99999-9999");
   });
 
+  it("edits property features as structured publication highlights", () => {
+    const { container } = render(
+      createElement(PropertyForm, {
+        action: "/api/admin/properties/property-1",
+        redirectTo: "/admin/imoveis",
+        submitLabel: "Salvar",
+        values: {
+          features: "Piscina: Aquecida\nAceita pets",
+        },
+      }),
+    );
+    const hiddenFeatures = container.querySelector<HTMLTextAreaElement>('textarea[name="features"]');
+
+    expect(screen.queryByText("Destaques exibidos na publicação.")).not.toBeInTheDocument();
+    expect(screen.getByText("Sugestões:")).toBeInTheDocument();
+    expect(screen.getByText("Característica")).toBeInTheDocument();
+    expect(screen.getAllByText("Detalhe opcional")).toHaveLength(1);
+    expect(screen.queryByText("Característica 2")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Característica 1")).toHaveValue("Piscina");
+    expect(screen.getByLabelText("Detalhe 1")).toHaveValue("Aquecida");
+    expect(screen.getByLabelText("Característica 2")).toHaveValue("Aceita pets");
+    expect(hiddenFeatures).toHaveValue("Piscina: Aquecida\nAceita pets");
+
+    fireEvent.change(screen.getByLabelText("Detalhe 2"), {
+      target: { value: "Sob consulta" },
+    });
+
+    expect(hiddenFeatures).toHaveValue("Piscina: Aquecida\nAceita pets: Sob consulta");
+  });
+
+  it("adds and removes suggested property features", () => {
+    const { container } = render(
+      createElement(PropertyForm, {
+        action: "/api/admin/properties/property-1",
+        redirectTo: "/admin/imoveis",
+        submitLabel: "Salvar",
+      }),
+    );
+    const hiddenFeatures = container.querySelector<HTMLTextAreaElement>('textarea[name="features"]');
+
+    expect(screen.getByText("Nenhuma característica adicionada.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Piscina" }));
+
+    expect(screen.getByLabelText("Característica 1")).toHaveValue("Piscina");
+    expect(hiddenFeatures).toHaveValue("Piscina");
+
+    fireEvent.click(screen.getByRole("button", { name: "Remover característica 1" }));
+
+    expect(hiddenFeatures).toHaveValue("");
+    expect(screen.getByText("Nenhuma característica adicionada.")).toBeInTheDocument();
+  });
+
   it("prefers coordinates for the admin map preview", () => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY", "maps-test-key");
 

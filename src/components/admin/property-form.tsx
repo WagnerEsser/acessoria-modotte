@@ -4,6 +4,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { AdminForm } from "@/components/admin/admin-form";
 import { MaskedInput } from "@/components/admin/masked-input";
+import { PropertyFeaturesEditor } from "@/components/admin/property-features-editor";
 import { PropertyImageManager, type ManagedPropertyImage } from "@/components/admin/property-image-manager";
 import { PropertyMapPreview } from "@/components/admin/property-map-preview";
 import { PropertyVideoManager, type ManagedPropertyVideo } from "@/components/admin/property-video-manager";
@@ -157,7 +158,7 @@ export function PropertyForm({ action, redirectTo, submitLabel, values, images, 
           <Field label="Ano de construção"><Input name="built_year" placeholder="Ex.: 2020" inputMode="numeric" defaultValue={getFieldValue(values?.builtYear)} /></Field>
           <label className="flex h-11 self-end items-center gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/35 px-4"><input name="furnished" type="checkbox" defaultChecked={Boolean(values?.furnished)} className="size-4 shrink-0 rounded border-brand-beige/30 bg-brand-navy/60 text-brand-gold focus:ring-brand-gold/30" /><span className="text-[13px] font-medium text-brand-ivory">Mobiliado</span><span title="Marque se o imóvel já é entregue com mobília." aria-label="Marque se o imóvel já é entregue com mobília."><CircleHelp aria-hidden="true" className="size-4 text-brand-ivory/55" /></span></label>
         </div>
-        <Field label="Características"><Textarea name="features" placeholder={"Uma característica por linha. Ex.:\nPiscina: Sim\nVaranda: Gourmet\nAceita pets"} defaultValue={getFieldValue(values?.features)} className="min-h-[140px]" /></Field>
+        <PropertyFeaturesEditor value={getFieldValue(values?.features)} />
       </section>
 
       <section className="space-y-4 rounded-3xl border border-brand-beige/12 bg-brand-ivory/4 p-5">
