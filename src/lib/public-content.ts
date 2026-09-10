@@ -717,7 +717,8 @@ export async function getPublicNeighborhoods() {
     supabase
       .from("properties")
       .select("neighborhood_id")
-      .eq("is_published", true),
+      .eq("is_published", true)
+      .neq("status", "hidden"),
   ]);
 
   const counts = new Map<string, number>();
@@ -735,9 +736,11 @@ export async function getPublicNeighborhoods() {
     );
   }
 
-  return ((neighborhoods ?? []) as NeighborhoodRow[]).map((neighborhood) =>
-    mapNeighborhoodRecord(neighborhood, counts.get(neighborhood.id) ?? 0),
-  );
+  return ((neighborhoods ?? []) as NeighborhoodRow[])
+    .map((neighborhood) =>
+      mapNeighborhoodRecord(neighborhood, counts.get(neighborhood.id) ?? 0),
+    )
+    .filter((neighborhood) => neighborhood.propertyCount > 0);
 }
 
 export async function getPublicNeighborhoodBySlug(slug: string) {
@@ -759,6 +762,7 @@ export async function getPublicNeighborhoodBySlug(slug: string) {
     .from("properties")
     .select("id", { count: "exact", head: true })
     .eq("is_published", true)
+    .neq("status", "hidden")
     .eq("neighborhood_id", (neighborhood as NeighborhoodRow).id);
 
   return mapNeighborhoodRecord(neighborhood as NeighborhoodRow, count ?? 0);

@@ -1,15 +1,90 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const publicClientMock = vi.hoisted(() => ({
+  client: null as null | {
+    from: (table: string) => unknown;
+  },
+}));
+
+vi.mock("@/lib/supabase/public", async () => {
+  const { createFallbackSupabaseClient } = await vi.importActual<
+    typeof import("@/lib/supabase/fallback")
+  >("@/lib/supabase/fallback");
+
+  return {
+    createSupabasePublicClient: () =>
+      publicClientMock.client ?? createFallbackSupabaseClient(),
+  };
+});
+
 import { brand } from "@/lib/brand";
 import {
   getPublicContactChannels,
+  getPublicNeighborhoods,
   getPublicSiteSettings,
   splitParagraphs,
   type PublicSiteSettings,
 } from "@/lib/public-content";
 
+type MockRows = Record<string, Array<Record<string, unknown>>>;
+
+function createQueryBuilder(rows: Array<Record<string, unknown>>) {
+  let currentRows = [...rows];
+  let count: number | null = null;
+
+  const builder = {
+    select(_columns: string, options?: { count?: "exact"; head?: boolean }) {
+      if (options?.count === "exact") {
+        count = currentRows.length;
+      }
+
+      return builder;
+    },
+    eq(column: string, value: unknown) {
+      currentRows = currentRows.filter((row) => row[column] === value);
+
+      return builder;
+    },
+    neq(column: string, value: unknown) {
+      currentRows = currentRows.filter((row) => row[column] !== value);
+
+      return builder;
+    },
+    order() {
+      return builder;
+    },
+    maybeSingle() {
+      return Promise.resolve({ data: currentRows[0] ?? null, error: null });
+    },
+    then<TResult1 = { data: typeof currentRows; count: typeof count; error: null }, TResult2 = never>(
+      onfulfilled?:
+        | ((
+            value: { data: typeof currentRows; count: typeof count; error: null },
+          ) => TResult1 | PromiseLike<TResult1>)
+        | null,
+      onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
+    ) {
+      return Promise.resolve({ data: currentRows, count, error: null }).then(
+        onfulfilled,
+        onrejected,
+      );
+    },
+  };
+
+  return builder;
+}
+
+function createMockSupabaseClient(rowsByTable: MockRows) {
+  return {
+    from(table: string) {
+      return createQueryBuilder(rowsByTable[table] ?? []);
+    },
+  };
+}
+
 describe("public content helpers", () => {
   afterEach(() => {
+    publicClientMock.client = null;
     vi.unstubAllEnvs();
   });
 
@@ -87,6 +162,64 @@ describe("public content helpers", () => {
       channels.some((channel) => channel.label === "WhatsApp comercial"),
     ).toBe(false);
     expect(channels.some((channel) => channel.label === "Telefone")).toBe(true);
+  });
+
+  it("returns only neighborhoods with visible published properties", async () => {
+    publicClientMock.client = createMockSupabaseClient({
+      neighborhoods: [
+        {
+          id: "centro-id",
+          slug: "centro",
+          name: "Centro",
+          city: "Balneário Camboriú",
+          state: "SC",
+          intro_text: null,
+          seo_title: null,
+          seo_description: null,
+          is_published: true,
+          sort_order: 1,
+          updated_at: "2026-07-23T00:00:00.000Z",
+        },
+        {
+          id: "sao-marcos-id",
+          slug: "sao-marcos",
+          name: "São Marcos",
+          city: "Joinville",
+          state: "SC",
+          intro_text: null,
+          seo_title: null,
+          seo_description: null,
+          is_published: true,
+          sort_order: 2,
+          updated_at: "2026-07-23T00:00:00.000Z",
+        },
+      ],
+      properties: [
+        {
+          neighborhood_id: "centro-id",
+          is_published: true,
+          status: "hidden",
+        },
+        {
+          neighborhood_id: "sao-marcos-id",
+          is_published: true,
+          status: "published",
+        },
+        {
+          neighborhood_id: "centro-id",
+          is_published: false,
+          status: "published",
+        },
+      ],
+    });
+
+    const neighborhoods = await getPublicNeighborhoods();
+
+    expect(neighborhoods).toHaveLength(1);
+    expect(neighborhoods[0]).toMatchObject({
+      slug: "sao-marcos",
+      propertyCount: 1,
+    });
   });
 
   it("falls back to brand settings when supabase env is missing", async () => {
