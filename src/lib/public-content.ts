@@ -96,6 +96,7 @@ type PropertyRow = {
   description: string | null;
   address: string | null;
   show_full_address: boolean;
+  show_map: boolean;
   city: string | null;
   state: string | null;
   zip_code: string | null;
@@ -221,11 +222,13 @@ export type PublicPropertyCard = {
   seoDescription: string | null;
   updatedAt: string;
   showFullAddress?: boolean;
+  showMap?: boolean;
 };
 
 export type PublicPropertyDetail = PublicPropertyCard & {
   description: string | null;
   address: string | null;
+  showMap: boolean;
   state: string | null;
   zipCode: string | null;
   latitude: number | null;
@@ -464,7 +467,7 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     price,
     priceValue,
     priceOnRequest: row.price_on_request,
-    summary: normalizeText(row.description),
+    summary: normalizeText(richTextToPlainText(row.description)),
     size: formatArea(row.area_useful ?? row.area_total),
     bedrooms: row.bedrooms ?? null,
     bathrooms: row.bathrooms ?? null,
@@ -484,6 +487,7 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     seoDescription: normalizeText(row.seo_description),
     updatedAt: row.updated_at,
     showFullAddress: row.show_full_address,
+    showMap: row.show_map,
   };
 
   return card;
@@ -530,6 +534,7 @@ function mapPropertyDetail(row: PropertyRow): PublicPropertyDetail {
     ...baseCard,
     description: normalizeText(row.description),
     address: row.show_full_address ? normalizeText(row.address) : null,
+    showMap: row.show_map,
     state: normalizeText(row.state),
     zipCode: normalizeText(row.zip_code),
     latitude: Number.isNaN(latitudeValue ?? NaN) ? null : latitudeValue,
@@ -663,7 +668,7 @@ export async function getPublicProperties() {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, city, state, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, show_map, city, state, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
     )
     .eq("is_published", true)
     .neq("status", "hidden")
@@ -687,7 +692,7 @@ export async function getPublicPropertyBySlug(slug: string) {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, contact_phone, contact_whatsapp, seo_title, seo_description, published_at, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_videos(url, file_name, mime_type, size_bytes, sort_order), property_features(label, value, sort_order)",
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, show_map, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, contact_phone, contact_whatsapp, seo_title, seo_description, published_at, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_videos(url, file_name, mime_type, size_bytes, sort_order), property_features(label, value, sort_order)",
     )
     .eq("slug", slug)
     .eq("is_published", true)

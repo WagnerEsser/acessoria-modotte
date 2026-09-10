@@ -96,6 +96,7 @@ create table if not exists public.properties (
   description text,
   address text,
   show_full_address boolean not null default false,
+  show_map boolean not null default true,
   neighborhood_id uuid references public.neighborhoods(id) on delete set null,
   city text,
   state text,
@@ -133,6 +134,9 @@ create table if not exists public.property_images (
   created_at timestamptz not null default now(),
   unique (property_id, sort_order)
 );
+
+alter table public.properties
+  add column if not exists show_map boolean not null default true;
 
 create table if not exists public.property_videos (
   id uuid primary key default gen_random_uuid(),

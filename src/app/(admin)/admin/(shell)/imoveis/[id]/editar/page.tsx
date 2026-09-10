@@ -29,6 +29,7 @@ type PropertyRecord = {
   state: string | null;
   address: string | null;
   show_full_address: boolean;
+  show_map: boolean;
   zip_code: string | null;
   price: number | string | null;
   price_on_request: boolean;
@@ -69,7 +70,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, title, slug, transaction_type, property_type, status, city, state, address, show_full_address, zip_code, price, price_on_request, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, latitude, longitude, contact_phone, contact_whatsapp, featured, is_published, seo_title, seo_description, description, neighborhood:neighborhoods(name), property_images(id, url, alt_text, is_cover), property_videos(id, url, storage_path, file_name, mime_type, size_bytes, sort_order), property_features(label, value, sort_order)"
+      "id, title, slug, transaction_type, property_type, status, city, state, address, show_full_address, show_map, zip_code, price, price_on_request, bedrooms, bathrooms, garages, area_total, area_useful, condominium_fee, iptu_value, built_year, furnished, latitude, longitude, contact_phone, contact_whatsapp, featured, is_published, seo_title, seo_description, description, neighborhood:neighborhoods(name), property_images(id, url, alt_text, is_cover), property_videos(id, url, storage_path, file_name, mime_type, size_bytes, sort_order), property_features(label, value, sort_order)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -125,6 +126,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
           neighborhoodName: neighborhood || undefined,
           address: property.address ?? "",
           showFullAddress: property.show_full_address,
+          showMap: property.show_map,
           zipCode: property.zip_code ?? "",
           price: property.price === null || property.price === undefined ? "" : String(property.price),
           priceOnRequest: property.price_on_request,

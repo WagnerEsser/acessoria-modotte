@@ -9,15 +9,17 @@ import { Card } from "@/components/ui/card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { PublicPageLink } from "@/components/shared/public-page-link";
+import { RichText } from "@/components/shared/rich-text";
 import { PropertyMap } from "@/components/site/property-map";
 import { PropertyImageGallery } from "@/components/site/property-image-gallery";
 import { formatBrazilianPhoneDisplayNumber, getWhatsAppHref } from "@/lib/contact";
+import { richTextToPlainText } from "@/lib/rich-text";
 import { buildMetadata } from "@/lib/seo";
 import {
   buildBreadcrumbStructuredData,
   buildPropertyStructuredData,
 } from "@/lib/structured-data";
-import { getPublicPropertyBySlug, getPublicSiteSettings, splitParagraphs } from "@/lib/public-content";
+import { getPublicPropertyBySlug, getPublicSiteSettings } from "@/lib/public-content";
 
 export const revalidate = 300;
 
@@ -52,6 +54,18 @@ function getPropertyContactHref(
   return getWhatsAppHref(`Olá, tenho interesse no imóvel ${property.title}.`, targetNumber);
 }
 
+function getMapQuery(property: NonNullable<Awaited<ReturnType<typeof getPublicPropertyBySlug>>>) {
+  if (property.showFullAddress && property.latitude !== null && property.longitude !== null) {
+    return `${property.latitude},${property.longitude}`;
+  }
+
+  if (property.showFullAddress) {
+    return [property.address, property.neighborhoodName, property.city, property.state].filter(Boolean).join(", ");
+  }
+
+  return [property.neighborhoodName, property.city, property.state].filter(Boolean).join(", ");
+}
+
 export async function generateMetadata({
   params,
 }: PropertyPageProps): Promise<Metadata> {
@@ -67,10 +81,12 @@ export async function generateMetadata({
     });
   }
 
+  const descriptionText = richTextToPlainText(property.description);
+
   return buildMetadata({
     title: property.seoTitle ?? property.title,
     description:
-      property.seoDescription ?? property.summary ?? property.description ?? property.price,
+      property.seoDescription ?? property.summary ?? (descriptionText || property.price),
     path: `/imoveis/${property.slug}`,
     image: property.coverImageUrl,
     imageAlt: property.coverImageAlt ?? property.title,
@@ -89,11 +105,11 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
   }
 
   const locationLabel = buildLocationLabel(property);
-  const paragraphs = splitParagraphs(property.description);
   const contactHref = getPropertyContactHref(property, siteSettings.whatsappNumber);
-  const mapQuery = property.showFullAddress
-    ? [property.address, property.neighborhoodName, property.city, property.state].filter(Boolean).join(", ")
-    : [property.neighborhoodName, property.city, property.state].filter(Boolean).join(", ");
+  const mapQuery = getMapQuery(property);
+  const mapNote = property.showFullAddress
+    ? "Localização indicada conforme os dados informados."
+    : "Mapa com localização aproximada pela região do imóvel.";
   const displayLocation = property.showFullAddress && property.address
     ? [property.address, property.city, property.state].filter(Boolean).join(" - ")
     : [property.neighborhoodName, property.city, property.state].filter(Boolean).join(" - ");
@@ -310,16 +326,12 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           </div>
         </div>
 
-        {paragraphs.length ? (
+        {property.description ? (
           <Card className="space-y-4 p-6">
             <p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">
               Descrição
             </p>
-            <div className="space-y-4 text-sm leading-7 text-brand-ivory/72">
-              {paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            <RichText value={property.description} className="text-sm leading-7 text-brand-ivory/72" />
           </Card>
         ) : null}
 
@@ -383,7 +395,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
           </Card>
         ) : null}
 
-        <PropertyMap query={mapQuery} />
+        {property.showMap ? <PropertyMap query={mapQuery} note={mapNote} /> : null}
       </div>
     </div>
   );

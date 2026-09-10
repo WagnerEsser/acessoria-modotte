@@ -186,6 +186,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       description: parsed.data.description,
       address: parsed.data.address,
       show_full_address: parsed.data.showFullAddress,
+      show_map: parsed.data.showMap,
       neighborhood_id: neighborhoodId,
       city: parsed.data.city,
       state: parsed.data.state,

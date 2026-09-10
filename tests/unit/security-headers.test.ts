@@ -16,7 +16,9 @@ describe("security headers", () => {
     expect(policy).toContain(
       "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com"
     );
-    expect(policy).toContain("frame-src https://challenges.cloudflare.com");
+    expect(policy).toContain(
+      "frame-src https://challenges.cloudflare.com https://www.google.com"
+    );
     expect(policy).toContain("upgrade-insecure-requests");
     expect(policy).not.toContain("'unsafe-eval'");
     expect(headers.get("Strict-Transport-Security")).toBe(

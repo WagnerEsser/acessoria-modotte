@@ -14,6 +14,7 @@ function buildFormData(overrides: Record<string, string> = {}) {
     state: "SC",
     address: "Rua das Flores, 100",
     show_full_address: "on",
+    show_map: "on",
     zip_code: "88330000",
     price: "1250000",
     bedrooms: "3",
@@ -46,6 +47,7 @@ describe("admin property form", () => {
     if (!result.ok) return;
 
     expect(result.data.showFullAddress).toBe(true);
+    expect(result.data.showMap).toBe(true);
     expect(result.data.status).toBe("published");
     expect(result.data.condominiumFee).toBe(850);
     expect(result.data.latitude).toBe(-26.99);
@@ -60,6 +62,15 @@ describe("admin property form", () => {
     const result = parsePropertyFormData(buildFormData({ latitude: "95" }));
 
     expect(result).toMatchObject({ ok: false, fieldErrors: { latitude: "Revise este campo." } });
+  });
+
+  it("parses hidden map state when the switch is off", () => {
+    const result = parsePropertyFormData(buildFormData({ show_map: "" }));
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.data.showMap).toBe(false);
   });
 });
 

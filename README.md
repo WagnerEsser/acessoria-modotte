@@ -34,6 +34,14 @@ SUPABASE_ANON_KEY=
 SITE_URL=http://localhost:3000
 ```
 
+Para exibir mapas de imóveis com a Google Maps Embed API, configure também:
+
+```env
+NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY=
+```
+
+A chave deve ter restrição de site/referrer para os domínios do projeto e restrição de API somente para `Maps Embed API`.
+
 Para criar ou atualizar automaticamente o usuário principal do painel administrativo local, configure também:
 
 ```env

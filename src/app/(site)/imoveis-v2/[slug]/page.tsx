@@ -20,6 +20,7 @@ import {
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { PublicPageLink } from "@/components/shared/public-page-link";
+import { RichText } from "@/components/shared/rich-text";
 import { PropertyImageGallery } from "@/components/site/property-image-gallery";
 import { PropertyMap } from "@/components/site/property-map";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +32,9 @@ import {
 import {
   getPublicPropertyBySlug,
   getPublicSiteSettings,
-  splitParagraphs,
   type PublicPropertyDetail,
 } from "@/lib/public-content";
+import { richTextToPlainText } from "@/lib/rich-text";
 import { buildMetadata } from "@/lib/seo";
 import { buildBreadcrumbStructuredData } from "@/lib/structured-data";
 import { cn } from "@/lib/utils";
@@ -85,6 +86,10 @@ function getDisplayLocation(property: PublicPropertyDetail) {
 }
 
 function getMapQuery(property: PublicPropertyDetail) {
+  if (property.showFullAddress && property.latitude !== null && property.longitude !== null) {
+    return `${property.latitude},${property.longitude}`;
+  }
+
   if (property.showFullAddress) {
     return [property.address, property.neighborhoodName, property.city, property.state]
       .filter(Boolean)
@@ -153,13 +158,14 @@ export async function generateMetadata({
     });
   }
 
+  const descriptionText = richTextToPlainText(property.description);
+
   return buildMetadata({
     title: `Nova visualização - ${property.seoTitle ?? property.title}`,
     description:
       property.seoDescription ??
       property.summary ??
-      property.description ??
-      property.price,
+      (descriptionText || property.price),
     path: `/imoveis-v2/${property.slug}`,
     image: property.coverImageUrl,
     imageAlt: property.coverImageAlt ?? property.title,
@@ -178,11 +184,13 @@ export default async function PropertyV2DetailPage({ params }: PropertyV2PagePro
     notFound();
   }
 
-  const paragraphs = splitParagraphs(property.description);
   const contactHref = getPropertyContactHref(property, siteSettings.whatsappNumber);
   const contactOpensNewTab = contactHref.startsWith("http");
   const displayLocation = getDisplayLocation(property);
   const mapQuery = getMapQuery(property);
+  const mapNote = property.showFullAddress
+    ? "Localização indicada conforme os dados informados."
+    : "Mapa com localização aproximada pela região do imóvel.";
   const coverImage = property.images[0] ?? null;
   const galleryPreviewImages = property.images.slice(1, 4);
   const metrics = [
@@ -376,12 +384,11 @@ export default async function PropertyV2DetailPage({ params }: PropertyV2PagePro
               description={property.summary ?? undefined}
             />
 
-            {paragraphs.length ? (
-              <div className="mt-6 space-y-5 rounded-[1.5rem] border border-brand-navy/10 bg-white p-6 text-base leading-8 text-brand-navy/68">
-                {paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
+            {property.description ? (
+              <RichText
+                value={property.description}
+                className="mt-6 rounded-[1.5rem] border border-brand-navy/10 bg-white p-6 text-base leading-8 text-brand-navy/68"
+              />
             ) : (
               <div className="mt-6 rounded-[1.5rem] border border-brand-navy/10 bg-white p-6 text-sm leading-6 text-brand-navy/62">
                 A descrição será exibida aqui quando estiver preenchida no cadastro.
@@ -468,9 +475,11 @@ export default async function PropertyV2DetailPage({ params }: PropertyV2PagePro
             </section>
           ) : null}
 
-          <div className="rounded-[1.5rem] border border-brand-navy/10 bg-white p-5 [&_h2]:text-brand-navy [&_p]:text-brand-navy/64">
-            <PropertyMap query={mapQuery} />
-          </div>
+          {property.showMap ? (
+            <div className="rounded-[1.5rem] border border-brand-navy/10 bg-white p-5 [&_h2]:text-brand-navy [&_p]:text-brand-navy/64">
+              <PropertyMap query={mapQuery} note={mapNote} />
+            </div>
+          ) : null}
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:self-start">

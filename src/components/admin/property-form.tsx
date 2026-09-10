@@ -3,8 +3,11 @@ import { Select } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { AdminForm } from "@/components/admin/admin-form";
+import { MaskedInput } from "@/components/admin/masked-input";
 import { PropertyImageManager, type ManagedPropertyImage } from "@/components/admin/property-image-manager";
+import { PropertyMapPreview } from "@/components/admin/property-map-preview";
 import { PropertyVideoManager, type ManagedPropertyVideo } from "@/components/admin/property-video-manager";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { CircleHelp } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -19,6 +22,7 @@ export type PropertyFormValues = {
   neighborhoodName?: string;
   address?: string;
   showFullAddress?: boolean;
+  showMap?: boolean;
   zipCode?: string;
   price?: string;
   priceOnRequest?: boolean;
@@ -65,7 +69,31 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+function SwitchField({
+  defaultChecked,
+  label,
+  name,
+}: {
+  defaultChecked: boolean;
+  label: string;
+  name: string;
+}) {
+  return (
+    <label className="inline-flex w-fit cursor-pointer items-center gap-2 text-xs uppercase tracking-[0.2em] text-brand-ivory/65">
+      <input
+        name={name}
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        className="peer sr-only"
+      />
+      <span className="relative h-6 w-11 rounded-full bg-brand-ivory/20 transition peer-checked:bg-brand-gold/80 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-gold/70 after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
+      {label}
+    </label>
+  );
+}
+
 export function PropertyForm({ action, redirectTo, submitLabel, values, images, videos }: PropertyFormProps) {
+  const mapsEmbedApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY?.trim();
   const transactionTypeOptions = [
     { value: "sale", label: "Venda", description: "Captação voltada à venda" },
     { value: "rent", label: "Locação", description: "Captação voltada à locação" },
@@ -104,26 +132,28 @@ export function PropertyForm({ action, redirectTo, submitLabel, values, images, 
           <Field label="Cidade"><Input name="city" placeholder="Ex.: Balneário Camboriú" defaultValue={getFieldValue(values?.city)} required /></Field>
           <Field label="Estado"><Input name="state" placeholder="Ex.: SC" defaultValue={getFieldValue(values?.state)} required /></Field>
           <Field label="Bairro"><Input name="neighborhood_name" placeholder="Ex.: Centro" defaultValue={getFieldValue(values?.neighborhoodName)} /></Field>
-          <Field label="CEP"><Input name="zip_code" placeholder="Ex.: 88330-000" inputMode="numeric" maxLength={9} defaultValue={getFieldValue(values?.zipCode)} /></Field>
+          <Field label="CEP"><MaskedInput name="zip_code" mask="cep" placeholder="Ex.: 88330-000" inputMode="numeric" maxLength={9} defaultValue={getFieldValue(values?.zipCode)} /></Field>
           <Field label="Endereço completo"><Input name="address" placeholder="Ex.: Avenida Brasil, 1000" defaultValue={getFieldValue(values?.address)} /></Field>
-          <label className="flex h-11 self-end items-center gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/35 px-4"><input name="show_full_address" type="checkbox" defaultChecked={Boolean(values?.showFullAddress)} className="size-4 shrink-0 rounded border-brand-beige/30 bg-brand-navy/60 text-brand-gold focus:ring-brand-gold/30" /><span className="text-[13px] font-medium text-brand-ivory">Mostrar endereço completo</span><span title="Desmarcado: mostramos apenas a região aproximada." aria-label="Desmarcado: mostramos apenas a região aproximada."><CircleHelp aria-hidden="true" className="size-4 text-brand-ivory/55" /></span></label>
+          <label className="flex h-11 self-end items-center gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/35 px-4"><input name="show_full_address" type="checkbox" defaultChecked={values?.showFullAddress !== false} className="size-4 shrink-0 rounded border-brand-beige/30 bg-brand-navy/60 text-brand-gold focus:ring-brand-gold/30" /><span className="text-[13px] font-medium text-brand-ivory">Mostrar endereço completo</span><span title="Desmarcado: mostramos apenas a região aproximada." aria-label="Desmarcado: mostramos apenas a região aproximada."><CircleHelp aria-hidden="true" className="size-4 text-brand-ivory/55" /></span></label>
           <Field label="Latitude (opcional)"><Input name="latitude" placeholder="Ex.: -26.9906" inputMode="decimal" defaultValue={getFieldValue(values?.latitude)} /></Field>
           <Field label="Longitude (opcional)"><Input name="longitude" placeholder="Ex.: -48.6356" inputMode="decimal" defaultValue={getFieldValue(values?.longitude)} /></Field>
         </div>
         <p className="text-xs leading-5 text-brand-ivory/52">Para o mapa, informe coordenadas do ponto exato apenas quando o endereço completo puder ser divulgado.</p>
+        <PropertyMapPreview initialValues={values} mapsEmbedApiKey={mapsEmbedApiKey ?? ""} />
+        <SwitchField name="show_map" defaultChecked={values?.showMap !== false} label="Mostrar mapa" />
       </section>
 
       <section className="space-y-4 rounded-3xl border border-brand-beige/12 bg-brand-ivory/4 p-5">
         <div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Características</p><h3 className="mt-2 font-display text-2xl text-brand-ivory">Dados para ajudar na decisão</h3></div>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Preço"><Input name="price" placeholder="Ex.: 850000" inputMode="decimal" defaultValue={getFieldValue(values?.price)} /></Field>
-          <Field label="Área útil"><Input name="area_useful" placeholder="Ex.: 120 m²" inputMode="decimal" defaultValue={getFieldValue(values?.areaUseful)} /></Field>
-          <Field label="Área total"><Input name="area_total" placeholder="Ex.: 160 m²" inputMode="decimal" defaultValue={getFieldValue(values?.areaTotal)} /></Field>
+          <Field label="Preço"><MaskedInput name="price" mask="currency-brl" placeholder="Ex.: R$ 850.000,00" inputMode="numeric" defaultValue={getFieldValue(values?.price)} /></Field>
+          <Field label="Área útil (m²)"><Input name="area_useful" placeholder="Ex.: 120" inputMode="decimal" defaultValue={getFieldValue(values?.areaUseful)} /></Field>
+          <Field label="Área total (m²)"><Input name="area_total" placeholder="Ex.: 160" inputMode="decimal" defaultValue={getFieldValue(values?.areaTotal)} /></Field>
           <Field label="Dormitórios"><Input name="bedrooms" placeholder="Ex.: 3" inputMode="numeric" defaultValue={getFieldValue(values?.bedrooms)} /></Field>
           <Field label="Banheiros"><Input name="bathrooms" placeholder="Ex.: 2" inputMode="numeric" defaultValue={getFieldValue(values?.bathrooms)} /></Field>
           <Field label="Vagas de garagem"><Input name="garages" placeholder="Ex.: 2" inputMode="numeric" defaultValue={getFieldValue(values?.garages)} /></Field>
-          <Field label="Taxa de condomínio"><Input name="condominium_fee" placeholder="Ex.: 850" inputMode="decimal" defaultValue={getFieldValue(values?.condominiumFee)} /></Field>
-          <Field label="IPTU"><Input name="iptu_value" placeholder="Ex.: 1800" inputMode="decimal" defaultValue={getFieldValue(values?.iptuValue)} /></Field>
+          <Field label="Taxa de condomínio"><MaskedInput name="condominium_fee" mask="currency-brl" placeholder="Ex.: R$ 850,00" inputMode="numeric" defaultValue={getFieldValue(values?.condominiumFee)} /></Field>
+          <Field label="IPTU"><MaskedInput name="iptu_value" mask="currency-brl" placeholder="Ex.: R$ 1.800,00" inputMode="numeric" defaultValue={getFieldValue(values?.iptuValue)} /></Field>
           <Field label="Ano de construção"><Input name="built_year" placeholder="Ex.: 2020" inputMode="numeric" defaultValue={getFieldValue(values?.builtYear)} /></Field>
           <label className="flex h-11 self-end items-center gap-3 rounded-2xl border border-brand-beige/12 bg-brand-navy/35 px-4"><input name="furnished" type="checkbox" defaultChecked={Boolean(values?.furnished)} className="size-4 shrink-0 rounded border-brand-beige/30 bg-brand-navy/60 text-brand-gold focus:ring-brand-gold/30" /><span className="text-[13px] font-medium text-brand-ivory">Mobiliado</span><span title="Marque se o imóvel já é entregue com mobília." aria-label="Marque se o imóvel já é entregue com mobília."><CircleHelp aria-hidden="true" className="size-4 text-brand-ivory/55" /></span></label>
         </div>
@@ -132,8 +162,13 @@ export function PropertyForm({ action, redirectTo, submitLabel, values, images, 
 
       <section className="space-y-4 rounded-3xl border border-brand-beige/12 bg-brand-ivory/4 p-5">
         <div><p className="text-xs uppercase tracking-[0.3em] text-brand-beige/55">Atendimento</p><h3 className="mt-2 font-display text-2xl text-brand-ivory">Como o interessado pode falar</h3></div>
-        <div className="grid gap-4 md:grid-cols-2"><Field label="Telefone"><Input name="contact_phone" placeholder="(11) 3333-4444" inputMode="tel" defaultValue={getFieldValue(values?.contactPhone)} /></Field><Field label="WhatsApp"><Input name="contact_whatsapp" placeholder="(11) 99999-9999" inputMode="tel" defaultValue={getFieldValue(values?.contactWhatsapp)} /></Field></div>
-        <Field label="Descrição principal do imóvel"><Textarea name="description" placeholder="Conte os principais detalhes do imóvel" defaultValue={getFieldValue(values?.description)} /></Field>
+        <div className="grid gap-4 md:grid-cols-2"><Field label="Telefone"><MaskedInput name="contact_phone" mask="phone" type="tel" placeholder="(11) 3333-4444" inputMode="tel" autoComplete="tel" maxLength={15} defaultValue={getFieldValue(values?.contactPhone)} /></Field><Field label="WhatsApp"><MaskedInput name="contact_whatsapp" mask="phone" type="tel" placeholder="(11) 99999-9999" inputMode="tel" autoComplete="tel" maxLength={15} defaultValue={getFieldValue(values?.contactWhatsapp)} /></Field></div>
+        <RichTextEditor
+          name="description"
+          label="Descrição principal do imóvel"
+          value={getFieldValue(values?.description)}
+          placeholder="Conte os principais detalhes do imóvel"
+        />
       </section>
 
       <section className="space-y-4 rounded-3xl border border-brand-beige/12 bg-brand-ivory/4 p-5">

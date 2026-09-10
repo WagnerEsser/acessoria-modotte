@@ -2,6 +2,7 @@ import type {
   PublicPropertyDetail,
   PublicSiteSettings,
 } from "@/lib/public-content";
+import { richTextToPlainText } from "@/lib/rich-text";
 import { siteUrl } from "@/lib/site";
 
 type BreadcrumbItem = {
@@ -133,14 +134,14 @@ export function buildPropertyStructuredData(property: PublicPropertyDetail) {
     "@id": absoluteUrl(`/imoveis/${property.slug}#property`),
     url: absoluteUrl(`/imoveis/${property.slug}`),
     name: property.title,
-    description: property.seoDescription ?? property.summary ?? property.description,
+    description: property.seoDescription ?? property.summary ?? richTextToPlainText(property.description),
     ...(property.images.length
       ? { image: property.images.map((image) => absoluteUrl(image.url)) }
       : property.coverImageUrl
         ? { image: [absoluteUrl(property.coverImageUrl)] }
         : {}),
     ...(address ? { address } : {}),
-    ...(property.showFullAddress && property.latitude !== null && property.longitude !== null
+    ...(property.showMap && property.showFullAddress && property.latitude !== null && property.longitude !== null
       ? {
           geo: {
             "@type": "GeoCoordinates",

@@ -25,6 +25,7 @@ import {
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { PublicPageLink } from "@/components/shared/public-page-link";
+import { RichText } from "@/components/shared/rich-text";
 import { PropertyImageGallery } from "@/components/site/property-image-gallery";
 import { PropertyMap } from "@/components/site/property-map";
 import { Badge } from "@/components/ui/badge";
@@ -36,9 +37,9 @@ import {
 import {
   getPublicPropertyBySlug,
   getPublicSiteSettings,
-  splitParagraphs,
   type PublicPropertyDetail,
 } from "@/lib/public-content";
+import { richTextToPlainText } from "@/lib/rich-text";
 import { buildMetadata } from "@/lib/seo";
 import { buildBreadcrumbStructuredData } from "@/lib/structured-data";
 import { cn } from "@/lib/utils";
@@ -96,6 +97,10 @@ function getDisplayLocation(property: PublicPropertyDetail) {
 }
 
 function getMapQuery(property: PublicPropertyDetail) {
+  if (property.showFullAddress && property.latitude !== null && property.longitude !== null) {
+    return `${property.latitude},${property.longitude}`;
+  }
+
   if (property.showFullAddress) {
     return [property.address, property.neighborhoodName, property.city, property.state]
       .filter(Boolean)
@@ -171,13 +176,14 @@ export async function generateMetadata({
     });
   }
 
+  const descriptionText = richTextToPlainText(property.description);
+
   return buildMetadata({
     title: `V3 - ${property.seoTitle ?? property.title}`,
     description:
       property.seoDescription ??
       property.summary ??
-      property.description ??
-      property.price,
+      (descriptionText || property.price),
     path: `/imoveis-v3/${property.slug}`,
     image: property.coverImageUrl,
     imageAlt: property.coverImageAlt ?? property.title,
@@ -196,10 +202,12 @@ export default async function PropertyV3DetailPage({ params }: PropertyV3PagePro
     notFound();
   }
 
-  const paragraphs = splitParagraphs(property.description);
   const contactHref = getPropertyContactHref(property, siteSettings.whatsappNumber);
   const contactOpensNewTab = contactHref.startsWith("http");
   const mapQuery = getMapQuery(property);
+  const mapNote = property.showFullAddress
+    ? "Localização indicada conforme os dados informados."
+    : "Mapa com localização aproximada pela região do imóvel.";
   const locationLabel = getLocationLabel(property);
   const displayLocation = getDisplayLocation(property);
   const coverImage = property.images[0] ?? null;
@@ -301,7 +309,7 @@ export default async function PropertyV3DetailPage({ params }: PropertyV3PagePro
           <nav className="flex flex-wrap gap-3" aria-label="Mídias do imóvel">
             <MediaNavItem href="#fotos-v3" icon={Camera} label="Fotos" />
             <MediaNavItem href="#video-v3" icon={Play} label="Vídeo" disabled={!property.videos.length} />
-            <MediaNavItem href="#mapa-v3" icon={Map} label="Mapa" disabled={!mapQuery} />
+            <MediaNavItem href="#mapa-v3" icon={Map} label="Mapa" disabled={!property.showMap || !mapQuery} />
           </nav>
         </div>
       </section>
@@ -343,13 +351,13 @@ export default async function PropertyV3DetailPage({ params }: PropertyV3PagePro
                 Sobre esse imóvel
               </h2>
             </div>
-            <div className="space-y-5 text-base leading-8 text-brand-ink/70">
-              {paragraphs.length ? (
-                paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
-              ) : (
-                <p>A descrição será exibida aqui quando estiver preenchida no cadastro.</p>
-              )}
-            </div>
+            {property.description ? (
+              <RichText value={property.description} className="text-base leading-8 text-brand-ink/70" />
+            ) : (
+              <p className="text-base leading-8 text-brand-ink/70">
+                A descrição será exibida aqui quando estiver preenchida no cadastro.
+              </p>
+            )}
           </section>
 
           {property.highlights.length ? (
@@ -495,11 +503,13 @@ export default async function PropertyV3DetailPage({ params }: PropertyV3PagePro
         </section>
       ) : null}
 
-      <section id="mapa-v3" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="[&_h2]:text-brand-ink [&_p]:text-brand-ink/58">
-          <PropertyMap query={mapQuery} />
-        </div>
-      </section>
+      {property.showMap ? (
+        <section id="mapa-v3" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="[&_h2]:text-brand-ink [&_p]:text-brand-ink/58">
+            <PropertyMap query={mapQuery} note={mapNote} />
+          </div>
+        </section>
+      ) : null}
 
       <section className="bg-brand-ivory px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">

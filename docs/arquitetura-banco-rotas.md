@@ -133,6 +133,7 @@ Campos principais:
 - `description`
 - `address`
 - `show_full_address`
+- `show_map`
 - `neighborhood_id`
 - `city`
 - `state`

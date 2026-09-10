@@ -516,6 +516,7 @@ Campos sugeridos:
 - price_on_request
 - description
 - address
+- show_map
 - neighborhood
 - city
 - state

@@ -15,6 +15,7 @@ export type ParsedPropertyForm = {
   neighborhoodName: string | null;
   address: string | null;
   showFullAddress: boolean;
+  showMap: boolean;
   zipCode: string | null;
   price: number | null;
   priceOnRequest: boolean;
@@ -58,6 +59,7 @@ const propertyFormSchema = z.object({
   neighborhoodName: nullableText(120),
   address: nullableText(250),
   showFullAddress: z.boolean(),
+  showMap: z.boolean(),
   zipCode: nullableText(10).refine(
     (value) => !value || /^\d{8}$/.test(value.replace(/\D/g, "")),
     "invalid_zip_code"
@@ -102,6 +104,7 @@ export function parsePropertyFormData(formData: FormData) {
   const neighborhoodName = readFormValue(formData, "neighborhood_name");
   const address = readFormValue(formData, "address");
   const showFullAddress = readFormBoolean(formData, "show_full_address");
+  const showMap = readFormBoolean(formData, "show_map");
   const zipCode = readFormValue(formData, "zip_code");
   const price = parseNumberField(readFormValue(formData, "price"));
   const bedrooms = parseNumberField(readFormValue(formData, "bedrooms")) ?? 0;
@@ -145,6 +148,7 @@ export function parsePropertyFormData(formData: FormData) {
     neighborhoodName: neighborhoodName || null,
     address: address || null,
     showFullAddress,
+    showMap,
     zipCode: zipCode || null,
     price,
     priceOnRequest: readFormBoolean(formData, "price_on_request"),
@@ -181,6 +185,7 @@ export function parsePropertyFormData(formData: FormData) {
       neighborhoodName: "neighborhood_name",
       address: "address",
       showFullAddress: "show_full_address",
+      showMap: "show_map",
       zipCode: "zip_code",
       price: "price",
       bedrooms: "bedrooms",

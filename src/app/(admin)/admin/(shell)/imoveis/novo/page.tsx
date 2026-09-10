@@ -34,6 +34,8 @@ export default function NewPropertyPage() {
         submitLabel="Salvar imóvel"
         values={{
           transactionType: "sale",
+          showFullAddress: true,
+          showMap: true,
         }}
       />
     </div>

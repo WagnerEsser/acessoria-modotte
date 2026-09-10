@@ -6,7 +6,7 @@ export function getContentSecurityPolicy(isProduction) {
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     `connect-src 'self' https://challenges.cloudflare.com${isProduction ? "" : " http://localhost:8000 ws: wss:"}`,
-    "frame-src https://challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com https://www.google.com",
     "media-src 'self' https:",
     "object-src 'none'",
     "base-uri 'self'",
