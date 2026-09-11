@@ -42,6 +42,9 @@ modelo sem segredos esta em `deploy/netlify/.env.hml.example`.
 | `LEAD_RATE_LIMIT_SECRET` | secreta | assinatura do limitador de formularios |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | publica | chave publica do Turnstile |
 | `TURNSTILE_SECRET_KEY` | secreta | verificacao do Turnstile no servidor |
+| `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY` | publica | mapa da pagina individual do imovel |
+| `NEXT_PUBLIC_GOOGLE_MAPS_JAVASCRIPT_API_KEY` | publica | aba Mapa em `/imoveis` com multiplos pontos |
+| `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | publica | Map ID opcional para marcadores modernos |
 
 `SITE_URL` e a unica fonte para URLs canonicas, sitemap, robots, dados
 estruturados e redirecionamentos da aplicacao. Ao trocar o dominio, altere
@@ -49,6 +52,10 @@ somente essa variavel e execute um novo deploy.
 
 As chaves secretas nunca devem ser salvas no repositorio, em issues, logs ou
 mensagens. Use valores diferentes para homologacao e producao.
+
+As chaves publicas do Google Maps devem ser restritas por hostname no Google
+Cloud e por API permitida. Habilite `Maps Embed API`, `Maps JavaScript API` e,
+quando houver imoveis sem latitude/longitude, `Geocoding API`.
 
 ## Preparacao do Supabase Cloud
 

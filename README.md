@@ -34,13 +34,22 @@ SUPABASE_ANON_KEY=
 SITE_URL=http://localhost:3000
 ```
 
-Para exibir mapas de imóveis com a Google Maps Embed API, configure também:
+Para exibir mapas de imóveis, configure também:
 
 ```env
 NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_JAVASCRIPT_API_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=
 ```
 
-A chave deve ter restrição de site/referrer para os domínios do projeto e restrição de API somente para `Maps Embed API`.
+`NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY` alimenta o mapa da página individual
+do imóvel. `NEXT_PUBLIC_GOOGLE_MAPS_JAVASCRIPT_API_KEY` alimenta a aba Mapa em
+`/imoveis`, com múltiplos pontos. `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` é opcional e
+habilita recursos modernos de marcador quando configurado no Google Cloud.
+
+As chaves devem ter restrição de site/referrer para os domínios do projeto e
+restrição de API somente para as APIs usadas: `Maps Embed API`,
+`Maps JavaScript API` e, se houver imóveis sem latitude/longitude, `Geocoding API`.
 
 Para criar ou atualizar automaticamente o usuário principal do painel administrativo local, configure também:
 

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Filter, Star } from "lucide-react";
+import { ArrowRight, Filter, List, Map, Star } from "lucide-react";
 
 import { PropertyPagination } from "@/components/site/property-pagination";
+import { PropertyMapView } from "@/components/site/property-map-view";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PropertyCard } from "@/components/shared/property-card";
@@ -18,6 +19,7 @@ import {
   parsePositiveInteger,
   PROPERTY_PAGE_SIZE,
 } from "@/lib/property-catalog";
+import { getPropertyMapItems } from "@/lib/property-map";
 
 export const revalidate = 300;
 
@@ -40,7 +42,8 @@ export async function generateMetadata({ searchParams }: PropertiesPageProps) {
     getFirstValue(resolvedSearchParams.tipo) ||
       getFirstValue(resolvedSearchParams.cidade) ||
       getFirstValue(resolvedSearchParams.bairro) ||
-      getFirstValue(resolvedSearchParams.destaque)
+      getFirstValue(resolvedSearchParams.destaque) ||
+      getFirstValue(resolvedSearchParams.visualizacao)
   );
   const path = !hasFilters && currentPage > 1 ? `/imoveis?pagina=${currentPage}` : "/imoveis";
 
@@ -58,6 +61,7 @@ function buildPropertiesHref(options: {
   city?: string;
   neighborhoodSlug?: string;
   featuredOnly?: boolean;
+  view?: "lista" | "mapa";
   page?: number;
   pageSize?: number;
 }) {
@@ -77,6 +81,10 @@ function buildPropertiesHref(options: {
 
   if (options.featuredOnly) {
     params.set("destaque", "1");
+  }
+
+  if (options.view === "mapa") {
+    params.set("visualizacao", "mapa");
   }
 
   if (options.page && options.page > 1) {
@@ -100,6 +108,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const activeCity = getFirstValue(resolvedSearchParams.cidade);
   const activeNeighborhoodSlug = getFirstValue(resolvedSearchParams.bairro);
   const featuredOnly = getFirstValue(resolvedSearchParams.destaque) === "1";
+  const activeView = getFirstValue(resolvedSearchParams.visualizacao) === "mapa" ? "mapa" : "lista";
   const currentPage = parsePositiveInteger(resolvedSearchParams.pagina, 1);
   const pageSize = parsePropertyPageSize(resolvedSearchParams.porPagina);
 
@@ -110,8 +119,12 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     featuredOnly,
   });
   const pagination = paginateProperties(filteredProperties, currentPage, pageSize);
+  const mapProperties = getPropertyMapItems(filteredProperties);
   const propertyTypes = getPropertyTypes(properties);
   const hasActiveFilter = Boolean(activeType || activeCity || activeNeighborhoodSlug || featuredOnly);
+  const mapsJavaScriptApiKey =
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_JAVASCRIPT_API_KEY?.trim() || "";
+  const mapsMapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID?.trim();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -140,6 +153,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
               href={buildPropertiesHref({
                 page: 1,
                 pageSize,
+                view: activeView,
               })}
               className={buttonVariants({
                 variant: hasActiveFilter ? "outline" : "gold",
@@ -156,6 +170,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 featuredOnly: true,
                 page: 1,
                 pageSize,
+                view: activeView,
               })}
               className={buttonVariants({
                 variant: featuredOnly ? "gold" : "outline",
@@ -175,6 +190,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                   neighborhoodSlug: activeNeighborhoodSlug,
                   page: 1,
                   pageSize,
+                  view: activeView,
                 })}
                 className={buttonVariants({
                   variant: activeType === type ? "gold" : "outline",
@@ -193,34 +209,89 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 : `${pagination.totalItems} imóveis encontrados`}
             </span>
             <span>
-              Página {pagination.currentPage} de {pagination.totalPages}
+              {activeView === "mapa"
+                ? mapProperties.length === 1
+                  ? "1 ponto no mapa"
+                  : `${mapProperties.length} pontos no mapa`
+                : `Página ${pagination.currentPage} de ${pagination.totalPages}`}
             </span>
           </div>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {pagination.items.map((property) => (
-            <PropertyCard key={property.slug} property={property} />
-          ))}
+        <div className="flex flex-wrap items-center gap-2" aria-label="Visualização dos imóveis">
+          <Link
+            href={buildPropertiesHref({
+              type: activeType,
+              city: activeCity,
+              neighborhoodSlug: activeNeighborhoodSlug,
+              featuredOnly,
+              page: 1,
+              pageSize,
+              view: "lista",
+            })}
+            className={buttonVariants({
+              variant: activeView === "lista" ? "gold" : "outline",
+              size: "sm",
+            })}
+            aria-current={activeView === "lista" ? "page" : undefined}
+          >
+            <List className="size-4" />
+            Lista
+          </Link>
+          <Link
+            href={buildPropertiesHref({
+              type: activeType,
+              city: activeCity,
+              neighborhoodSlug: activeNeighborhoodSlug,
+              featuredOnly,
+              page: 1,
+              pageSize,
+              view: "mapa",
+            })}
+            className={buttonVariants({
+              variant: activeView === "mapa" ? "gold" : "outline",
+              size: "sm",
+            })}
+            aria-current={activeView === "mapa" ? "page" : undefined}
+          >
+            <Map className="size-4" />
+            Mapa
+          </Link>
         </div>
 
-        {pagination.items.length === 0 ? (
-          <Card className="p-8 text-center text-sm leading-6 text-brand-ivory/70">
-            {pagination.totalItems
-              ? "Nenhum imóvel encontrado com os filtros atuais."
-              : "Nenhum imóvel publicado ainda."}
-          </Card>
-        ) : null}
+        {activeView === "mapa" ? (
+          <PropertyMapView
+            properties={mapProperties}
+            apiKey={mapsJavaScriptApiKey}
+            mapId={mapsMapId}
+          />
+        ) : (
+          <>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {pagination.items.map((property) => (
+                <PropertyCard key={property.slug} property={property} />
+              ))}
+            </div>
 
-        <PropertyPagination
-          currentPage={pagination.currentPage}
-          totalItems={pagination.totalItems}
-          pageSize={pageSize}
-          type={activeType}
-          city={activeCity}
-          neighborhoodSlug={activeNeighborhoodSlug}
-          featuredOnly={featuredOnly}
-        />
+            {pagination.items.length === 0 ? (
+              <Card className="p-8 text-center text-sm leading-6 text-brand-ivory/70">
+                {pagination.totalItems
+                  ? "Nenhum imóvel encontrado com os filtros atuais."
+                  : "Nenhum imóvel publicado ainda."}
+              </Card>
+            ) : null}
+
+            <PropertyPagination
+              currentPage={pagination.currentPage}
+              totalItems={pagination.totalItems}
+              pageSize={pageSize}
+              type={activeType}
+              city={activeCity}
+              neighborhoodSlug={activeNeighborhoodSlug}
+              featuredOnly={featuredOnly}
+            />
+          </>
+        )}
       </div>
     </div>
   );

@@ -201,6 +201,11 @@ export type PublicPropertyCard = {
   transactionType: string;
   location: string | null;
   city: string | null;
+  state: string | null;
+  address: string | null;
+  zipCode: string | null;
+  latitude: number | null;
+  longitude: number | null;
   neighborhoodSlug: string | null;
   status: string;
   price: string;
@@ -455,6 +460,18 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     ? "Sob consulta"
     : formatCurrencyBRL(row.price);
   const priceValue = normalizeNumber(row.price);
+  const latitudeValue =
+    row.latitude === null || row.latitude === undefined || row.latitude === ""
+      ? null
+      : Number(row.latitude);
+  const longitudeValue =
+    row.longitude === null ||
+    row.longitude === undefined ||
+    row.longitude === ""
+      ? null
+      : Number(row.longitude);
+  const latitude = Number.isNaN(latitudeValue ?? NaN) ? null : latitudeValue;
+  const longitude = Number.isNaN(longitudeValue ?? NaN) ? null : longitudeValue;
   const card: PublicPropertyCard = {
     slug: row.slug,
     title: row.title,
@@ -462,6 +479,11 @@ function mapPropertyCard(row: PropertyRow, index = 0): PublicPropertyCard {
     transactionType: row.transaction_type,
     location: normalizeText(neighborhood?.name),
     city: normalizeText(row.city) ?? normalizeText(neighborhood?.city),
+    state: normalizeText(row.state) ?? normalizeText(neighborhood?.state),
+    address: row.show_full_address ? normalizeText(row.address) : null,
+    zipCode: row.show_full_address ? normalizeText(row.zip_code) : null,
+    latitude: row.show_full_address ? latitude : null,
+    longitude: row.show_full_address ? longitude : null,
     neighborhoodSlug: normalizeText(neighborhood?.slug),
     status: row.status,
     price,
@@ -668,7 +690,7 @@ export async function getPublicProperties() {
   const { data } = await supabase
     .from("properties")
     .select(
-      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, show_map, city, state, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
+      "id, slug, title, transaction_type, property_type, status, is_published, featured, price, price_on_request, description, address, show_full_address, show_map, city, state, zip_code, latitude, longitude, bedrooms, bathrooms, garages, area_total, area_useful, seo_title, seo_description, updated_at, neighborhood:neighborhoods(id, slug, name, city, state), property_images(url, alt_text, sort_order, is_cover, width, height), property_features(label, value, sort_order)",
     )
     .eq("is_published", true)
     .neq("status", "hidden")
